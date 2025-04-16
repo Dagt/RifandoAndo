@@ -1,0 +1,270 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ShieldCheck, CreditCard, Landmark, Receipt } from "lucide-react";
+
+const ConfirmarCompra = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [formulario, setFormulario] = useState({
+    nombre: "",
+    correo: "",
+    telefono: "",
+    nacimiento: "",
+    acepta: false,
+    metodo: "",
+  });
+
+  const [boletos, setBoletos] = useState([]);
+  const [monto, setMonto] = useState(0);
+  const [errores, setErrores] = useState({});
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const seleccionados = JSON.parse(localStorage.getItem("boletos")) || [];
+    if (seleccionados.length === 0) {
+      navigate("/");
+      return;
+    }
+    setBoletos(seleccionados);
+    const precioGuardado = parseFloat(localStorage.getItem("precio_boleto")) || 0;
+    setMonto(precioGuardado * seleccionados.length);
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormulario((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const calcularEdad = (fecha) => {
+    const hoy = new Date();
+    const nacimiento = new Date(fecha);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+    return edad;
+  };
+
+  const validar = () => {
+  const nuevosErrores = {};
+  const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const regexTelefono = /^[0-9]{10}$/;
+  const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+
+  if (!formulario.nombre.trim()) {
+    nuevosErrores.nombre = "Requerido";
+  } else if (!regexNombre.test(formulario.nombre.trim())) {
+    nuevosErrores.nombre = "Solo letras y espacios (sin números ni símbolos)";
+  }
+
+  if (!regexCorreo.test(formulario.correo)) nuevosErrores.correo = "Correo inválido";
+  if (!regexTelefono.test(formulario.telefono)) nuevosErrores.telefono = "Teléfono inválido";
+
+  if (!formulario.nacimiento) {
+    nuevosErrores.nacimiento = "Requerido";
+  } else if (calcularEdad(formulario.nacimiento) < 18) {
+    nuevosErrores.nacimiento = "Debes ser mayor de edad";
+  }
+
+  if (!formulario.acepta) nuevosErrores.acepta = "Debes aceptar los términos";
+  if (!formulario.metodo) nuevosErrores.metodo = "Selecciona un método de pago";
+
+  setErrores(nuevosErrores);
+  return Object.keys(nuevosErrores).length === 0;
+};
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validar()) return;
+
+    const payload = {
+      nombre: formulario.nombre,
+      correo: formulario.correo,
+      telefono: formulario.telefono,
+      nacimiento: formulario.nacimiento,
+      acepta: formulario.acepta,
+      metodo_pago: formulario.metodo,
+      rifa_id: id,
+      boletos: boletos,
+      monto: monto,
+    };
+
+    try {
+      const response = await fetch("http://192.168.1.90:8000/api/confirmar-compra/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+  const instrucciones = data.instrucciones || null;
+
+  if (formulario.metodo === "OXXO" && instrucciones?.referencia) {
+    navigate("/instrucciones-pago", {
+      state: {
+        ...instrucciones,
+        nombre: formulario.nombre,
+        boletos: boletos,
+        rifa: data.rifa,
+        monto: data.monto,
+        expira_pago: instrucciones.expires_at,
+      },
+    });
+  } else if (formulario.metodo === "SPEI" && instrucciones?.clabe) {
+    navigate("/instrucciones-transferencia", {
+      state: {
+        ...instrucciones,
+        nombre: formulario.nombre,
+        boletos: boletos,
+        rifa: data.rifa,
+        monto: monto,
+        expira_pago: instrucciones.expires_at,
+        concepto: instrucciones.concepto,
+      },
+    });
+  } else if (formulario.metodo === "tarjeta" && instrucciones?.checkout_url) {
+    window.location.href = instrucciones.checkout_url;
+  } else {
+    alert("❌ No se pudieron generar las instrucciones de pago. Intenta de nuevo o prueba otro método.");
+  }
+}
+
+ else {
+        alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error al conectar con el servidor.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen p-6 text-white flex items-center justify-center">
+      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 w-full max-w-xl shadow-lg">
+        <h2 className="text-2xl font-extrabold text-center text-orange-400 mb-6">
+          Confirma tu información para finalizar
+        </h2>
+
+        <div className="bg-white/10 text-white text-center p-3 rounded mb-4">
+          <p className="text-sm">
+            Estás por comprar <strong>{boletos.length}</strong> boletos por un total de{" "}
+            <strong>${monto}</strong>.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold mb-1">Nombre completo</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formulario.nombre}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none"
+            />
+            {errores.nombre && <p className="text-red-300 text-sm">{errores.nombre}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-1">Correo electrónico</label>
+            <input
+              type="email"
+              name="correo"
+              value={formulario.correo}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none"
+            />
+            {errores.correo && <p className="text-red-300 text-sm">{errores.correo}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-1">Teléfono</label>
+            <input
+              type="tel"
+              name="telefono"
+              value={formulario.telefono}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none"
+            />
+            {errores.telefono && <p className="text-red-300 text-sm">{errores.telefono}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-1">Fecha de nacimiento</label>
+            <input
+              type="date"
+              name="nacimiento"
+              value={formulario.nacimiento}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none"
+            />
+            {errores.nacimiento && <p className="text-red-300 text-sm">{errores.nacimiento}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2">Selecciona tu método de pago:</label>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[{ key: "SPEI", icon: <Landmark className="w-4 h-4" />, label: "Transferencia" },
+                { key: "OXXO", icon: <Receipt className="w-4 h-4" />, label: "OXXO" },
+                { key: "tarjeta", icon: <CreditCard className="w-4 h-4" />, label: "Tarjeta" }]
+                .map(({ key, icon, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFormulario((prev) => ({ ...prev, metodo: key }))}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border font-semibold capitalize transition
+                    ${formulario.metodo === key
+                      ? "bg-yellow-400 text-indigo-900 border-yellow-300"
+                      : "bg-white/20 text-white border-white/30 hover:bg-white/30"}`}
+                >
+                  {icon} {label}
+                </button>
+              ))}
+            </div>
+            {errores.metodo && <p className="text-red-300 text-sm mt-1">{errores.metodo}</p>}
+          </div>
+
+          <div className="flex flex-col items-center justify-center text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="acepta"
+                checked={formulario.acepta}
+                onChange={handleChange}
+                className="form-checkbox h-4 w-4 text-orange-400"
+              />
+              <span className="flex items-center gap-1 text-white">
+                <ShieldCheck className="w-4 h-4 text-orange-300" />
+                Acepto los{" "}
+                <a
+                  href="/terminos"
+                  className="underline text-yellow-300 hover:text-yellow-400"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  términos y condiciones
+                </a>
+              </span>
+            </label>
+            {errores.acepta && <p className="text-red-300 mt-1">{errores.acepta}</p>}
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded transition mt-2"
+          >
+            Finalizar compra
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ConfirmarCompra;

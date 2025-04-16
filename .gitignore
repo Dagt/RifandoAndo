@@ -1,0 +1,32 @@
+# === BACKEND ===
+backend/__pycache__/
+backend/*.py[cod]
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/.env
+backend/.env.*
+
+# === FRONTEND ===
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env.local
+
+# === GENERAL ===
+*.log
+*.bak
+*.swp
+*.tmp
+*.sqlite3
+.vscode/
+.DS_Store
+Commands.txt
+
+# === GIT ===
+.git/
+
+# === LINUX / OSX / WINDOWS ===
+Thumbs.db
+ehthumbs.db
+*.orig

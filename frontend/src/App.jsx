@@ -1,0 +1,60 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import RifaDetalle from "./pages/RifaDetalle";
+import SeleccionBoletos from "./pages/SeleccionBoletos";
+import ConfirmarCompra from "./pages/ConfirmarCompra";
+import Layout from "./components/Layout";
+import ConfirmacionFinal from "./pages/ConfirmacionFinal";
+import Verificador from "./pages/Verificador";
+import Ganadores from "./pages/Ganadores";
+import Proximas from "./pages/Proximas";
+import Login from "./pages/Login";
+import AdminPanel from "./pages/AdminPanel";
+import RutaProtegida from "./utils/RutaProtegida";
+import CrearRifa from "./pages/CrearRifa";
+import Estadisticas from "./pages/Estadisticas";
+import EditarRifa from "./pages/EditarRifa"
+import RifasAdmin from "./pages/RifasAdmin";
+import NotFound from "./pages/NotFound";
+import PanelTransacciones from "./pages/PanelTransacciones";
+import BuscadorBoletos from "./pages/BuscadorBoletos";
+import InstruccionesPago from "./pages/InstruccionesPago";
+import InstruccionesTransferencia from "./pages/InstruccionesTransferencia";
+import FalloPago from "./pages/FalloPago";
+import PoliticasCondiciones from "./pages/PoliticasCondiciones";
+
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/rifa/:id" element={<RifaDetalle />} />
+          <Route path="/rifa/:id/participar" element={<SeleccionBoletos />} />
+          <Route path="/rifa/:id/confirmar" element={<ConfirmarCompra />} />
+          <Route path="/compra-exitosa" element={<ConfirmacionFinal />} />
+          <Route path="/verificador" element={<Verificador />} />
+          <Route path="/ganadores" element={<Ganadores />} />
+          <Route path="/proximas-rifas" element={<Proximas />} />
+          <Route path="/lgn" element={<Login />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/fallo-pago" element={<FalloPago />} />
+          <Route path="/instrucciones-pago" element={<InstruccionesPago />} />
+          <Route path="/terminos" element={<PoliticasCondiciones />} />
+          <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
+          <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
+          <Route path="/admin/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
+          <Route path="/admin/estadisticas" element={<RutaProtegida> <Estadisticas /></RutaProtegida>} />
+          <Route path="/admin/rifa/:id/editar" element={<RutaProtegida><EditarRifa /></RutaProtegida>} />
+          <Route path="/admin/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
+          <Route path="/admin/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
+          <Route path="/admin/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
