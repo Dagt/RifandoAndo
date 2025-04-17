@@ -8,7 +8,7 @@ import environ
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # === Seguridad ===
 SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key")
@@ -80,9 +80,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist' / 'assets'
-]
+STATICFILES_DIRS = [     BASE_DIR / 'frontend' / 'dist' / 'assets']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
