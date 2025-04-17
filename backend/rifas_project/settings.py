@@ -14,8 +14,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key")
 DEBUG = env("DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[".herokuapp.com", "localhost", "127.0.0.1"])
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["https://*.herokuapp.com"])
+# === Hosts permitidos ===
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
+    ".herokuapp.com",
+    "localhost",
+    "127.0.0.1",
+    "rifandoando.club",
+    ".rifandoando.club",
+    "www.rifandoando.club"
+])
+
+# === CSRF confiables ===
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[
+    "https://*.herokuapp.com",
+    "https://rifandoando.club",
+    "https://www.rifandoando.club"
+])
 
 SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
@@ -37,7 +51,7 @@ INSTALLED_APPS = [
 
 # === Middleware ===
 MIDDLEWARE = [
-    'backend.middleware.RedirectToWWW',
+    'backend.middleware.RedirectToWWW',  # si quieres redirigir a www
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
