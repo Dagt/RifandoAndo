@@ -150,8 +150,8 @@ def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None)
                 "type": "HostedPayment",
                 "allowed_payment_methods": ["card"],
                 "expires_at": expires_at,
-                "success_url": f"http://192.168.1.90:5173/compra-exitosa?folio={folio}",
-                "failure_url": "http://192.168.1.90:5173/fallo-pago"
+                "success_url": f"https://rifandoando.club:5173/compra-exitosa?folio={folio}",
+                "failure_url": "https://rifandoando.club:5173/fallo-pago"
             },
             "metadata": {
                 "folio": folio
