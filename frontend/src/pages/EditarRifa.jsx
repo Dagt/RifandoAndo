@@ -11,7 +11,7 @@ const EditarRifa = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch(`http://192.168.1.90:8000/api/rifas/${id}/`)
+    fetch(`https://rifandoando.club:8000/api/rifas/${id}/`)
       .then(res => res.json())
       .then(data => {
         setRifa(data);
@@ -27,7 +27,7 @@ const EditarRifa = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const res = await fetch(`http://192.168.1.90:8000/api/rifas/${id}/editar/`, {
+    const res = await fetch(`https://rifandoando.club:8000/api/rifas/${id}/editar/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -53,7 +53,7 @@ const EditarRifa = () => {
     formData.append("imagen", archivo);
 
     const token = localStorage.getItem("token");
-    const res = await fetch(`http://192.168.1.90:8000/api/subir-imagen/${id}/`, {
+    const res = await fetch(`https://rifandoando.club:8000/api/subir-imagen/${id}/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`

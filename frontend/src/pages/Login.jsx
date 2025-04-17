@@ -20,7 +20,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://192.168.1.90:8000/api/token/", {
+      const response = await fetch("https://rifandoando.club:8000/api/token/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credenciales),

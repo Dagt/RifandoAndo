@@ -74,7 +74,7 @@ def confirmar_compra(request):
     if telefono.isdigit() and len(telefono) == 10:
         telefono = f"+52{telefono}"
 
-    tiempo_expiracion = timezone.now() + timedelta(hours=2)
+    tiempo_expiracion = timezone.now() + timedelta(minutes=5)
     expires_at = int(tiempo_expiracion.timestamp())
 
     transaccion = Transaccion.objects.create(

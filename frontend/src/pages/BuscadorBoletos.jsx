@@ -21,7 +21,7 @@ const BuscarBoleto = () => {
     if (rifaSeleccionada) params.append("rifa_id", rifaSeleccionada);
 
     try {
-      const res = await fetch(`http://192.168.1.90:8000/api/buscar-boletos/?${params.toString()}`, {
+      const res = await fetch(`https://rifandoando.club:8000/api/buscar-boletos/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -47,7 +47,7 @@ const BuscarBoleto = () => {
 
   const cargarRifas = async () => {
     try {
-      const res = await fetch("http://192.168.1.90:8000/api/rifas/", {
+      const res = await fetch("https://rifandoando.club:8000/api/rifas/", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

@@ -16,7 +16,7 @@ const ConfirmacionFinal = () => {
     window.scrollTo(0, 0);
 
     if (folio) {
-      fetch(`http://192.168.1.90:8000/api/verificar/${folio}`)
+      fetch(`https://rifandoando.club:8000/api/verificar/${folio}`)
         .then((res) => res.json())
         .then((data) => {
           if (!data.error) setDatos(data);
