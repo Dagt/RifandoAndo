@@ -10,7 +10,7 @@ const Estadisticas = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch("https://rifandoando.club:8000/api/estadisticas/")
+    fetch("https://rifandoando.club/api/estadisticas/")
       .then((res) => res.json())
       .then(setData)
       .catch((err) => console.error("Error cargando estadísticas:", err));

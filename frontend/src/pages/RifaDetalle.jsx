@@ -10,7 +10,7 @@ const RifaDetalle = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch(`https://rifandoando.club:8000/api/rifas/${id}/`)
+    fetch(`https://rifandoando.club/api/rifas/${id}/`)
       .then(res => res.json())
       .then(data => {
         setRifa(data);

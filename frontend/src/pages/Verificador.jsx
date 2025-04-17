@@ -18,7 +18,7 @@ const Verificador = () => {
     setResultado(null);
     setError(null);
     try {
-      const res = await fetch(`https://rifandoando.club:8000/api/verificar/${folio}/`);
+      const res = await fetch(`https://rifandoando.club/api/verificar/${folio}/`);
       if (!res.ok) throw new Error("No encontrado");
       const data = await res.json();
       setResultado(data);

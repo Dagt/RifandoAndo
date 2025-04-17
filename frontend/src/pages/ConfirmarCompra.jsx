@@ -94,7 +94,7 @@ const ConfirmarCompra = () => {
     };
 
     try {
-      const response = await fetch("https://rifandoando.club:8000/api/confirmar-compra/", {
+      const response = await fetch("https://rifandoando.club/api/confirmar-compra/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

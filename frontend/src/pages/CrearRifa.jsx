@@ -47,7 +47,7 @@ const CrearRifa = () => {
       const token = localStorage.getItem("token");
 
       // Crear rifa
-      const response = await fetch("https://rifandoando.club:8000/api/crear-rifa/", {
+      const response = await fetch("https://rifandoando.club/api/crear-rifa/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +71,7 @@ const CrearRifa = () => {
         const formData = new FormData();
         formData.append("imagen", imagen);
 
-        const subir = await fetch(`https://rifandoando.club:8000/api/subir-imagen/${rifaId}/`, {
+        const subir = await fetch(`https://rifandoando.club/api/subir-imagen/${rifaId}/`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

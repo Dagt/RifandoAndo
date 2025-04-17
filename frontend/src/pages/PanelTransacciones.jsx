@@ -24,7 +24,7 @@ const PanelTransacciones = () => {
       if (estado) params.append("estado", estado.toLowerCase());
       if (metodo) params.append("metodo", metodo);
 
-      const res = await fetch(`https://rifandoando.club:8000/api/transacciones/?${params.toString()}`, {
+      const res = await fetch(`https://rifandoando.club/api/transacciones/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -56,7 +56,7 @@ const PanelTransacciones = () => {
 
   const marcarComoPagada = async (folio) => {
     if (!window.confirm("¿Confirmar que esta transacción ya fue pagada?")) return;
-    const res = await fetch(`https://rifandoando.club:8000/api/transacciones/${folio}/completar/`, {
+    const res = await fetch(`https://rifandoando.club/api/transacciones/${folio}/completar/`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -71,7 +71,7 @@ const PanelTransacciones = () => {
 
   const cancelarTransaccion = async (folio) => {
     if (!window.confirm("¿Cancelar esta transacción? Esta acción liberará los boletos.")) return;
-    const res = await fetch(`https://rifandoando.club:8000/api/transacciones/${folio}/cancelar/`, {
+    const res = await fetch(`https://rifandoando.club/api/transacciones/${folio}/cancelar/`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
     });

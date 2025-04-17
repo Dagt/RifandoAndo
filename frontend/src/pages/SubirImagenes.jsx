@@ -17,7 +17,7 @@ const SubirImagenes = ({ rifaId }) => {
 
     const token = localStorage.getItem("access");
 
-    const response = await fetch(`https://rifandoando.club:8000/api/subir-imagen/${rifaId}/`, {
+    const response = await fetch(`https://rifandoando.club/api/subir-imagen/${rifaId}/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

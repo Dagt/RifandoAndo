@@ -12,17 +12,17 @@ const SeleccionBoletos = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch(`https://rifandoando.club:8000/api/rifas/${id}/boletos-disponibles/`)
+    fetch(`https://rifandoando.club/api/rifas/${id}/boletos-disponibles/`)
       .then((res) => res.json())
       .then((data) => setBoletosDisponibles(data.disponibles));
 
-    fetch(`https://rifandoando.club:8000/api/rifas/${id}/`)
+    fetch(`https://rifandoando.club/api/rifas/${id}/`)
       .then((res) => res.json())
       .then((data) => setTotalBoletos(data.total_boletos));
   }, [id]);
 
   useEffect(() => {
-  fetch(`https://rifandoando.club:8000/api/rifas/${id}/`)
+  fetch(`https://rifandoando.club/api/rifas/${id}/`)
     .then((res) => res.json())
     .then((data) => {
       localStorage.setItem("precio_boleto", data.precio_boleto);
