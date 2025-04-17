@@ -19,7 +19,7 @@ const RifasAdmin = () => {
       if (busqueda.trim() !== "") params.append("buscar", busqueda.trim());
       params.append("page", pagina);
 
-      const res = await fetch(`https://rifandoando.club/api/rifas/?${params.toString()}`);
+      const res = await fetch(`/api/rifas/?${params.toString()}`);
       const data = await res.json();
       setRifas(data.results || []);
       setTotalPaginas(Math.ceil(data.count / 10));
@@ -37,7 +37,7 @@ const RifasAdmin = () => {
 
   const handleEliminar = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta rifa?")) return;
-    const res = await fetch(`https://rifandoando.club/api/rifas/${id}/eliminar/`, {
+    const res = await fetch(`/api/rifas/${id}/eliminar/`, {
       method: "DELETE",
     });
     if (res.ok) {

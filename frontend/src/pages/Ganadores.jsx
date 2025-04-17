@@ -8,7 +8,7 @@ const Ganadores = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch("https://rifandoando.club/api/rifas-finalizadas/")
+    fetch("/api/rifas-finalizadas/")
       .then((res) => res.json())
       .then((data) => {
         const finalizadas = data

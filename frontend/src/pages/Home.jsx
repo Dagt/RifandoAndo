@@ -9,7 +9,7 @@ const Home = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch("https://rifandoando.club/api/rifas-activas/")
+    fetch("/api/rifas-activas/")
       .then((res) => {
         if (!res.ok) throw new Error("No se pudo cargar las rifas.");
         return res.json();
