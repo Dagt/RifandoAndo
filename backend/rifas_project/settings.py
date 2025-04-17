@@ -3,20 +3,24 @@ from pathlib import Path
 from datetime import timedelta
 import environ
 
-# Carga variables de entorno desde .env
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+# === Entorno ===
+env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Seguridad
+# === Seguridad ===
 SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key")
 DEBUG = env("DEBUG", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
-# Aplicaciones
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[".herokuapp.com", "localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["https://*.herokuapp.com"])
+
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# === Aplicaciones ===
 INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.admin',
@@ -30,7 +34,7 @@ INSTALLED_APPS = [
     'rifas_app',
 ]
 
-# Middleware
+# === Middleware ===
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -45,11 +49,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'rifas_project.urls'
 
-# Plantillas (usa build de Vite)
+# === Plantillas (usa build de Vite) ===
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Carpeta generada por Vite
+        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Carpeta generada por `npm run build`
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,39 +65,38 @@ TEMPLATES = [
     },
 ]
 
-# Archivos estáticos
+WSGI_APPLICATION = 'rifas_project.wsgi.application'
+
+# === Base de datos ===
+DATABASES = {
+    'default': env.db(default='sqlite:///db.sqlite3')
+}
+
+# === Redis y Celery ===
+CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# === Archivos estáticos ===
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist' / 'assets']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-WSGI_APPLICATION = 'rifas_project.wsgi.application'
-
-# Base de datos (usa DATABASE_URL de Heroku si está disponible)
-DATABASES = {
-    'default': env.db(default='sqlite:///db.sqlite3')
-}
-
-# Redis y Celery
-CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
-
-# Archivos multimedia
+# === Archivos multimedia ===
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Internacionalización
+# === Internacionalización ===
 LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'America/Mexico_City'
 USE_I18N = True
 USE_TZ = True
 
-# CORS
+# === CORS ===
 CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
 
-# Autenticación
+# === Autenticación ===
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -108,7 +111,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# APIs externas
+# === Integraciones externas ===
 TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
@@ -116,5 +119,5 @@ TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
 CONEKTA_API_KEY = env("CONEKTA_API_KEY")
 CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 
-# Campo ID por defecto
+# === ID automático por defecto ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
