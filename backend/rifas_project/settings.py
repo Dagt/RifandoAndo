@@ -1,20 +1,22 @@
+import os
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
-import os
+import environ
 
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key")
+DEBUG = env("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']  # Solo para desarrollo
-
-# Apps instaladas
+# Aplicaciones
 INSTALLED_APPS = [
-    'corsheaders',  #
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -22,32 +24,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rifas_app',
     'django_celery_beat',
+    'rifas_app',
 ]
 
-#Auth
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
-}
-
-#Twilio
-TWILIO_ACCOUNT_SID = config("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = config("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = config("TWILIO_PHONE_NUMBER")
-
-#CONEKTA_API_KEY
-CONEKTA_API_KEY = config("CONEKTA_API_KEY")
-CONEKTA_API_VERSION = config("CONEKTA_API_VERSION")
-
-# Middleware
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,7 +45,7 @@ ROOT_URLCONF = 'rifas_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'frontend' / 'build'],  # frontend compilado
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,46 +59,52 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rifas_project.wsgi.application'
 
-# Base de datos SQLite
+# Base de datos para producción
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(default='sqlite:///db.sqlite3')
 }
 
-#Redis + Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# Redis y Celery
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+# Twilio y Conekta
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
+CONEKTA_API_KEY = env("CONEKTA_API_KEY")
+CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 
-
-# Validación de contraseñas (puedes dejarla así durante desarrollo)
-AUTH_PASSWORD_VALIDATORS = []
-
-# Zona horaria e idioma
 LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'America/Mexico_City'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos
-STATIC_URL = 'static/'
-
-# Tipo de ID por defecto
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# CORS: permitir todos los orígenes en desarrollo
-CORS_ALLOW_ALL_ORIGINS = True
+# Archivos estáticos y medios
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'build' / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
 
-#Token management
+# Autenticación
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

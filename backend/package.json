@@ -1,8 +1,12 @@
 {
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "react-responsive-carousel": "^3.2.23"
-  }
+  },
+  "proxy": "http://localhost:8000"
 }
