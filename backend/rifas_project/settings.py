@@ -80,7 +80,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [     BASE_DIR / 'frontend' / 'dist' / 'assets']
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
