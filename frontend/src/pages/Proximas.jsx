@@ -10,7 +10,7 @@ const Proximas = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch("https://rifandoando.club/api/proximas-rifas/")
+    fetch("/api/proximas-rifas/")
       .then((res) => {
         if (!res.ok) throw new Error("No se pudo cargar las rifas.");
         return res.json();
