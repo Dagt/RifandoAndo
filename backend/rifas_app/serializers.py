@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Rifa, Galeria, BoletoSeleccionado, Transaccion
 
-#Serializer para rifas activas
 class RifaSerializer(serializers.ModelSerializer):
     imagen_destacada = serializers.SerializerMethodField()
     boletos_vendidos = serializers.SerializerMethodField()
@@ -37,10 +36,11 @@ class RifaSerializer(serializers.ModelSerializer):
 
     def get_imagenes(self, obj):
         request = self.context.get('request')
-        return [request.build_absolute_uri(img.imagen.url) for img in obj.imagenes.all()]
+        return [
+            request.build_absolute_uri(img.imagen.url) if request else img.imagen.url
+            for img in obj.imagenes.all()
+        ]
 
-
-#Serializer para rifas con estado finalzadas para presentar a los ganadores
 class RifaFinalizadaSerializer(RifaSerializer):
     boletos_pagados = serializers.SerializerMethodField()
 
@@ -59,7 +59,6 @@ class RifaFinalizadaSerializer(RifaSerializer):
             for b in boletos
         ]
 
-#Serializer de rifas en estado "en espera" (Creadas pero no activas)
 class ProximasRifasSerializer(serializers.ModelSerializer):
     imagen_destacada = serializers.SerializerMethodField()
     imagenes = serializers.SerializerMethodField()
@@ -90,12 +89,14 @@ class ProximasRifasSerializer(serializers.ModelSerializer):
 
     def get_imagenes(self, obj):
         request = self.context.get("request")
-        return [request.build_absolute_uri(img.imagen.url) for img in obj.imagenes.all()]
+        return [
+            request.build_absolute_uri(img.imagen.url) if request else img.imagen.url
+            for img in obj.imagenes.all()
+        ]
 
     def get_boletos_vendidos(self, obj):
         return obj.boletoseleccionado_set.count()
 
-#Serializer para la transaccion
 class TransaccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaccion
