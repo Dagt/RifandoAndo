@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
 # === Middleware ===
 MIDDLEWARE = [
+    'backend.middleware.RedirectToWWW',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
