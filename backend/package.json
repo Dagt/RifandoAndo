@@ -8,5 +8,11 @@
     "jwt-decode": "^4.0.0",
     "react-responsive-carousel": "^3.2.23"
   },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "heroku-postbuild": "npm run build"
+  },
   "proxy": "http://localhost:8000"
 }

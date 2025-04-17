@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-import mimetypes
 from datetime import timedelta
+import mimetypes
 import environ
 
 # === Entorno ===
@@ -50,11 +50,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'rifas_project.urls'
 
-# === Plantillas (usa build de Vite) ===
+# === Plantillas ===
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'backend' / 'templates'],  # Nuevo path
+        'DIRS': [BASE_DIR / 'backend' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,7 +80,9 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR.parent / 'frontend' / 'dist' / 'assets']
+STATICFILES_DIRS = [
+    BASE_DIR / 'frontend' / 'dist' / 'assets'
+]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -123,4 +125,5 @@ CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 # === ID automático por defecto ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# === Forzar MIME correcto para JS en whitenoise ===
 mimetypes.add_type("application/javascript", ".js", True)
