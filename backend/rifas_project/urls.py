@@ -26,5 +26,5 @@ class FrontendRender(View):
 
 # Cualquier ruta que no sea API va al frontend
 urlpatterns += [
-    re_path(r"^(?!api/).*", FrontendRender.as_view()),
+     re_path(r"^(?!api/|admin/).*", TemplateView.as_view(template_name="index.html")),
 ]

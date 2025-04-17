@@ -53,7 +53,7 @@ ROOT_URLCONF = 'rifas_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Carpeta generada por `npm run build`
+        'DIRS': [BASE_DIR / 'backend' / 'templates'],  # Nuevo path
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
