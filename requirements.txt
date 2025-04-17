@@ -17,6 +17,7 @@ click-repl==0.3.0
 colorama==0.4.6
 conekta==6.0.4
 cron-descriptor==1.4.5
+dj-database-url==2.3.0
 Django==5.1.8
 django-celery-beat==2.7.0
 django-cors-headers==4.7.0

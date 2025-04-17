@@ -45,11 +45,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'rifas_project.urls'
 
-# Plantillas (usa build de React)
+# Plantillas (usa build de Vite)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend' / 'build'],  # React build folder
+        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Carpeta generada por Vite
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -60,6 +60,12 @@ TEMPLATES = [
         },
     },
 ]
+
+# Archivos estáticos
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist' / 'assets']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 WSGI_APPLICATION = 'rifas_project.wsgi.application'
 
