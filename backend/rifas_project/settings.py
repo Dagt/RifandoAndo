@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import mimetypes
 from datetime import timedelta
 import environ
 
@@ -121,3 +122,5 @@ CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 
 # === ID automático por defecto ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+mimetypes.add_type("application/javascript", ".js", True)
