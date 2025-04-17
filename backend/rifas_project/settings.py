@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 
 # === Middleware ===
 MIDDLEWARE = [
-    'backend.middleware.RedirectToWWW',  # si quieres redirigir a www
+    'backend.middleware.RedirectToWWW',  
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
