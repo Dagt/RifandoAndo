@@ -156,19 +156,17 @@ def confirmar_compra(request):
             f"Ref. OXXO: {instrucciones['referencia']}\n"
             f"Monto: ${monto}\n\n"
             f"Paga antes de: {hora_limite}\n"
-            f"Evita la cancelacion.\n"
-            f"Verifica el estado en:\n{verificador_url}"
+            f"Verifica tu compr\n{verificador_url}"
         )
 
     elif instrucciones and metodo == "spei":
         mensaje = (
             f"RifandoAndo\n\n"
-            f"CLABE: {instrucciones['clabe']}\n\n"
-            f"Folio/Concepto/: {instrucciones['concepto']}\n"
+            f"CLABE: {instrucciones['clabe']}\n"
+            f"Folio/Concepto: {instrucciones['concepto']}\n"
             f"Monto: ${monto}\n\n"
             f"Paga antes del: {hora_limite}\n"
-            f"Evita la cancelacion.\n"
-            f"Verifica en:\n{verificador_url}"
+            f"Verifica tu compra en:\n{verificador_url}"
         )
     else:
         mensaje = None  # no SMS para tarjeta
