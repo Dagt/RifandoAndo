@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Gift, Ticket, Clock } from "lucide-react";
+import { Gift, Ticket, Clock, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -46,6 +46,22 @@ const RifaCard = ({
 
   const boletosVendidos = total_boletos - boletos_disponibles;
   const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
+
+  const compartirRifa = () => {
+    const url = `https://www.rifandoando.club/`;
+    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando! Participa aquí:\n${url}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: nombre,
+        text: texto,
+        url,
+      }).catch((err) => console.error("Error al compartir", err));
+    } else {
+      navigator.clipboard.writeText(texto);
+      alert("Enlace copiado al portapapeles");
+    }
+  };
 
   return (
     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 w-full max-w-sm text-white">
@@ -99,11 +115,21 @@ const RifaCard = ({
         </p>
 
         {mostrarBoton && (
-          <Link to={`/rifa/${id}/participar`}>
-            <button className="w-full bg-pink-500 text-white py-2 font-semibold rounded-xl hover:bg-pink-600 transition">
-              Participar
+          <>
+            <Link to={`/rifa/${id}/participar`}>
+              <button className="w-full bg-pink-500 text-white py-2 font-semibold rounded-xl hover:bg-pink-600 transition">
+                Participar
+              </button>
+            </Link>
+
+            <button
+              onClick={compartirRifa}
+              className="mt-2 w-full border border-white/20 text-white py-2 font-semibold rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-5 h-5" />
+              Compartir
             </button>
-          </Link>
+          </>
         )}
       </div>
     </div>

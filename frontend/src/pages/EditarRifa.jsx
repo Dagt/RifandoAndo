@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Camera } from "lucide-react";
 
 const EditarRifa = () => {
   const { id } = useParams();
@@ -8,7 +9,7 @@ const EditarRifa = () => {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
-  const [mensajeImagen, setMensajeImagen] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,8 +52,8 @@ const EditarRifa = () => {
     if (!archivos.length) return;
 
     const token = localStorage.getItem("token");
+    let todasSubidas = true;
 
-    let errores = 0;
     for (let i = 0; i < archivos.length; i++) {
       const formData = new FormData();
       formData.append("imagen", archivos[i]);
@@ -65,17 +66,20 @@ const EditarRifa = () => {
         body: formData,
       });
 
-      if (!res.ok) errores++;
+      if (!res.ok) {
+        todasSubidas = false;
+        break;
+      }
     }
 
-    if (errores === 0) {
-      setMensajeImagen("Imágenes subidas correctamente.");
+    if (todasSubidas) {
+      setUploadSuccess("Imágenes subidas correctamente");
+      setTimeout(() => setUploadSuccess(""), 3000);
+      e.target.reset();
     } else {
-      setMensajeImagen(`Error al subir ${errores} imagen(es).`);
+      setUploadSuccess("Ocurrió un error al subir una o más imágenes");
+      setTimeout(() => setUploadSuccess(""), 3000);
     }
-
-    e.target.reset();
-    setTimeout(() => setMensajeImagen(""), 3000);
   };
 
   if (loading) return <p className="text-white text-center mt-10">Cargando...</p>;
@@ -89,13 +93,16 @@ const EditarRifa = () => {
       <h2 className="text-2xl font-bold text-orange-400 mb-4 text-center">Editar Rifa #{id}</h2>
 
       {mensaje && <p className="text-center text-sm text-green-400 mb-4">{mensaje}</p>}
-      {mensajeImagen && <p className="text-center text-sm text-green-400 mb-4">{mensajeImagen}</p>}
+      {uploadSuccess && <p className="text-center text-sm text-green-400 mb-4">{uploadSuccess}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
 
         {esEnEspera && (
           <div className="bg-white/10 border border-white/20 p-4 rounded-xl">
-            <h3 className="text-lg font-bold mb-2 text-yellow-300">📸 Agregar más imágenes</h3>
+            <h3 className="text-lg font-bold mb-2 text-yellow-300 flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Agregar más imágenes
+            </h3>
             <form onSubmit={handleUpload} className="space-y-2">
               <input
                 type="file"
