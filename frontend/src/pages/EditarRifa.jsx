@@ -98,12 +98,12 @@ const EditarRifa = () => {
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
 
         {esEnEspera && (
-          <div className="bg-white/10 border border-white/20 p-4 rounded-xl">
+          <div className="bg-white/10 border border-white/20 p-4 rounded-xl mb-4">
             <h3 className="text-lg font-bold mb-2 text-yellow-300 flex items-center gap-2">
               <Camera className="w-5 h-5" />
               Agregar más imágenes
             </h3>
-            <form onSubmit={handleUpload} className="space-y-2">
+            <form onSubmit={handleUpload}>
               <input
                 type="file"
                 name="imagenes"
@@ -113,7 +113,7 @@ const EditarRifa = () => {
               />
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
+                className="mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
               >
                 Subir imágenes
               </button>
