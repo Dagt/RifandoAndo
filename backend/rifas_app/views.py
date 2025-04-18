@@ -143,7 +143,7 @@ def confirmar_compra(request):
 
     # Construcción de mensaje SMS
     hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%H:%M')
-    verificador_url = f"https://rifandoando.club:5173/verificador?folio={transaccion.folio}"
+    verificador_url = f"https://rifandoando.club/verificador?folio={transaccion.folio}"
 
     mensaje = f"RifandoAndo\n"
 
