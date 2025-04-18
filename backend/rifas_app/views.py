@@ -147,26 +147,25 @@ def confirmar_compra(request):
     folio = transaccion.folio
     monto = transaccion.monto
 
-    mensaje = None
+    mensaje = "RifandoAndo\n\n"
 
     if instrucciones and metodo == "oxxo":
         mensaje = (
-            f"Folio: {folio}\n"
+            f"Folio: {folio}\n\n"
             f"Ref. OXXO: {instrucciones['referencia']}\n"
-            f"Monto: ${monto}\n"
+            f"Monto: ${monto}\n\n"
             f"Paga antes de: {hora_limite}\n"
-            f"Si no pagas a tiempo, se cancelan tus boletos.\n"
+            f"Evita la cancelacion.\n"
             f"Verifica el estado en:\n{verificador_url}"
         )
 
     elif instrucciones and metodo == "spei":
         mensaje = (
-            f"Folio: {folio}\n"
-            f"CLABE: {instrucciones['clabe']}\n"
-            f"Concepto: {instrucciones['concepto']}\n"
-            f"Monto: ${monto}\n"
-            f"Paga antes de: {hora_limite}\n"
-            f"Evita cancelación.\n"
+            f"CLABE: {instrucciones['clabe']}\n\n"
+            f"Folio/Concepto/: {instrucciones['concepto']}\n"
+            f"Monto: ${monto}\n\n"
+            f"Paga antes del: {hora_limite}\n"
+            f"Evita la cancelacion.\n"
             f"Verifica en:\n{verificador_url}"
         )
     else:
