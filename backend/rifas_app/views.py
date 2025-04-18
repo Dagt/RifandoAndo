@@ -147,10 +147,11 @@ def confirmar_compra(request):
     folio = transaccion.folio
     monto = transaccion.monto
 
-    mensaje = "RifandoAndo\n\n"
+    mensaje = None
 
     if instrucciones and metodo == "oxxo":
         mensaje = (
+            f"RifandoAndo\n\n"
             f"Folio: {folio}\n\n"
             f"Ref. OXXO: {instrucciones['referencia']}\n"
             f"Monto: ${monto}\n\n"
@@ -161,6 +162,7 @@ def confirmar_compra(request):
 
     elif instrucciones and metodo == "spei":
         mensaje = (
+            f"RifandoAndo\n\n"
             f"CLABE: {instrucciones['clabe']}\n\n"
             f"Folio/Concepto/: {instrucciones['concepto']}\n"
             f"Monto: ${monto}\n\n"
