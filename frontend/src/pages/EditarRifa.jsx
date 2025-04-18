@@ -8,30 +8,31 @@ const EditarRifa = () => {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
+  const [mensajeImagen, setMensajeImagen] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetch(`/api/rifas/${id}/`)
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         setRifa(data);
         setForm(data);
         setLoading(false);
       });
   }, [id]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     const res = await fetch(`/api/rifas/${id}/editar/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(form),
     });
@@ -44,12 +45,14 @@ const EditarRifa = () => {
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const archivos = e.target.files;
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    const archivos = e.target.imagenes.files;
     if (!archivos.length) return;
 
     const token = localStorage.getItem("token");
 
+    let errores = 0;
     for (let i = 0; i < archivos.length; i++) {
       const formData = new FormData();
       formData.append("imagen", archivos[i]);
@@ -62,13 +65,17 @@ const EditarRifa = () => {
         body: formData,
       });
 
-      if (!res.ok) {
-        alert(`Error al subir imagen: ${archivos[i].name}`);
-      }
+      if (!res.ok) errores++;
     }
 
-    alert("Imágenes subidas correctamente");
-    e.target.value = ""; // limpia el input
+    if (errores === 0) {
+      setMensajeImagen("Imágenes subidas correctamente.");
+    } else {
+      setMensajeImagen(`Error al subir ${errores} imagen(es).`);
+    }
+
+    e.target.reset();
+    setTimeout(() => setMensajeImagen(""), 3000);
   };
 
   if (loading) return <p className="text-white text-center mt-10">Cargando...</p>;
@@ -82,91 +89,71 @@ const EditarRifa = () => {
       <h2 className="text-2xl font-bold text-orange-400 mb-4 text-center">Editar Rifa #{id}</h2>
 
       {mensaje && <p className="text-center text-sm text-green-400 mb-4">{mensaje}</p>}
+      {mensajeImagen && <p className="text-center text-sm text-green-400 mb-4">{mensajeImagen}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
+
         {esEnEspera && (
-          <div className="bg-white/10 border border-white/20 p-4 rounded-xl mb-6">
-            <h3 className="text-lg font-bold mb-2 text-yellow-300">Agregar más imágenes</h3>
-            <input
-              type="file"
-              name="imagenes"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="block w-full text-sm text-white file:bg-blue-500 file:hover:bg-blue-600 file:text-white file:font-bold file:border-none file:px-4 file:py-2 file:rounded"
-            />
+          <div className="bg-white/10 border border-white/20 p-4 rounded-xl">
+            <h3 className="text-lg font-bold mb-2 text-yellow-300">📸 Agregar más imágenes</h3>
+            <form onSubmit={handleUpload} className="space-y-2">
+              <input
+                type="file"
+                name="imagenes"
+                accept="image/*"
+                multiple
+                className="block w-full text-sm"
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
+              >
+                Subir imágenes
+              </button>
+            </form>
           </div>
         )}
 
         {(esEnEspera || esActiva) && (
-          <>
-            <div>
-              <label className="block mb-1 font-semibold">Nombre</label>
-              <input
-                type="text"
-                name="nombre"
-                value={form.nombre || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
-            </div>
+          <div>
+            <label className="block mb-1 font-semibold">Nombre</label>
+            <input type="text" name="nombre" value={form.nombre || ""} onChange={handleChange}
+              className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+          </div>
+        )}
 
-            <div>
-              <label className="block mb-1 font-semibold">Descripción</label>
-              <textarea
-                name="descripcion"
-                value={form.descripcion || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
-            </div>
-          </>
+        {(esEnEspera || esActiva) && (
+          <div>
+            <label className="block mb-1 font-semibold">Descripción</label>
+            <textarea name="descripcion" value={form.descripcion || ""} onChange={handleChange}
+              className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+          </div>
         )}
 
         {esEnEspera && (
           <>
             <div>
               <label className="block mb-1 font-semibold">Total de boletos</label>
-              <input
-                type="number"
-                name="total_boletos"
-                value={form.total_boletos || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="number" name="total_boletos" value={form.total_boletos || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Precio del boleto</label>
-              <input
-                type="number"
-                name="precio_boleto"
-                value={form.precio_boleto || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="number" name="precio_boleto" value={form.precio_boleto || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Fecha de inicio</label>
-              <input
-                type="date"
-                name="fecha_inicio"
-                value={form.fecha_inicio || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="date" name="fecha_inicio" value={form.fecha_inicio || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Fecha de finalización</label>
-              <input
-                type="date"
-                name="fecha_fin"
-                value={form.fecha_fin || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="date" name="fecha_fin" value={form.fecha_fin || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
           </>
         )}
@@ -175,32 +162,19 @@ const EditarRifa = () => {
           <>
             <div>
               <label className="block mb-1 font-semibold">Número ganador</label>
-              <input
-                type="number"
-                name="numero_ganador"
-                value={form.numero_ganador || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="number" name="numero_ganador" value={form.numero_ganador || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Link al video del sorteo</label>
-              <input
-                type="url"
-                name="video_sorteo_url"
-                value={form.video_sorteo_url || ""}
-                onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-              />
+              <input type="url" name="video_sorteo_url" value={form.video_sorteo_url || ""} onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
             </div>
           </>
         )}
 
-        <button
-          type="submit"
-          className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded font-bold w-full"
-        >
+        <button type="submit" className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded font-bold w-full">
           Guardar cambios
         </button>
       </form>
