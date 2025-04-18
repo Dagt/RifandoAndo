@@ -48,20 +48,20 @@ const RifaCard = ({
   const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
 
   const compartirRifa = () => {
-    const url = `https://www.rifandoando.club/`;
-    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando! Participa aquí:\n${url}`;
+  const url = `https://www.rifandoando.club/rifa/${id}/participar`;
+  const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\n${url}`;
 
-    if (navigator.share) {
-      navigator.share({
-  title: nombre,
-  text: `¡Mira esta rifa: "${nombre}" en Rifando Ando!`,
-  url: `https://www.rifandoando.club/rifa/${id}/participar`,
-}).catch((err) => console.error("Error al compartir", err));
-    } else {
-      navigator.clipboard.writeText(texto);
-      alert("Enlace copiado al portapapeles");
-    }
-  };
+  if (navigator.share) {
+    navigator.share({
+      title: nombre,
+      text: mensaje,
+      url: url
+    }).catch((err) => console.error("Error al compartir", err));
+  } else {
+    navigator.clipboard.writeText(mensaje);
+    alert("Enlace copiado al portapapeles");
+  }
+};
 
   return (
     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 w-full max-w-sm text-white">
