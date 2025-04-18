@@ -83,20 +83,55 @@ const EditarRifa = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
 
-        {esEnEspera && (
-          <div className="bg-white/10 border border-white/20 p-4 rounded-xl">
-            <h3 className="text-lg font-bold mb-2 text-yellow-300">📸 Agregar más imágenes</h3>
-            <form onSubmit={handleUpload} className="space-y-2">
-              <input type="file" name="imagen" accept="image/*" className="block w-full text-sm" />
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
-              >
-                Subir imagen
-              </button>
-            </form>
-          </div>
-        )}
+      {esEnEspera && (
+<div className="bg-white/10 border border-white/20 p-4 rounded-xl">
+  <h3 className="text-lg font-bold mb-2 text-yellow-300">📸 Agregar más imágenes</h3>
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      const archivos = e.target.imagenes.files;
+      if (!archivos.length) return alert("Selecciona al menos una imagen");
+
+      const token = localStorage.getItem("token");
+
+      for (let i = 0; i < archivos.length; i++) {
+        const formData = new FormData();
+        formData.append("imagen", archivos[i]);
+
+        const res = await fetch(`/api/subir-imagen/${id}/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!res.ok) {
+          alert(`Error al subir imagen ${archivos[i].name}`);
+        }
+      }
+
+      alert("Imágenes subidas correctamente");
+      e.target.reset();
+    }}
+    className="space-y-2"
+  >
+    <input
+      type="file"
+      name="imagenes"
+      accept="image/*"
+      multiple
+      className="block w-full text-sm"
+    />
+    <button
+      type="submit"
+      className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
+    >
+      Subir imágenes
+    </button>
+  </form>
+</div>
+)}
 
         {(esEnEspera || esActiva) && (
           <div>

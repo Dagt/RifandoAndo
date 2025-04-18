@@ -142,25 +142,34 @@ def confirmar_compra(request):
         }, status=400)
 
     # Construcción de mensaje SMS
-    hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%H:%M')
-    verificador_url = f"https://rifandoando.club/verificador?folio={transaccion.folio}"
+    hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%d/%b %H:%Mh')
+    verificador_url = f"https://rifandoando.club:5173/verificador?folio={transaccion.folio}"
+    folio = transaccion.folio
+    monto = transaccion.monto
 
-    mensaje = f"RifandoAndo\n"
+    mensaje = None
 
     if instrucciones and metodo == "oxxo":
-        mensaje += (
-            f"\nReferencia OXXO: {instrucciones['referencia']}"
-            f"\nTotal: ${transaccion.monto}\n"
-            f"\nPaga antes de: {hora_limite}h\n"
-            f"\nVerificar tu compra\n{verificador_url}"
+        mensaje = (
+            f"Rifando Ando - Detalles de tu compra\n\n"
+            f"Referencia OXXO: {instrucciones['referencia']}\n"
+            f"Monto: ${monto}\n"
+            f"Límite de pago: {hora_limite}\n\n"
+            f"Si no pagas antes de esa hora, los boletos se cancelan.\n\n"
+            f"Verifica tu compra aquí:\n{verificador_url}\n\n"
+            f"Tu folio: {folio}"
         )
+
     elif instrucciones and metodo == "spei":
-        mensaje += (
-            f"\ncuenta CLABE: {instrucciones['clabe']}"
-            f"\nTotal: ${transaccion.monto}"
-            f"\nConcepto: {instrucciones['concepto']}\n"
-            f"\nPaga antes de las: {hora_limite}h\n"
-            f"\n{verificador_url}"
+        mensaje = (
+            f"Rifando Ando - Detalles de tu compra\n\n"
+            f"Cuenta CLABE: {instrucciones['clabe']}\n"
+            f"Concepto: {instrucciones['concepto']}\n"
+            f"Monto: ${monto}\n"
+            f"Límite de pago: {hora_limite}\n\n"
+            f"Si no pagas antes de esa hora, los boletos se cancelan.\n\n"
+            f"Verifica tu compra aquí:\n{verificador_url}\n\n"
+            f"Tu folio: {folio}"
         )
     else:
         mensaje = None  # no SMS para tarjeta
