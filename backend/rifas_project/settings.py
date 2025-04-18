@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_celery_beat',
     'rifas_app',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 # === Middleware ===
