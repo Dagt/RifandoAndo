@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
 
@@ -10,6 +10,7 @@ const EditarRifa = () => {
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
+  const inputImagenesRef = useRef();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,9 +47,8 @@ const EditarRifa = () => {
     }
   };
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    const archivos = e.target.imagenes.files;
+  const handleUpload = async () => {
+    const archivos = inputImagenesRef.current.files;
     if (!archivos.length) return;
 
     const token = localStorage.getItem("token");
@@ -75,7 +75,7 @@ const EditarRifa = () => {
     if (todasSubidas) {
       setUploadSuccess("Imágenes subidas correctamente");
       setTimeout(() => setUploadSuccess(""), 3000);
-      e.target.reset();
+      inputImagenesRef.current.value = null;
     } else {
       setUploadSuccess("Ocurrió un error al subir una o más imágenes");
       setTimeout(() => setUploadSuccess(""), 3000);
@@ -96,71 +96,99 @@ const EditarRifa = () => {
       {uploadSuccess && <p className="text-center text-sm text-green-400 mb-4">{uploadSuccess}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
-
         {esEnEspera && (
           <div className="bg-white/10 border border-white/20 p-4 rounded-xl mb-4">
             <h3 className="text-lg font-bold mb-2 text-yellow-300 flex items-center gap-2">
               <Camera className="w-5 h-5" />
               Agregar más imágenes
             </h3>
-            <form onSubmit={handleUpload}>
+            <input
+              type="file"
+              name="imagenes"
+              accept="image/*"
+              multiple
+              ref={inputImagenesRef}
+              className="block w-full text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleUpload}
+              className="mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
+            >
+              Subir imágenes
+            </button>
+          </div>
+        )}
+
+        {(esEnEspera || esActiva) && (
+          <>
+            <div>
+              <label className="block mb-1 font-semibold">Nombre</label>
               <input
-                type="file"
-                name="imagenes"
-                accept="image/*"
-                multiple
-                className="block w-full text-sm"
+                type="text"
+                name="nombre"
+                value={form.nombre || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
               />
-              <button
-                type="submit"
-                className="mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-bold w-full"
-              >
-                Subir imágenes
-              </button>
-            </form>
-          </div>
-        )}
+            </div>
 
-        {(esEnEspera || esActiva) && (
-          <div>
-            <label className="block mb-1 font-semibold">Nombre</label>
-            <input type="text" name="nombre" value={form.nombre || ""} onChange={handleChange}
-              className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
-          </div>
-        )}
-
-        {(esEnEspera || esActiva) && (
-          <div>
-            <label className="block mb-1 font-semibold">Descripción</label>
-            <textarea name="descripcion" value={form.descripcion || ""} onChange={handleChange}
-              className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
-          </div>
+            <div>
+              <label className="block mb-1 font-semibold">Descripción</label>
+              <textarea
+                name="descripcion"
+                value={form.descripcion || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
+            </div>
+          </>
         )}
 
         {esEnEspera && (
           <>
             <div>
               <label className="block mb-1 font-semibold">Total de boletos</label>
-              <input type="number" name="total_boletos" value={form.total_boletos || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="number"
+                name="total_boletos"
+                value={form.total_boletos || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Precio del boleto</label>
-              <input type="number" name="precio_boleto" value={form.precio_boleto || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="number"
+                name="precio_boleto"
+                value={form.precio_boleto || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Fecha de inicio</label>
-              <input type="date" name="fecha_inicio" value={form.fecha_inicio || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="date"
+                name="fecha_inicio"
+                value={form.fecha_inicio || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Fecha de finalización</label>
-              <input type="date" name="fecha_fin" value={form.fecha_fin || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="date"
+                name="fecha_fin"
+                value={form.fecha_fin || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
           </>
         )}
@@ -169,14 +197,24 @@ const EditarRifa = () => {
           <>
             <div>
               <label className="block mb-1 font-semibold">Número ganador</label>
-              <input type="number" name="numero_ganador" value={form.numero_ganador || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="number"
+                name="numero_ganador"
+                value={form.numero_ganador || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
 
             <div>
               <label className="block mb-1 font-semibold">Link al video del sorteo</label>
-              <input type="url" name="video_sorteo_url" value={form.video_sorteo_url || ""} onChange={handleChange}
-                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none" />
+              <input
+                type="url"
+                name="video_sorteo_url"
+                value={form.video_sorteo_url || ""}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+              />
             </div>
           </>
         )}
