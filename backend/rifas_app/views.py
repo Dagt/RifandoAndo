@@ -143,7 +143,7 @@ def confirmar_compra(request):
 
     # Construcción de mensaje SMS
     hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%d/%b %H:%Mh')
-    verificador_url = f"https://rifandoando.club:5173/verificador?folio={transaccion.folio}"
+    verificador_url = f"https://www.rifandoando.club/verificador?folio={transaccion.folio}"
     folio = transaccion.folio
     monto = transaccion.monto
 
@@ -151,25 +151,23 @@ def confirmar_compra(request):
 
     if instrucciones and metodo == "oxxo":
         mensaje = (
-            f"Rifando Ando - Detalles de tu compra\n\n"
-            f"Referencia OXXO: {instrucciones['referencia']}\n"
+            f"Folio: {folio}\n"
+            f"Ref. OXXO: {instrucciones['referencia']}\n"
             f"Monto: ${monto}\n"
-            f"Límite de pago: {hora_limite}\n\n"
-            f"Si no pagas antes de esa hora, los boletos se cancelan.\n\n"
-            f"Verifica tu compra aquí:\n{verificador_url}\n\n"
-            f"Tu folio: {folio}"
+            f"Paga antes de: {hora_limite}\n"
+            f"Si no pagas a tiempo, se cancelan tus boletos.\n"
+            f"Verifica el estado en:\n{verificador_url}"
         )
 
     elif instrucciones and metodo == "spei":
         mensaje = (
-            f"Rifando Ando - Detalles de tu compra\n\n"
-            f"Cuenta CLABE: {instrucciones['clabe']}\n"
+            f"Folio: {folio}\n"
+            f"CLABE: {instrucciones['clabe']}\n"
             f"Concepto: {instrucciones['concepto']}\n"
             f"Monto: ${monto}\n"
-            f"Límite de pago: {hora_limite}\n\n"
-            f"Si no pagas antes de esa hora, los boletos se cancelan.\n\n"
-            f"Verifica tu compra aquí:\n{verificador_url}\n\n"
-            f"Tu folio: {folio}"
+            f"Paga antes de: {hora_limite}\n"
+            f"Evita cancelación.\n"
+            f"Verifica en:\n{verificador_url}"
         )
     else:
         mensaje = None  # no SMS para tarjeta
