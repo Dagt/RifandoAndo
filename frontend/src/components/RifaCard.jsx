@@ -53,10 +53,10 @@ const RifaCard = ({
 
     if (navigator.share) {
       navigator.share({
-        title: nombre,
-        text: texto,
-        url,
-      }).catch((err) => console.error("Error al compartir", err));
+  title: nombre,
+  text: `¡Mira esta rifa: "${nombre}" en Rifando Ando!`,
+  url: `https://www.rifandoando.club/rifa/${id}/participar`,
+}).catch((err) => console.error("Error al compartir", err));
     } else {
       navigator.clipboard.writeText(texto);
       alert("Enlace copiado al portapapeles");

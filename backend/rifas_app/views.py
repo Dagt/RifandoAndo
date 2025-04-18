@@ -156,7 +156,7 @@ def confirmar_compra(request):
             f"Ref. OXXO: {instrucciones['referencia']}\n"
             f"Monto: ${monto}\n\n"
             f"Paga antes de: {hora_limite}\n"
-            f"Verifica tu compr\n{verificador_url}"
+            f"Verifica tu compra\n{verificador_url}"
         )
 
     elif instrucciones and metodo == "spei":

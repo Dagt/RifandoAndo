@@ -61,12 +61,16 @@ const BuscarBoleto = () => {
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+  window.scrollTo(0, 0);
   if (mensaje) {
     const timeout = setTimeout(() => setMensaje(""), 4000);
     return () => clearTimeout(timeout);
   }
-  }, [mensaje]);
+}, [mensaje]);
+
+useEffect(() => {
+  cargarRifas();
+}, []);
 
 
   return (
