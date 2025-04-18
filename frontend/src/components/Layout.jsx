@@ -16,9 +16,7 @@ const Layout = () => {
                       sm:w-[650px] sm:h-[650px]
                       md:w-[850px] md:h-[850px] md:bottom-[-180px] md:right-[-120px] md:translate-x-0">
         <img
-          src="/static/logo.png"
-          alt=""
-          className="w-full h-full object-contain opacity-50"
+          src="/static/logo.png" alt="" className="w-full h-full object-contain opacity-50"
         />
       </div>
 
