@@ -48,7 +48,7 @@ const RifaCard = ({
   const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
 
   const compartirRifa = () => {
-    const url = `https://www.rifandoando.club/rifa/${id}/participar`;
+    const url = `https://www.rifandoando.club`;
     const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\nParticipa aquí: ${url}`;
 
     if (navigator.share) {
@@ -56,7 +56,6 @@ const RifaCard = ({
         .share({
           title: nombre,
           text: texto,
-          url: url,
         })
         .catch((err) => console.error("Error al compartir", err));
     } else {
