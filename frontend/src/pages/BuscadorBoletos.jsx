@@ -9,6 +9,35 @@ const BuscarBoleto = () => {
   const [resultados, setResultados] = useState([]);
   const [mensaje, setMensaje] = useState("");
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    cargarRifas();
+  }, []);
+
+  useEffect(() => {
+    if (mensaje) {
+      const timeout = setTimeout(() => setMensaje(""), 4000);
+      return () => clearTimeout(timeout);
+    }
+  }, [mensaje]);
+
+  const cargarRifas = async () => {
+    try {
+      const res = await fetch("/api/rifas/", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.results) {
+        const filtradas = data.results.filter(r => r.estado !== "en_espera");
+        setRifas(filtradas);
+      } else {
+        console.error("No se recibieron rifas válidas");
+      }
+    } catch (error) {
+      console.error("Error al cargar rifas:", error);
+    }
+  };
+
   const buscar = async () => {
     if (!numero) {
       setMensaje("Debes ingresar un número de boleto");
@@ -44,30 +73,6 @@ const BuscarBoleto = () => {
       setMensaje("Error al buscar boleto");
     }
   };
-
-  const cargarRifas = async () => {
-    try {
-      const res = await fetch("/api/rifas/", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        const activasOF = (data.results || []).filter(r => r.estado !== "en_espera");
-        setRifas(activasOF);
-      }
-    } catch (error) {
-      console.error("Error al cargar rifas:", error);
-    }
-  };
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  if (mensaje) {
-    const timeout = setTimeout(() => setMensaje(""), 4000);
-    return () => clearTimeout(timeout);
-  }
-  }, [mensaje]);
-
 
   return (
     <div className="min-h-screen p-6 text-white">

@@ -49,7 +49,7 @@ const RifaCard = ({
 
   const compartirRifa = () => {
     const url = `https://www.rifandoando.club/rifa/${id}/participar`;
-    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\n${url}`;
+    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\nParticipa aquí: ${url}`;
 
     if (navigator.share) {
       navigator
@@ -60,8 +60,9 @@ const RifaCard = ({
         })
         .catch((err) => console.error("Error al compartir", err));
     } else {
-      navigator.clipboard.writeText(texto);
-      alert("Enlace copiado al portapapeles");
+      navigator.clipboard.writeText(texto).then(() => {
+        alert("Enlace copiado al portapapeles");
+      });
     }
   };
 
@@ -92,9 +93,7 @@ const RifaCard = ({
         </h2>
 
         {descripcion && (
-          <p className="text-sm text-purple-200 text-center mb-2 line-clamp-2">
-            {descripcion}
-          </p>
+          <p className="text-sm text-purple-200 text-center mb-2 line-clamp-2">{descripcion}</p>
         )}
 
         <p className="text-sm text-green-300 text-center flex items-center justify-center gap-1 mb-1">
