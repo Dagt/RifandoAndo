@@ -48,20 +48,22 @@ const RifaCard = ({
   const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
 
   const compartirRifa = () => {
-  const url = `https://www.rifandoando.club/rifa/${id}/participar`;
-  const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\n${url}`;
+    const url = `https://www.rifandoando.club/rifa/${id}/participar`;
+    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\n${url}`;
 
-  if (navigator.share) {
-    navigator.share({
-      title: nombre,
-      text: mensaje,
-      url: url
-    }).catch((err) => console.error("Error al compartir", err));
-  } else {
-    navigator.clipboard.writeText(mensaje);
-    alert("Enlace copiado al portapapeles");
-  }
-};
+    if (navigator.share) {
+      navigator
+        .share({
+          title: nombre,
+          text: texto,
+          url: url,
+        })
+        .catch((err) => console.error("Error al compartir", err));
+    } else {
+      navigator.clipboard.writeText(texto);
+      alert("Enlace copiado al portapapeles");
+    }
+  };
 
   return (
     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 w-full max-w-sm text-white">
@@ -90,7 +92,9 @@ const RifaCard = ({
         </h2>
 
         {descripcion && (
-          <p className="text-sm text-purple-200 text-center mb-2 line-clamp-2">{descripcion}</p>
+          <p className="text-sm text-purple-200 text-center mb-2 line-clamp-2">
+            {descripcion}
+          </p>
         )}
 
         <p className="text-sm text-green-300 text-center flex items-center justify-center gap-1 mb-1">
