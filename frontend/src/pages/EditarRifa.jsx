@@ -96,7 +96,7 @@ const EditarRifa = () => {
       {uploadSuccess && <p className="text-center text-sm text-green-400 mb-4">{uploadSuccess}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
-        {esEnEspera && (
+        {(esEnEspera || esFinalizada) && (
           <div className="bg-white/10 border border-white/20 p-4 rounded-xl mb-4">
             <h3 className="text-lg font-bold mb-2 text-yellow-300 flex items-center gap-2">
               <Camera className="w-5 h-5" />
