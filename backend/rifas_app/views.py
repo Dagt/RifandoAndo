@@ -570,6 +570,7 @@ def buscar_boleto(request):
         resultados.append({
             "numero": boleto.numero,
             "rifa": boleto.rifa.nombre,
+            "estado_rifa": boleto.rifa.estado,
             "pagado": boleto.pagado,
             "folio": transaccion.folio,
             "nombre_completo": transaccion.nombre_completo,
