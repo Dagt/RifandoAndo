@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../utils/useAuth";
 
-const BuscarBoleto = () => {
+const BuscadorBoletos = () => {
   const { token } = useAuth();
   const [numero, setNumero] = useState("");
   const [rifas, setRifas] = useState([]);
@@ -24,14 +24,16 @@ const BuscarBoleto = () => {
   const cargarRifas = async () => {
     try {
       const res = await fetch("/api/rifas/", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok && data.results) {
-        const filtradas = data.results.filter(r => r.estado !== "en_espera");
-        setRifas(filtradas);
+        const rifasFiltradas = data.results.filter(
+          (r) => r.estado !== "en_espera" && r.boletos_vendidos > 0
+        );
+        setRifas(rifasFiltradas);
       } else {
-        console.error("No se recibieron rifas válidas");
+        console.error("Error al cargar rifas");
       }
     } catch (error) {
       console.error("Error al cargar rifas:", error);
@@ -51,7 +53,7 @@ const BuscarBoleto = () => {
 
     try {
       const res = await fetch(`/api/buscar-boletos/?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
@@ -76,7 +78,9 @@ const BuscarBoleto = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h2 className="text-3xl font-bold text-yellow-400 text-center mb-6">🔎 Buscar Boleto</h2>
+      <h2 className="text-3xl font-bold text-yellow-400 text-center mb-6">
+        🔎 Buscar Boleto
+      </h2>
 
       <div className="max-w-xl mx-auto space-y-4">
         <input
@@ -94,7 +98,9 @@ const BuscarBoleto = () => {
         >
           <option value="">Todas las rifas</option>
           {rifas.map((r) => (
-            <option key={r.id} value={r.id} className="text-black">{r.nombre}</option>
+            <option key={r.id} value={r.id} className="text-black">
+              {r.nombre}
+            </option>
           ))}
         </select>
 
@@ -106,25 +112,61 @@ const BuscarBoleto = () => {
         </button>
       </div>
 
-      {mensaje && (
-        <p className="text-center text-red-400 mt-6">{mensaje}</p>
-      )}
+      {mensaje && <p className="text-center text-red-400 mt-6">{mensaje}</p>}
 
       {resultados.length > 0 && (
         <div className="mt-8 max-w-4xl mx-auto space-y-6">
           {resultados.map((resultado, idx) => (
-            <div key={idx} className="bg-white/10 rounded-xl p-6 shadow border border-white/20 backdrop-blur-sm">
-              <h3 className="text-xl font-bold mb-4 text-yellow-300">🎫 Boleto #{resultado.numero}</h3>
+            <div
+              key={idx}
+              className="bg-white/10 rounded-xl p-6 shadow border border-white/20 backdrop-blur-sm"
+            >
+              <h3 className="text-xl font-bold mb-4 text-yellow-300">
+                🎫 Boleto #{resultado.numero}
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <p><span className="text-white/70 font-semibold">Nombre:</span> {resultado.nombre_completo}</p>
-                <p><span className="text-white/70 font-semibold">Correo:</span> {resultado.correo}</p>
-                <p><span className="text-white/70 font-semibold">Teléfono:</span> {resultado.telefono}</p>
-                <p><span className="text-white/70 font-semibold">Rifa:</span> {resultado.rifa}</p>
-                <p><span className="text-white/70 font-semibold">Folio:</span> {resultado.folio}</p>
-                <p><span className="text-white/70 font-semibold">Método de pago:</span> {resultado.metodo_pago}</p>
-                <p><span className="text-white/70 font-semibold">Estado transacción:</span> {resultado.estado_transaccion}</p>
-                <p><span className="text-white/70 font-semibold">Pagado:</span> {resultado.pagado ? "✅ Sí" : "❌ No"}</p>
-                <p><span className="text-white/70 font-semibold">Fecha:</span> {new Date(resultado.fecha_transaccion).toLocaleString()}</p>
+                <p>
+                  <span className="text-white/70 font-semibold">Nombre:</span>{" "}
+                  {resultado.nombre_completo}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">Correo:</span>{" "}
+                  {resultado.correo}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">
+                    Teléfono:
+                  </span>{" "}
+                  {resultado.telefono}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">Rifa:</span>{" "}
+                  {resultado.rifa}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">Folio:</span>{" "}
+                  {resultado.folio}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">
+                    Método de pago:
+                  </span>{" "}
+                  {resultado.metodo_pago}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">
+                    Estado transacción:
+                  </span>{" "}
+                  {resultado.estado_transaccion}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">Pagado:</span>{" "}
+                  {resultado.pagado ? "✅ Sí" : "❌ No"}
+                </p>
+                <p>
+                  <span className="text-white/70 font-semibold">Fecha:</span>{" "}
+                  {new Date(resultado.fecha_transaccion).toLocaleString()}
+                </p>
               </div>
             </div>
           ))}
@@ -134,4 +176,4 @@ const BuscarBoleto = () => {
   );
 };
 
-export default BuscarBoleto;
+export default BuscadorBoletos;
