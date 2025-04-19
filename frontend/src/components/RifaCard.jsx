@@ -48,14 +48,15 @@ const RifaCard = ({
   const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
 
   const compartirRifa = () => {
-    const url = `https://www.rifandoando.club`;
-    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\nParticipa aquí: ${url}`;
+    const url = `https://www.rifandoando.club/rifa/${id}`;
+    const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\nParticipa aquí:`;
 
     if (navigator.share) {
       navigator
         .share({
           title: nombre,
           text: texto,
+          url: url,
         })
         .catch((err) => console.error("Error al compartir", err));
     } else {
@@ -116,23 +117,25 @@ const RifaCard = ({
           <span className="font-medium">{tiempoRestante}</span>
         </p>
 
-        {mostrarBoton && (
-          <>
-            <Link to={`/rifa/${id}/participar`}>
-              <button className="w-full bg-pink-500 text-white py-2 font-semibold rounded-xl hover:bg-pink-600 transition">
-                Participar
-              </button>
-            </Link>
+        <>
+  {mostrarBoton && (
+    <Link to={`/rifa/${id}/participar`}>
+      <button className="w-full bg-pink-500 text-white py-2 font-semibold rounded-xl hover:bg-pink-600 transition">
+        Participar
+      </button>
+    </Link>
+  )}
 
-            <button
-              onClick={compartirRifa}
-              className="mt-2 w-full border border-white/20 text-white py-2 font-semibold rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
-            >
-              <Share2 className="w-5 h-5" />
-              Compartir
-            </button>
-          </>
-        )}
+  {mostrarCompartir && (
+    <button
+      onClick={compartirRifa}
+      className="mt-2 w-full border border-white/20 text-white py-2 font-semibold rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
+    >
+      <Share2 className="w-5 h-5" />
+      Compartir
+    </button>
+  )}
+</>
       </div>
     </div>
   );
