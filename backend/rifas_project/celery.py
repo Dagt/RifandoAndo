@@ -21,3 +21,10 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute=1, hour=0),
     },
 }
+
+
+# Asegura que la ruta del proyecto esté en sys.path
+current_path = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_path, ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
