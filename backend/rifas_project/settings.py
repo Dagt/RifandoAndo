@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import mimetypes
-import urllib.parse as urlparse
+from urllib.parse import urlparse
 import environ
 
 # === Entorno ===
@@ -91,9 +91,17 @@ DATABASES = {
 }
 
 # === Redis y Celery ===
-parsed_redis = urlparse(env.str("REDIS_URL", default="redis://localhost:6379/0"))
-CELERY_BROKER_URL = parsed_redis.geturl()
-CELERY_RESULT_BACKEND = parsed_redis.geturl()
+redis_url_raw = env.str("REDIS_URL", default="redis://localhost:6379/0")
+redis_parsed = urlparse(redis_url_raw)
+
+# Convertir rediss:// a redis:// si aplica (Heroku usa rediss://)
+if redis_parsed.scheme == "rediss":
+    redis_url_clean = f"redis://{redis_parsed.hostname}:{redis_parsed.port}"
+else:
+    redis_url_clean = redis_url_raw
+
+CELERY_BROKER_URL = redis_url_clean
+CELERY_RESULT_BACKEND = redis_url_clean
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
@@ -144,6 +152,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # === Forzar MIME correcto para JS en whitenoise ===
 mimetypes.add_type("application/javascript", ".js", True)
 
+# === Cloudinary ===
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
