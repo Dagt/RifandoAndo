@@ -42,12 +42,12 @@ const RifaDetalle = () => {
             nombre={rifa.nombre}
             precio={rifa.precio_boleto}
             descripcion={rifa.descripcion}
-            imagenes={rifa.imagenes}
+            imagenes={Array.isArray(rifa.imagenes) ? rifa.imagenes : []}
             boletos_disponibles={rifa.total_boletos - (rifa.boletos_vendidos || 0)}
             total_boletos={rifa.total_boletos}
             fecha_fin={rifa.fecha_fin}
-            mostrarBoton={true}
-            mostrarCompartir={false}
+            mostrarBoton={rifa.estado === "activa"}
+            mostrarCompartir={rifa.estado !== "finalizada"}
           />
         </div>
       )}

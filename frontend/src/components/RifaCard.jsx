@@ -13,8 +13,8 @@ const RifaCard = ({
   boletos_disponibles,
   total_boletos,
   fecha_fin,
-  mostrarBoton = true,
-  mostrarCompartir = true,
+  mostrarBoton=true,
+  mostrarCompartir=true,
 }) => {
   const [tiempoRestante, setTiempoRestante] = useState("");
 

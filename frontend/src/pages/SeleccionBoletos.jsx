@@ -12,22 +12,30 @@ const SeleccionBoletos = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch(`/api/rifas/${id}/boletos-disponibles/`)
-      .then((res) => res.json())
-      .then((data) => setBoletosDisponibles(data.disponibles));
-
     fetch(`/api/rifas/${id}/`)
       .then((res) => res.json())
-      .then((data) => setTotalBoletos(data.total_boletos));
-  }, [id]);
+      .then((data) => {
+        if (data.estado !== "activa") {
+          alert("⚠️ Esta rifa no está activa en este momento.");
+          navigate("/");
+          return;
+        }
 
-  useEffect(() => {
-  fetch(`/api/rifas/${id}/`)
-    .then((res) => res.json())
-    .then((data) => {
-      localStorage.setItem("precio_boleto", data.precio_boleto);
-      localStorage.setItem("nombre_rifa", data.nombre);
-    });
+        localStorage.setItem("precio_boleto", data.precio_boleto);
+        localStorage.setItem("nombre_rifa", data.nombre);
+        setTotalBoletos(data.total_boletos);
+
+        // Solo cargar boletos si la rifa está activa
+        return fetch(`/api/rifas/${id}/boletos-disponibles/`);
+      })
+      .then((res) => res?.json?.())
+      .then((data) => {
+        if (data?.disponibles) setBoletosDisponibles(data.disponibles);
+      })
+      .catch((err) => {
+        console.error("Error al cargar datos:", err);
+        alert("Error al cargar datos de la rifa.");
+      });
   }, [id]);
 
 

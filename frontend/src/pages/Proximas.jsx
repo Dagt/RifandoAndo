@@ -47,6 +47,7 @@ const Proximas = () => {
             total_boletos={rifa.total_boletos}
             fecha_fin={rifa.fecha_inicio}
             mostrarBoton={false}
+            mostrarCompartir={true}
           />
         ))}
       </div>
