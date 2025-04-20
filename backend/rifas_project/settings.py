@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import mimetypes
+import urllib.parse as urlparse
 import environ
 
 # === Entorno ===
@@ -90,8 +91,14 @@ DATABASES = {
 }
 
 # === Redis y Celery ===
-CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
+redis_url = urlparse.urlparse(env("REDIS_URL", "redis://localhost:6379/0"))
+# Si es Heroku (rediss://), convertirlo a redis:// sin SSL
+if redis_url.scheme == "rediss":
+    CELERY_BROKER_URL = f"redis://{redis_url.hostname}:{redis_url.port}"
+    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+else:
+    CELERY_BROKER_URL = env("REDIS_URL")
+    CELERY_RESULT_BACKEND = env("REDIS_URL")
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
