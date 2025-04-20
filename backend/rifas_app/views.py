@@ -406,21 +406,12 @@ def eliminar_rifa(request, rifa_id):
 def obtener_rifa(request, rifa_id):
     try:
         rifa = Rifa.objects.get(id=rifa_id)
-        data = {
-            "id": rifa.id,
-            "nombre": rifa.nombre,
-            "descripcion": rifa.descripcion,
-            "estado": rifa.estado,
-            "total_boletos": rifa.total_boletos,
-            "precio_boleto": rifa.precio_boleto,
-            "fecha_inicio": rifa.fecha_inicio.strftime("%Y-%m-%d"),
-            "fecha_fin": rifa.fecha_fin.strftime("%Y-%m-%d"),
-            "numero_ganador": rifa.numero_ganador,
-            "video_sorteo_url": rifa.enlace_video,
-        }
-        return Response(data)
     except Rifa.DoesNotExist:
         return Response({"error": "Rifa no encontrada"}, status=404)
+
+    serializer = RifaSerializer(rifa, context={"request": request})
+    return Response(serializer.data)
+
 
 
 #Endpoint para editar rifa segun Estado
