@@ -416,7 +416,8 @@ def obtener_rifa(request, rifa_id):
             "fecha_inicio": rifa.fecha_inicio.strftime("%Y-%m-%d"),
             "fecha_fin": rifa.fecha_fin.strftime("%Y-%m-%d"),
             "numero_ganador": rifa.numero_ganador,
-            "video_sorteo_url": rifa.enlace_video
+            "video_sorteo_url": rifa.enlace_video,
+            "imagenes": [img.imagen.url for img in rifa.galeria_set.all()] 
         }
         return Response(data)
     except Rifa.DoesNotExist:
