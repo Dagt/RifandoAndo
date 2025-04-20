@@ -91,14 +91,14 @@ DATABASES = {
 }
 
 # === Redis y Celery ===
-redis_url = urlparse.urlparse(env("REDIS_URL", "redis://localhost:6379/0"))
+redis_url = urlparse.urlparse(env.str("REDIS_URL", default="redis://localhost:6379/0"))
 # Si es Heroku (rediss://), convertirlo a redis:// sin SSL
 if redis_url.scheme == "rediss":
     CELERY_BROKER_URL = f"redis://{redis_url.hostname}:{redis_url.port}"
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 else:
-    CELERY_BROKER_URL = env("REDIS_URL")
-    CELERY_RESULT_BACKEND = env("REDIS_URL")
+    CELERY_BROKER_URL = redis_url.geturl()
+    CELERY_RESULT_BACKEND = redis_url.geturl()
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # === Archivos estáticos ===
