@@ -92,7 +92,7 @@ DATABASES = {
 
 # === Redis y Celery (usando rediss:// directamente) ===
 REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
-if REDIS_URL.startswith("rediss://")):
+if REDIS_URL.startswith("rediss://"):
     CELERY_BROKER_URL = REDIS_URL
     CELERY_RESULT_BACKEND = REDIS_URL
     CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
