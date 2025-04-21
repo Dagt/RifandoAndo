@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import mimetypes
-from urllib.parse import urlparse
 import environ
 
 # === Entorno ===
@@ -90,8 +89,7 @@ DATABASES = {
     'default': env.db(default='sqlite:///db.sqlite3')
 }
 
-# === Redis y Celery ===
-# === Redis y Celery (usar rediss:// directamente) ===
+# === Redis y Celery (usando rediss:// directamente) ===
 REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
@@ -142,7 +140,7 @@ CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 # === ID automático por defecto ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# === Forzar MIME correcto para JS en whitenoise ===
+# === MIME para JS en whitenoise ===
 mimetypes.add_type("application/javascript", ".js", True)
 
 # === Cloudinary ===
