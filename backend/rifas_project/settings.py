@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import timedelta
 import mimetypes
 import environ
+import ssl
 
 # === Entorno ===
 env = environ.Env(DEBUG=(bool, False))
@@ -91,8 +92,14 @@ DATABASES = {
 
 # === Redis y Celery (usando rediss:// directamente) ===
 REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
+if REDIS_URL.startswith("rediss://")):
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
+    CELERY_REDIS_BACKEND_OPTIONS = {'ssl_cert_reqs': ssl.CERT_NONE}
+else:
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
