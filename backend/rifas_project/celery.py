@@ -13,12 +13,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rifas_project.settings')
 
 # Crear instancia de Celery
 app = Celery('rifas_project')
-app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Redis (no modificar ni transformar la URL)
-REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
-app.conf.broker_url = REDIS_URL
-app.conf.result_backend = REDIS_URL
+# Usar configuración desde settings.py (usa CELERY_BROKER_URL, CELERY_RESULT_BACKEND, etc.)
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Tareas periódicas
 app.conf.beat_schedule = {
