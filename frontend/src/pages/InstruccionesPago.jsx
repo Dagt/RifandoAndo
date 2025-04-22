@@ -32,7 +32,7 @@ const InstruccionesPago = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-[url('/fondo-galaxia.jpg')] bg-cover bg-center flex items-center justify-center">
+    <div className="min-h-screen p-6 bg-cover bg-center flex items-center justify-center">
       <div className="w-full max-w-3xl space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-extrabold text-yellow-400">Instrucciones de Pago</h2>

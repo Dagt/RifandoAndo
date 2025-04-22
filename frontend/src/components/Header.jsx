@@ -9,6 +9,7 @@ import {
   Menu,
   Clock,
   ShieldX,
+  Mail,
   LayoutDashboard,
   PlusCircle,
   Pencil,
@@ -35,6 +36,7 @@ const Header = () => {
     { to: "/ganadores", texto: "Ganadores", icono: <Trophy className="w-4 h-4" /> },
     { to: "/proximas-rifas", texto: "Próximas", icono: <Clock className="w-4 h-4" /> },
     { to: "/terminos", texto: "Términos", icono: <ShieldCheck className="w-4 h-4" /> },
+    { to: "/contacto", texto: "Contacto", icono: <Mail className="w-4 h-4" /> },
   ];
 
   const cerrarSubmenu = () => setSubmenuAbierto(false);
@@ -96,6 +98,12 @@ const Header = () => {
           </button>
         )}
       </nav>
+
+      {/* Logo y texto "Menú" solo en móviles */}
+<div className="flex items-center gap-2 lg:hidden text-white font-bold">
+  <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+  <span className="text-[16px]">Menú</span>
+</div>
 
       {/* Botón hamburguesa móvil */}
       <button onClick={() => setMenuAbierto(!menuAbierto)} className="lg:hidden z-[101] text-yellow-300 ml-auto">

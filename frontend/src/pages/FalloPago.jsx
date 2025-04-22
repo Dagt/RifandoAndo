@@ -7,19 +7,18 @@ const FalloPago = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-red-950 flex flex-col items-center justify-center text-white p-6 text-center space-y-6">
-      <XCircle className="w-16 h-16 text-red-400" />
-      <h2 className="text-3xl font-bold text-red-300">¡Pago no completado!</h2>
-      <p className="text-white/80">
-        Parece que algo salió mal con tu pago. Puedes intentar nuevamente o
-        elegir otro método.
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center text-white">
+      <XCircle className="w-20 h-20 text-red-400 mb-4 animate-pulse" />
+      <h1 className="text-4xl font-extrabold text-red-300 mb-2">¡Error en el pago!</h1>
+      <p className="text-white/80 max-w-md mb-6">
+        Algo salió mal al intentar procesar tu pago. Si fue un error de red o del banco, puedes intentarlo de nuevo más tarde o elegir otro método de pago.
       </p>
       <button
         onClick={() => navigate("/")}
-        className="flex items-center gap-2 mt-4 px-4 py-2 bg-white/10 border border-white/20 rounded hover:bg-white/20"
+        className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition"
       >
         <Home className="w-5 h-5" />
-        Ir al inicio
+        Volver al inicio
       </button>
     </div>
   );

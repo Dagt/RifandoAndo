@@ -23,6 +23,7 @@ import InstruccionesPago from "./pages/InstruccionesPago";
 import InstruccionesTransferencia from "./pages/InstruccionesTransferencia";
 import FalloPago from "./pages/FalloPago";
 import PoliticasCondiciones from "./pages/PoliticasCondiciones";
+import Contacto from "./pages/Contacto";
 
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/fallo-pago" element={<FalloPago />} />
           <Route path="/instrucciones-pago" element={<InstruccionesPago />} />
           <Route path="/terminos" element={<PoliticasCondiciones />} />
+          <Route path="/contacto" element={<Contacto />} />
           <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
           <Route path="/admin/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
