@@ -150,7 +150,7 @@ def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None)
                 "type": "HostedPayment",
                 "allowed_payment_methods": ["card"],
                 "expires_at": expires_at,
-                "success_url": f"https://rifandoando.club/compra-exitosa?folio={folio}",
+                "success_url": "https://rifandoando.club/verificar-checkout",
                 "failure_url": "https://rifandoando.club/fallo-pago"
             },
             "metadata": {

@@ -646,3 +646,35 @@ def conekta_success(request):
         "fecha": transaccion.fecha_creacion,
         "total_boletos": transaccion.rifa.total_boletos if hasattr(transaccion, 'rifa') else 10000
     })
+
+#Endpoint para verificar pagos con tarjeta
+@api_view(["GET"])
+def verificar_checkout(request):
+    checkout_id = request.GET.get("checkout_id")
+
+    if not checkout_id:
+        return Response({"error": "Falta el parámetro checkout_id"}, status=400)
+
+    headers = {
+        "Accept": f"application/vnd.conekta-v{settings.CONEKTA_API_VERSION}+json",
+        "Authorization": f"Bearer {settings.CONEKTA_API_KEY}"
+    }
+
+    try:
+        response = requests.get(
+            f"https://api.conekta.io/checkout_orders/{checkout_id}",
+            headers=headers
+        )
+        if response.status_code != 200:
+            return Response({"error": "No se pudo consultar la orden de Conekta"}, status=400)
+
+        data = response.json()
+        folio = data.get("metadata", {}).get("folio")
+
+        if not folio:
+            return Response({"error": "No se encontró el folio en la metadata"}, status=404)
+
+        return redirect(f"/compra-exitosa?folio={folio}")
+
+    except Exception as e:
+        return Response({"error": f"Error inesperado: {str(e)}"}, status=500)
