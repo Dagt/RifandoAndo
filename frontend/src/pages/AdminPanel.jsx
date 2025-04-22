@@ -23,7 +23,7 @@ const AdminPanel = () => {
 
         {/* Crear nueva rifa */}
         <div
-          onClick={() => navigate("/admin/crear-rifa")}
+          onClick={() => navigate("/panel/crear-rifa")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
           <h2 className="text-lg font-bold text-yellow-300 mb-2">➕ Crear nueva rifa</h2>
@@ -32,7 +32,7 @@ const AdminPanel = () => {
 
         {/* Estadísticas */}
         <div
-          onClick={() => navigate("/admin/estadisticas")}
+          onClick={() => navigate("/panel/estadisticas")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
           <h2 className="text-lg font-bold text-yellow-300 mb-2">📊 Estadísticas</h2>
@@ -41,7 +41,7 @@ const AdminPanel = () => {
 
         {/* Editar Rifas */}
         <div
-          onClick={() => navigate("/admin/rifas")}
+          onClick={() => navigate("/panel/rifas")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
           <h2 className="text-lg font-bold text-yellow-300 mb-2">📋 Editar rifas</h2>
@@ -50,7 +50,7 @@ const AdminPanel = () => {
 
         {/* Panel de transacciones */}
         <div
-          onClick={() => navigate("/admin/transacciones")}
+          onClick={() => navigate("/panel/transacciones")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
           <h2 className="text-lg font-bold text-yellow-300 mb-2">💳 Ver transacciones</h2>
@@ -59,7 +59,7 @@ const AdminPanel = () => {
 
         {/* Buscar Boletos */}
         <div
-          onClick={() => navigate("/admin/buscador-boletos")}
+          onClick={() => navigate("/panel/buscador-boletos")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
           <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🎟 Buscar boleto por No.</h2>
