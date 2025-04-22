@@ -1,21 +1,31 @@
+# backend/rifas_project/celery.py
+
 import os
+import ssl
 from celery import Celery
 from celery.schedules import crontab
 from dotenv import load_dotenv
 import environ
 
-# Cargar entorno
 load_dotenv()
 env = environ.Env()
 
-# Configuración base de Django
+# Configuración base
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rifas_project.settings')
 
-# Crear instancia de Celery
-app = Celery('rifas_project')
+REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
 
-# Usar configuración desde settings.py (usa CELERY_BROKER_URL, CELERY_RESULT_BACKEND, etc.)
+app = Celery('rifas_project')
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Configuración segura para rediss://
+if REDIS_URL.startswith("rediss://"):
+    ssl_options = {"ssl_cert_reqs": ssl.CERT_NONE}
+    app.conf.broker_use_ssl = ssl_options
+    app.conf.redis_backend_use_ssl = ssl_options
+
+app.conf.broker_url = REDIS_URL
+app.conf.result_backend = REDIS_URL
 
 # Tareas periódicas
 app.conf.beat_schedule = {
@@ -29,5 +39,4 @@ app.conf.beat_schedule = {
     },
 }
 
-# Descubrir tareas
 app.autodiscover_tasks()
