@@ -130,19 +130,19 @@ const Header = () => {
       <Link to="/adm-panel" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <LayoutDashboard className="w-4 h-4" /> Ir al panel
       </Link>
-      <Link to="/admin/crear-rifa" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/crear-rifa" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <PlusCircle className="w-4 h-4" /> Crear rifa
       </Link>
-      <Link to="/admin/rifas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/rifas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <Pencil className="w-4 h-4" /> Editar rifas
       </Link>
-      <Link to="/admin/transacciones" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/transacciones" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <CreditCard className="w-4 h-4" /> Transacciones
       </Link>
-      <Link to="/admin/buscador-boletos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/buscador-boletos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <SearchCheck className="w-4 h-4" /> Buscar boleto
       </Link>
-      <Link to="/admin/estadisticas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/estadisticas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <BarChart className="w-4 h-4" /> Estadisticas
       </Link>
     </div>

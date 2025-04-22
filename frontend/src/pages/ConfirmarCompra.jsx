@@ -156,11 +156,7 @@ const ConfirmarCompra = () => {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
-          {formulario.metodo === "OXXO" && (
-            <p className="text-xs text-yellow-300">
-              ⚠️ Comisión adicional de $12.00 por pago en OXXO (total: ${montoFinal})
-            </p>
-          )}
+
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -231,8 +227,15 @@ const ConfirmarCompra = () => {
                   {icon} {label}
                 </button>
               ))}
-            </div>
-            {errores.metodo && <p className="text-red-300 text-sm mt-1">{errores.metodo}</p>}
+              </div>
+
+              {formulario.metodo === "OXXO" && (
+                <div className="mt-2 w-full text-center text-xs text-yellow-300">
+                ⚠️ Comisión adicional de $12.00 por pago en OXXO (total: ${montoFinal})
+                </div>
+              )}
+
+              {errores.metodo && <p className="text-red-300 text-sm mt-1">{errores.metodo}</p>}
           </div>
 
           <div className="flex flex-col items-center justify-center text-sm">

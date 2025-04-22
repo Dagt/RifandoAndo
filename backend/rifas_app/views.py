@@ -42,10 +42,10 @@ def boletos_disponibles(request, rifa_id):
     return Response({"disponibles": disponibles})
 
 #Endpoint encargado de recabar la informacion de una venta
+#Endpoint encargado de recabar la informacion de una venta
 @api_view(["POST"])
 def confirmar_compra(request):
-    from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
-    from .sms_utils import enviar_sms
+    from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei  # asegúrate de importar
 
     data = request.data
     campos_requeridos = [
@@ -78,61 +78,54 @@ def confirmar_compra(request):
     tiempo_expiracion = timezone.now() + timedelta(hours=2)
     expires_at = int(tiempo_expiracion.timestamp())
 
+    transaccion = Transaccion.objects.create(
+        nombre_completo=data["nombre"],
+        correo=data["correo"],
+        telefono=telefono,
+        fecha_nacimiento=data["nacimiento"],
+        monto=data["monto"],
+        metodo_pago=data["metodo_pago"],
+        fecha_expiracion=tiempo_expiracion,
+        rifa_nombre=rifa.nombre
+    )
+
     metodo = data["metodo_pago"].lower()
     instrucciones = None
-    folio_temp = uuid.uuid4().hex[:12].upper()  # Crear un folio temporal
 
-    try:
-        if metodo == "oxxo":
-            instrucciones = crear_orden_oxxo(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=folio_temp,
-                expires_at=expires_at
-            )
-        elif metodo == "spei":
-            instrucciones = crear_orden_spei(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=folio_temp,
-                expires_at=expires_at
-            )
-        elif metodo == "tarjeta":
-            checkout = crear_orden_tarjeta(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=folio_temp,
-                expires_at=expires_at
-            )
-            if checkout and checkout.get("checkout_url"):
-                instrucciones = {
-                    "checkout_url": checkout["checkout_url"],
-                    "expires_at": expires_at
-                }
-
-        if instrucciones is None:
-            return Response({"error": "No se pudieron generar las instrucciones de pago"}, status=400)
-
-        # Crear la transacción ahora que todo fue exitoso
-        transaccion = Transaccion.objects.create(
-            nombre_completo=data["nombre"],
+    if metodo == "oxxo":
+        instrucciones = crear_orden_oxxo(
+            nombre=data["nombre"],
             correo=data["correo"],
             telefono=telefono,
-            fecha_nacimiento=data["nacimiento"],
             monto=data["monto"],
-            metodo_pago=data["metodo_pago"],
-            fecha_expiracion=tiempo_expiracion,
-            rifa_nombre=rifa.nombre,
-            folio=folio_temp
+            folio=transaccion.folio,
+            expires_at=expires_at
         )
+    elif metodo == "spei":
+        instrucciones = crear_orden_spei(
+            nombre=data["nombre"],
+            correo=data["correo"],
+            telefono=telefono,
+            monto=data["monto"],
+            folio=transaccion.folio,
+            expires_at=expires_at
+        )
+    elif metodo == "tarjeta":
+        checkout = crear_orden_tarjeta(
+            nombre=data["nombre"],
+            correo=data["correo"],
+            telefono=telefono,
+            monto=data["monto"],
+            folio=transaccion.folio,
+            expires_at=expires_at
+        )
+        if checkout and checkout.get("checkout_url"):
+            instrucciones = {
+                "checkout_url": checkout["checkout_url"],
+                "expires_at": expires_at
+            }
 
-        # Apartar boletos
+    try:
         BoletoSeleccionado.objects.bulk_create([
             BoletoSeleccionado(
                 rifa=rifa,
@@ -143,11 +136,13 @@ def confirmar_compra(request):
             )
             for numero in boletos_solicitados
         ])
+    except Exception:
+        transaccion.delete()
+        return Response({
+            "error": "No se pudieron apartar los boletos. Puede que uno de ellos ya haya sido seleccionado. Intenta con otros números."
+        }, status=400)
 
-    except Exception as e:
-        return Response({"error": f"Error al generar la orden: {str(e)}"}, status=400)
-
-    # SMS
+    # Construcción de mensaje SMS
     hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%d/%b %H:%Mh')
     verificador_url = f"https://www.rifandoando.club/verificador?folio={transaccion.folio}"
     folio = transaccion.folio
@@ -164,6 +159,7 @@ def confirmar_compra(request):
             f"Paga antes de: {hora_limite}\n"
             f"Verifica tu compra\n{verificador_url}"
         )
+
     elif instrucciones and metodo == "spei":
         mensaje = (
             f"RifandoAndo\n\n"
@@ -173,6 +169,8 @@ def confirmar_compra(request):
             f"Paga antes del: {hora_limite}\n"
             f"Verifica tu compra en:\n{verificador_url}"
         )
+    else:
+        mensaje = None  # no SMS para tarjeta
 
     if mensaje:
         try:
@@ -193,11 +191,12 @@ def confirmar_compra(request):
         "rifa": transaccion.rifa_nombre,
         "boletos": boletos_solicitados,
         "total_boletos": rifa.total_boletos,
-        "instrucciones": instrucciones
     }
 
-    return Response(response_data)
+    if instrucciones:
+        response_data["instrucciones"] = instrucciones
 
+    return Response(response_data)
 
 
 #Endpoint para verificar los folios y regresa la informacion de una transaccion
