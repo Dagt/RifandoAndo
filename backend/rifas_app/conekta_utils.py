@@ -158,7 +158,7 @@ def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None)
             }
         }
 
-        response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
+        response = requests.post("https://api.conekta.io/checkout_orders", json=data, headers=headers)
 
         if response.status_code not in [200, 201]:
             print("❌ Error al crear orden tarjeta:", response.status_code, response.text)
