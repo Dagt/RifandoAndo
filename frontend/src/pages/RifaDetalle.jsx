@@ -29,7 +29,7 @@ const RifaDetalle = () => {
   return (
     <div className="p-6 text-white min-h-screen">
       <h1 className="text-4xl font-extrabold text-center text-orange-400 mb-6">
-         ${rifa.nombre}
+         Mira esta rifa!!!
       </h1>
 
       {cargando && <p className="text-center text-white/70">Cargando rifa...</p>}

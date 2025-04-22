@@ -13,7 +13,7 @@ const Contacto = () => {
         <br className="hidden sm:inline" /> Nos encantaría trabajar contigo. ¡Podemos ayudarte a llevar tu rifa al siguiente nivel!
       </p>
 
-      <div className="w-full bg-white/10 border border-white/20 rounded-lg p-6 space-y-4 text-left text-white">
+      <div className="w-full bg-white/40 border border-white/20 rounded-lg p-6 space-y-4 text-left text-white">
         <h2 className="text-xl font-bold flex items-center gap-2 text-yellow-300">
           <Users className="w-5 h-5" />
           Propuestas de colaboración
@@ -43,7 +43,7 @@ const Contacto = () => {
 
         <p className="text-white/70 pt-4 border-t border-white/10 mt-4 text-sm">
           También puedes escribirnos si tienes dudas o sugerencias sobre la plataforma.
-          Estaremos felices de leerte 😊
+          Estaremos felices de leerte
         </p>
       </div>
 
