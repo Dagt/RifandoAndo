@@ -17,6 +17,7 @@ const ConfirmarCompra = () => {
 
   const [boletos, setBoletos] = useState([]);
   const [monto, setMonto] = useState(0);
+  const montoFinal = formulario.metodo === "OXXO" ? monto + 12 : monto;
   const [errores, setErrores] = useState({});
 
   useEffect(() => {
@@ -90,7 +91,7 @@ const ConfirmarCompra = () => {
       metodo_pago: formulario.metodo,
       rifa_id: id,
       boletos: boletos,
-      monto: monto,
+      monto: montoFinal,
     };
 
     try {
@@ -151,11 +152,15 @@ const ConfirmarCompra = () => {
           Confirma tu información para finalizar
         </h2>
 
-        <div className="bg-white/10 text-white text-center p-3 rounded mb-4">
+        <div className="bg-white/10 text-white text-center p-3 rounded mb-4 space-y-1">
           <p className="text-sm">
-            Estás por comprar <strong>{boletos.length}</strong> boletos por un total de{" "}
-            <strong>${monto}</strong>.
+            Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
+          {formulario.metodo === "OXXO" && (
+            <p className="text-xs text-yellow-300">
+              ⚠️ Comisión adicional de $12.00 por pago en OXXO (total: ${montoFinal})
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

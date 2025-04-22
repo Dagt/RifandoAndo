@@ -47,12 +47,12 @@ function App() {
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
-          <Route path="/admin/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
-          <Route path="/admin/estadisticas" element={<RutaProtegida> <Estadisticas /></RutaProtegida>} />
-          <Route path="/admin/rifa/:id/editar" element={<RutaProtegida><EditarRifa /></RutaProtegida>} />
-          <Route path="/admin/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
-          <Route path="/admin/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
-          <Route path="/admin/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
+          <Route path="/panel/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
+          <Route path="/panel/estadisticas" element={<RutaProtegida> <Estadisticas /></RutaProtegida>} />
+          <Route path="/panel/rifa/:id/editar" element={<RutaProtegida><EditarRifa /></RutaProtegida>} />
+          <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
+          <Route path="/panel/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
+          <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
         </Route>
       </Routes>
     </Router>

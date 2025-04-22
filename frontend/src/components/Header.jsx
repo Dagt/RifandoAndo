@@ -101,7 +101,7 @@ const Header = () => {
 
       {/* Logo y texto "Menú" solo en móviles */}
 <div className="flex items-center gap-2 lg:hidden text-white font-bold">
-  <img src="/static/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+  <img src="/static/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
   <span className="text-[16px]">Menú</span>
 </div>
 
