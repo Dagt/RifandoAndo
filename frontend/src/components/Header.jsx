@@ -68,19 +68,19 @@ const Header = () => {
                 <Link to="/adm-panel" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <LayoutDashboard className="w-4 h-4" /> Ir al panel
                 </Link>
-                <Link to="/admin/crear-rifa" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/crear-rifa" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <PlusCircle className="w-4 h-4" /> Crear rifa
                 </Link>
-                <Link to="/admin/rifas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/rifas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <Pencil className="w-4 h-4" /> Editar rifas
                 </Link>
-                <Link to="/admin/transacciones" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/transacciones" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <CreditCard className="w-4 h-4" /> Transacciones
                 </Link>
-                <Link to="/admin/buscador-boletos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/buscador-boletos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <SearchCheck className="w-4 h-4" /> Buscar boleto
                 </Link>
-                <Link to="/admin/estadisticas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/estadisticas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                 <BarChart className="w-4 h-4" /> Estadisticas
                 </Link>
               </div>
