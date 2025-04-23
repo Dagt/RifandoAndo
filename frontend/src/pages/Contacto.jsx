@@ -8,12 +8,12 @@ const Contacto = () => {
       <Megaphone className="w-16 h-16 text-yellow-400 mb-4 animate-bounce" />
       <h1 className="text-4xl font-extrabold text-orange-400 mb-4">¡Colabora con nosotros!</h1>
 
-      <p className="text-white/80 mb-6">
+      <p className="text-white/80 mb-6 font-extrabold">
         ¿Tienes una idea para una rifa? ¿Representas una marca, negocio o influencer que quiere organizar un sorteo con nosotros?
-        <br className="hidden sm:inline" /> Nos encantaría trabajar contigo. ¡Podemos ayudarte a llevar tu rifa al siguiente nivel!
+        <br className="hidden sm:inline font-extrabold" /> Nos encantaría trabajar contigo. ¡Podemos ayudarte a llevar tu rifa al siguiente nivel!
       </p>
 
-      <div className="w-full bg-white/20 border border-white/20 rounded-lg p-6 space-y-4 text-left text-white">
+      <div className="w-full bg-white/10  backdrop-blur-md border border-white/20 rounded-lg p-6 space-y-4 text-left text-white">
         <h2 className="text-xl font-bold flex items-center gap-2 text-yellow-300">
           <Users className="w-5 h-5" />
           Propuestas de colaboración
