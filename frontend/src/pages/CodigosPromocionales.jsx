@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 
 const CodigosPromocionalesAdmin = () => {
   const [codigos, setCodigos] = useState([]);
+  const [rifas, setRifas] = useState([]);
+  const [mensaje, setMensaje] = useState("");
+
   const [nuevoCodigo, setNuevoCodigo] = useState({
     codigo: "",
     tipo: "porcentaje",
@@ -10,14 +13,21 @@ const CodigosPromocionalesAdmin = () => {
     fecha_expiracion: "",
     usos_maximos: "",
     rifas: [],
+    minimo_boletos_para_regalo: "",
+    boletos_regalo: "",
   });
-  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetch("/api/codigos-promocionales/")
       .then((res) => res.json())
       .then((data) => setCodigos(data))
       .catch((err) => console.error("Error al cargar códigos", err));
+
+    fetch("/api/rifas-activas/")
+      .then((res) => res.json())
+      .then((data) => setRifas(data))
+      .catch((err) => console.error("Error al cargar rifas", err));
   }, []);
 
   const handleChange = (e) => {
@@ -25,14 +35,27 @@ const CodigosPromocionalesAdmin = () => {
     setNuevoCodigo((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleRifaToggle = (id) => {
+    setNuevoCodigo((prev) => {
+      const rifas = prev.rifas.includes(id)
+        ? prev.rifas.filter((r) => r !== id)
+        : [...prev.rifas, id];
+      return { ...prev, rifas };
+    });
+  };
+
   const crearCodigo = (e) => {
     e.preventDefault();
+
+    const payload = {
+      ...nuevoCodigo,
+      rifas: nuevoCodigo.rifas,
+    };
+
     fetch("/api/codigos-promocionales/crear/", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(nuevoCodigo),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -47,6 +70,8 @@ const CodigosPromocionalesAdmin = () => {
             fecha_expiracion: "",
             usos_maximos: "",
             rifas: [],
+            minimo_boletos_para_regalo: "",
+            boletos_regalo: "",
           });
         } else {
           setMensaje("❌ Error al crear código.");
@@ -58,6 +83,26 @@ const CodigosPromocionalesAdmin = () => {
       });
   };
 
+
+const [filtroEstado, setFiltroEstado] = useState("todos");
+const [busqueda, setBusqueda] = useState("");
+
+const codigosFiltrados = codigos.filter((c) => {
+  const ahora = new Date();
+  const expira = c.fecha_expiracion ? new Date(c.fecha_expiracion) < ahora : false;
+  const agotado = c.usos_maximos !== null && c.usos_actuales >= c.usos_maximos;
+
+  if (filtroEstado === "activos") {
+    if (expira || agotado) return false;
+  } else if (filtroEstado === "expirados") {
+    if (!expira) return false;
+  } else if (filtroEstado === "agotados") {
+    if (!agotado) return false;
+  }
+
+  return c.codigo.toLowerCase().includes(busqueda.toLowerCase());
+});
+
   return (
     <div className="p-6 text-white max-w-6xl mx-auto">
       <h1 className="text-3xl font-extrabold text-center text-yellow-400 mb-6">
@@ -65,7 +110,9 @@ const CodigosPromocionalesAdmin = () => {
       </h1>
 
       {mensaje && (
-        <div className="mb-4 bg-white/10 p-3 rounded text-sm text-center">{mensaje}</div>
+        <div className="mb-4 bg-white/10 p-3 rounded text-sm text-center">
+          {mensaje}
+        </div>
       )}
 
       <form
@@ -102,6 +149,29 @@ const CodigosPromocionalesAdmin = () => {
           required
         />
 
+        {nuevoCodigo.tipo === "boletos_extra" && (
+          <>
+            <input
+              type="number"
+              name="minimo_boletos_para_regalo"
+              placeholder="Ej: 5 (cada X)"
+              className="p-2 rounded bg-white/20 text-white"
+              value={nuevoCodigo.minimo_boletos_para_regalo}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="number"
+              name="boletos_regalo"
+              placeholder="Ej: 1 (regalo)"
+              className="p-2 rounded bg-white/20 text-white"
+              value={nuevoCodigo.boletos_regalo}
+              onChange={handleChange}
+              required
+            />
+          </>
+        )}
+
         <input
           type="number"
           name="compra_minima"
@@ -128,15 +198,59 @@ const CodigosPromocionalesAdmin = () => {
           onChange={handleChange}
         />
 
+        <div className="col-span-full">
+          <label className="block mb-2 text-sm">Aplicar solo en rifas específicas:</label>
+          <div className="flex flex-wrap gap-2">
+            {rifas.map((r) => (
+              <label key={r.id} className="text-sm bg-white/10 px-2 py-1 rounded cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mr-1"
+                  checked={nuevoCodigo.rifas.includes(r.id)}
+                  onChange={() => handleRifaToggle(r.id)}
+                />
+                {r.nombre}
+              </label>
+            ))}
+          </div>
+        </div>
+
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-700 transition text-white font-bold py-2 px-4 rounded col-span-full"
+          className="bg-green-600 hover:bg-green-700 transition text-white font-bold py-2 px-4 rounded col-span-full mt-2"
         >
           ➕ Crear código
         </button>
       </form>
 
       <div className="overflow-x-auto">
+        {/* Filtros y búsqueda */}
+<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+  <div className="flex gap-2">
+    {["todos", "activos", "expirados", "agotados"].map((filtro) => (
+      <button
+        key={filtro}
+        onClick={() => setFiltroEstado(filtro)}
+        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          filtroEstado === filtro
+            ? "bg-yellow-400 text-indigo-900"
+            : "bg-white/10 text-white hover:bg-white/20"
+        }`}
+      >
+        {filtro.charAt(0).toUpperCase() + filtro.slice(1)}
+      </button>
+    ))}
+  </div>
+
+  <input
+    type="text"
+    placeholder="🔍 Buscar código"
+    value={busqueda}
+    onChange={(e) => setBusqueda(e.target.value)}
+    className="px-3 py-1 rounded bg-white/10 text-white text-sm w-full md:w-64 border border-white/20"
+  />
+</div>
+
         <table className="min-w-full text-sm text-white text-left border border-white/10">
           <thead className="bg-white/10">
             <tr>
@@ -149,7 +263,7 @@ const CodigosPromocionalesAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {codigos.map((c) => (
+            {codigosFiltrados.map((c) => (
               <tr key={c.id} className="border-t border-white/10">
                 <td className="p-2 font-bold text-yellow-300">{c.codigo}</td>
                 <td className="p-2 capitalize">{c.tipo}</td>

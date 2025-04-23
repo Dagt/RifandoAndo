@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   BarChart,
   Trophy,
+  HelpCircle,
   Menu,
   Clock,
   ShieldX,
@@ -38,6 +39,7 @@ const Header = () => {
     { to: "/proximas-rifas", texto: "Próximas", icono: <Clock className="w-4 h-4" /> },
     { to: "/terminos", texto: "Términos", icono: <ShieldCheck className="w-4 h-4" /> },
     { to: "/contacto", texto: "Contacto", icono: <Mail className="w-4 h-4" /> },
+    { to: "/como-funciona", texto: "Como funciona", icono: <HelpCircle className="w-4 h-4" /> },
   ];
 
   const cerrarSubmenu = () => setSubmenuAbierto(false);

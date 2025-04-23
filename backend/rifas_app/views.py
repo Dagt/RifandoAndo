@@ -12,6 +12,7 @@ from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
+from django.core.exceptions import ValidationError
 from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer
 from rest_framework.decorators import (
     api_view,
@@ -688,6 +689,12 @@ def listar_codigos_promocionales(request):
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
+        codigo = CodigoPromocional(**serializer.validated_data)
+        try:
+            codigo.full_clean()  # 🔍 esto llama al método clean() que definiste en el modelo
+            codigo.save()
+            serializer = CodigoPromocionalSerializer(codigo)
+            return Response(serializer.data, status=201)
+        except ValidationError as e:
+            return Response({"error": e.message_dict}, status=400)
     return Response(serializer.errors, status=400)

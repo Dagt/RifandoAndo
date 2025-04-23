@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
+from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 import uuid
 
@@ -97,13 +98,29 @@ class CodigoPromocional(models.Model):
     usos_maximos = models.PositiveIntegerField(null=True, blank=True)
     usos_actuales = models.PositiveIntegerField(default=0)
     rifas = models.ManyToManyField("Rifa", blank=True, help_text="Rifas en las que aplica este código")
-
+    minimo_boletos_para_regalo = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Ej. 2 significa que por cada 2 comprados se regala 1"
+    )
+    boletos_regalo = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Cuántos boletos regalar (normalmente 1)"
+    )
     def esta_activo(self):
         if self.fecha_expiracion and timezone.now() > self.fecha_expiracion:
             return False
         if self.usos_maximos is not None and self.usos_actuales >= self.usos_maximos:
             return False
         return True
+
+    def clean(self):
+        if self.tipo == "porcentaje":
+            if self.minimo_boletos_para_regalo or self.boletos_regalo:
+                raise ValidationError(
+                    "Los campos de boletos extra no deben estar definidos si el tipo es 'porcentaje'.")
+        elif self.tipo == "boletos_extra":
+            if not self.minimo_boletos_para_regalo or not self.boletos_regalo:
+                raise ValidationError(
+                    "Debes definir los campos 'mínimo de boletos' y 'boletos regalo' si el tipo es 'boletos_extra'.")
+
 
     def __str__(self):
         return self.codigo
