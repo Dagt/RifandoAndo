@@ -46,40 +46,59 @@ const CodigosPromocionalesAdmin = () => {
   };
 
   const crearCodigo = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload = {
-      ...nuevoCodigo,
-      valor: nuevoCodigo.tipo === "porcentaje" ? nuevoCodigo.valor : null,
-    };
-
-    fetch("/api/codigos-promocionales/crear/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.id) {
-          setCodigos((prev) => [data, ...prev]);
-          setMensaje("✅ Código creado correctamente.");
-          setNuevoCodigo({
-            codigo: "",
-            tipo: "porcentaje",
-            valor: "",
-            compra_minima: "",
-            fecha_expiracion: "",
-            usos_maximos: "",
-            rifas: [],
-            minimo_boletos_para_regalo: "",
-            boletos_regalo: "",
-          });
-        } else {
-          setMensaje("❌ Error al crear código.");
-        }
-      })
-      .catch(() => setMensaje("❌ Error al crear código."));
+  // Construimos el payload filtrando solo lo necesario
+  const payload = {
+    codigo: nuevoCodigo.codigo.trim(),
+    tipo: nuevoCodigo.tipo,
+    rifas: nuevoCodigo.rifas,
+    usos_maximos: nuevoCodigo.usos_maximos || null,
+    fecha_expiracion: nuevoCodigo.fecha_expiracion || null,
   };
+
+  if (nuevoCodigo.tipo === "porcentaje") {
+    payload.valor = parseInt(nuevoCodigo.valor, 10);
+    payload.compra_minima = nuevoCodigo.compra_minima || null;
+  } else if (nuevoCodigo.tipo === "boletos_extra") {
+    payload.valor = null;
+    payload.minimo_boletos_para_regalo = parseInt(nuevoCodigo.minimo_boletos_para_regalo, 10);
+    payload.boletos_regalo = parseInt(nuevoCodigo.boletos_regalo, 10);
+    payload.compra_minima = null; // no aplica
+  }
+
+  fetch("/api/codigos-promocionales/crear/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.id) {
+        setCodigos((prev) => [data, ...prev]);
+        setMensaje("✅ Código creado correctamente.");
+        setNuevoCodigo({
+          codigo: "",
+          tipo: "porcentaje",
+          valor: "",
+          compra_minima: "",
+          fecha_expiracion: "",
+          usos_maximos: "",
+          rifas: [],
+          minimo_boletos_para_regalo: "",
+          boletos_regalo: "",
+        });
+      } else {
+        const mensajeError = data?.error
+          ? Object.values(data.error).flat().join(" ")
+          : "❌ Error al crear código.";
+        setMensaje(mensajeError);
+      }
+    })
+    .catch(() => {
+      setMensaje("❌ Error al crear código.");
+    });
+};
 
   const codigosFiltrados = codigos.filter((c) => {
     const ahora = new Date();
@@ -106,48 +125,119 @@ const CodigosPromocionalesAdmin = () => {
       )}
 
       <form
-        onSubmit={crearCodigo}
-        className="grid md:grid-cols-3 gap-4 mb-8 bg-white/10 p-4 rounded-xl backdrop-blur-md shadow-md"
-      >
-        <input type="text" name="codigo" placeholder="Código" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.codigo} onChange={handleChange} required />
-        <select name="tipo" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.tipo} onChange={handleChange}>
-          <option value="porcentaje">Descuento (%)</option>
-          <option value="boletos_extra">Boletos extra</option>
-        </select>
+  onSubmit={crearCodigo}
+  className="grid md:grid-cols-3 gap-4 mb-8 bg-white/10 p-4 rounded-xl backdrop-blur-md shadow-md"
+>
+  <input
+    type="text"
+    name="codigo"
+    placeholder="Código"
+    className="p-2 rounded bg-white/30 text-white"
+    value={nuevoCodigo.codigo}
+    onChange={handleChange}
+    required
+  />
 
-        {nuevoCodigo.tipo === "porcentaje" && (
-          <input type="number" name="valor" placeholder="Porcentaje de descuento" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.valor} onChange={handleChange} required />
-        )}
+  <select
+    name="tipo"
+    className="p-2 rounded bg-white/30 text-white"
+    value={nuevoCodigo.tipo}
+    onChange={handleChange}
+  >
+    <option value="porcentaje">Descuento (%)</option>
+    <option value="boletos_extra">Boletos extra</option>
+  </select>
 
-        {nuevoCodigo.tipo === "boletos_extra" && (
-          <>
-            <input type="number" name="minimo_boletos_para_regalo" placeholder="Ej: 5 (cada X)" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.minimo_boletos_para_regalo} onChange={handleChange} required />
-            <input type="number" name="boletos_regalo" placeholder="Ej: 1 (regalo)" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.boletos_regalo} onChange={handleChange} required />
-          </>
-        )}
+  {nuevoCodigo.tipo === "porcentaje" && (
+    <input
+      type="number"
+      name="valor"
+      placeholder="Porcentaje de descuento"
+      className="p-2 rounded bg-white/30 text-white"
+      value={nuevoCodigo.valor}
+      onChange={handleChange}
+      required
+    />
+  )}
 
-        <input type="number" name="compra_minima" placeholder="Compra mínima en $" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.compra_minima} onChange={handleChange} />
-        <input type="datetime-local" name="fecha_expiracion" placeholder="Fecha de expiración" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.fecha_expiracion} onChange={handleChange} />
-        <input type="number" name="usos_maximos" placeholder="Límite de usos" className="p-2 rounded bg-white/20 text-white" value={nuevoCodigo.usos_maximos} onChange={handleChange} />
+  {nuevoCodigo.tipo === "boletos_extra" && (
+    <>
+      <input
+        type="number"
+        name="minimo_boletos_para_regalo"
+        placeholder="Ej: 5 (cada X)"
+        className="p-2 rounded bg-white/30 text-white"
+        value={nuevoCodigo.minimo_boletos_para_regalo}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="number"
+        name="boletos_regalo"
+        placeholder="Ej: 1 (regalo)"
+        className="p-2 rounded bg-white/30 text-white"
+        value={nuevoCodigo.boletos_regalo}
+        onChange={handleChange}
+        required
+      />
+    </>
+  )}
 
-        <div className="col-span-full">
-          <label className="block mb-2 text-sm">Aplicar solo en rifas específicas:</label>
-          <div className="flex flex-wrap gap-2">
-            {rifas.map((r) => (
-              <label key={r.id} className="text-sm bg-white/10 px-2 py-1 rounded cursor-pointer">
-                <input type="checkbox" className="mr-1" checked={nuevoCodigo.rifas.includes(r.id)} onChange={() => handleRifaToggle(r.id)} />
-                {r.nombre}
-              </label>
-            ))}
-          </div>
-        </div>
+  {nuevoCodigo.tipo === "porcentaje" && (
+    <input
+      type="number"
+      name="compra_minima"
+      placeholder="Compra mínima en $"
+      className="p-2 rounded bg-white/30 text-white"
+      value={nuevoCodigo.compra_minima}
+      onChange={handleChange}
+    />
+  )}
 
-        <div className="col-span-full text-center">
-          <button type="submit" className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 transition text-white font-bold py-2 px-4 rounded">
-            ➕ Crear
-          </button>
-        </div>
-      </form>
+  <input
+    type="datetime-local"
+    name="fecha_expiracion"
+    placeholder="Fecha de expiración del código"
+    className="p-2 rounded bg-white/30 text-white"
+    value={nuevoCodigo.fecha_expiracion}
+    onChange={handleChange}
+  />
+
+  <input
+    type="number"
+    name="usos_maximos"
+    placeholder="Límite de usos"
+    className="p-2 rounded bg-white/30 text-white"
+    value={nuevoCodigo.usos_maximos}
+    onChange={handleChange}
+  />
+
+  <div className="col-span-full">
+    <label className="block mb-2 text-sm">Aplicar solo en rifas específicas:</label>
+    <div className="flex flex-wrap gap-2">
+      {rifas.map((r) => (
+        <label key={r.id} className="text-sm bg-white/10 px-2 py-1 rounded cursor-pointer">
+          <input
+            type="checkbox"
+            className="mr-1"
+            checked={nuevoCodigo.rifas.includes(r.id)}
+            onChange={() => handleRifaToggle(r.id)}
+          />
+          {r.nombre}
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <div className="col-span-full text-center">
+    <button
+      type="submit"
+      className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 transition text-white font-semibold py-2 px-5 rounded"
+    >
+      ➕ Crear código
+    </button>
+  </div>
+</form>
 
       <div className="overflow-x-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">

@@ -92,7 +92,7 @@ class CodigoPromocional(models.Model):
 
     codigo = models.CharField(max_length=50, unique=True)
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    valor = models.PositiveIntegerField(help_text="Porcentaje (ej. 10) o número de boletos extra (ej. 2)")
+    valor = models.PositiveIntegerField(null=True, blank=True, help_text="Porcentaje (ej. 10) o número de boletos extra (ej. 2)")
     compra_minima = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     fecha_expiracion = models.DateTimeField(null=True, blank=True)
     usos_maximos = models.PositiveIntegerField(null=True, blank=True)
