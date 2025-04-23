@@ -17,8 +17,7 @@ from .views import (
     completar_transaccion,
     cancelar_transaccion,
     buscar_boleto,
-    conekta_success,
-    verificar_checkout
+    conekta_success
 )
 
 urlpatterns = [
@@ -40,6 +39,5 @@ urlpatterns = [
     path("transacciones/<str:folio>/cancelar/", cancelar_transaccion, name="cancelar_transaccion"),
     path("buscar-boletos/", buscar_boleto, name="buscar_boleto"),
     path("conekta/success/<str:order_id>/", conekta_success),
-    path("verificar-checkout", verificar_checkout , name="verificar_checkout"),
 
 ]
