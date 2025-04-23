@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-white/10 backdrop-blur-md text-white text-sm font-semibold border-t border-white/10 px-4 py-2 text-center">
       <div className="flex justify-center gap-4 mb-1">
-        <a href="https://facebook.com" target="_blank" rel="noreferrer">
+        <a href="https://www.facebook.com/profile.php?id=61557059177764" target="_blank" rel="noreferrer">
           <Facebook className="w-4 h-4 hover:text-blue-400" />
         </a>
         <a href="https://instagram.com" target="_blank" rel="noreferrer">
