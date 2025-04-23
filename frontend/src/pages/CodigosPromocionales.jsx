@@ -70,7 +70,7 @@ const CodigosPromocionalesAdmin = () => {
 
       <form
         onSubmit={crearCodigo}
-        className="grid md:grid-cols-3 gap-4 mb-8 bg-white/10 p-4 rounded-xl shadow-md"
+        className="grid md:grid-cols-3 gap-4 mb-8 bg-white/10 p-4 rounded-xl backdrop-blur-md shadow-md"
       >
         <input
           type="text"

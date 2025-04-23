@@ -82,7 +82,7 @@ const Header = () => {
                   <SearchCheck className="w-4 h-4" /> Buscar boleto
                 </Link>
                 <Link to="/panel/codigos-promocion" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
-                  <Tag className="w-4 h-4" /> Códigos de promoción
+                  <Tag className="w-4 h-4" /> Códigos
                 </Link>
                 <Link to="/panel/estadisticas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                 <BarChart className="w-4 h-4" /> Estadisticas
@@ -147,7 +147,7 @@ const Header = () => {
         <SearchCheck className="w-4 h-4" /> Buscar boleto
       </Link>
       <Link to="/panel/codigos-promocion" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
-        <Tag className="w-4 h-4" /> Códigos de promoción
+        <Tag className="w-4 h-4" /> Códigos
       </Link>
       <Link to="/panel/estadisticas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <BarChart className="w-4 h-4" /> Estadisticas

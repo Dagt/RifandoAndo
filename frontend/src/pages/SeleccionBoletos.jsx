@@ -150,13 +150,13 @@ const SeleccionBoletos = () => {
                 onClick={pruebaSuerte}
                 className="w-full lg:w-auto bg-yellow-400 text-indigo-900 font-semibold py-2 px-4 rounded-xl hover:bg-yellow-500 transition text-sm"
               >
-                🍀 Me siento con suerte
+                🍀 Prueba tu suerte
               </button>
             </div>
           </div>
 
           {/* Código promocional */}
-          <div className="text-center text-sm font-bold text-white/70 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
+          <div className="text-center text-sm font-bold text-white/80 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
             {mostrarCampoPromo ? "Ocultar código promocional" : "¿Tienes un código promocional?"}
           </div>
 
