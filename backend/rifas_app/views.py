@@ -7,18 +7,17 @@ from django.utils.timezone import now, timedelta, localtime, datetime,  get_curr
 from django.core.cache import cache
 from django.db.models import Sum, Count, Q, F
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
-from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer
+from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer
 from rest_framework.decorators import (
     api_view,
     permission_classes,
     parser_classes
 )
-
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
@@ -646,3 +645,34 @@ def conekta_success(request):
         "fecha": transaccion.fecha_creacion,
         "total_boletos": transaccion.rifa.total_boletos if hasattr(transaccion, 'rifa') else 10000
     })
+
+#Endpoint para validar codigos de promocion
+@api_view(["POST"])
+def validar_codigo(request):
+    codigo_txt = request.data.get("codigo", "").strip()
+    telefono = request.data.get("telefono")
+    rifa_id = request.data.get("rifa_id")
+    monto = float(request.data.get("monto", 0))
+
+    if not all([codigo_txt, telefono, rifa_id]):
+        return Response({"error": "Faltan datos para validar el código."}, status=400)
+
+    try:
+        codigo = CodigoPromocional.objects.get(codigo__iexact=codigo_txt)
+    except CodigoPromocional.DoesNotExist:
+        return Response({"error": "Código no válido."}, status=404)
+
+    if not codigo.esta_activo():
+        return Response({"error": "Este código ya expiró o alcanzó su límite de usos."}, status=400)
+
+    if not codigo.rifas.filter(id=rifa_id).exists():
+        return Response({"error": "Este código no aplica para esta rifa."}, status=400)
+
+    if codigo.compra_minima and monto < float(codigo.compra_minima):
+        return Response({"error": f"El monto mínimo para usar este código es de ${codigo.compra_minima}."}, status=400)
+
+    if CodigoUsado.objects.filter(codigo=codigo, telefono=telefono).exists():
+        return Response({"error": "Este código ya fue usado por este número."}, status=400)
+
+    serializer = CodigoPromocionalSerializer(codigo)
+    return Response({"valido": True, "detalle": serializer.data})

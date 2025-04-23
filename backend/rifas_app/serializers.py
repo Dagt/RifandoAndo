@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Rifa, Galeria, BoletoSeleccionado, Transaccion
+from .models import Rifa, Galeria, BoletoSeleccionado, Transaccion, CodigoPromocional
 
 class RifaSerializer(serializers.ModelSerializer):
     imagen_destacada = serializers.SerializerMethodField()
@@ -104,3 +104,8 @@ class TransaccionSerializer(serializers.ModelSerializer):
             "id", "folio", "nombre_completo", "correo", "telefono",
             "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre"
         ]
+
+class CodigoPromocionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CodigoPromocional
+        fields = '__all__'

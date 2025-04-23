@@ -7,11 +7,12 @@ const SeleccionBoletos = () => {
   const [seleccionados, setSeleccionados] = useState([]);
   const [cantidadSuerte, setCantidadSuerte] = useState(10);
   const [totalBoletos, setTotalBoletos] = useState(1000);
+  const [mostrarCampoPromo, setMostrarCampoPromo] = useState(false);
+  const [codigoPromo, setCodigoPromo] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
     fetch(`/api/rifas/${id}/`)
       .then((res) => res.json())
       .then((data) => {
@@ -24,8 +25,6 @@ const SeleccionBoletos = () => {
         localStorage.setItem("precio_boleto", data.precio_boleto);
         localStorage.setItem("nombre_rifa", data.nombre);
         setTotalBoletos(data.total_boletos);
-
-        // Solo cargar boletos si la rifa está activa
         return fetch(`/api/rifas/${id}/boletos-disponibles/`);
       })
       .then((res) => res?.json?.())
@@ -38,22 +37,18 @@ const SeleccionBoletos = () => {
       });
   }, [id]);
 
-
   const padLength = String(totalBoletos - 1).length;
 
   const toggleBoleto = (numero) => {
-    if (seleccionados.includes(numero)) {
-      setSeleccionados(seleccionados.filter((n) => n !== numero));
-    } else {
-      setSeleccionados([...seleccionados, numero]);
-    }
+    setSeleccionados((prev) =>
+      prev.includes(numero) ? prev.filter((n) => n !== numero) : [...prev, numero]
+    );
   };
 
   const borrarSeleccion = () => setSeleccionados([]);
 
   const pruebaSuerte = () => {
-    let cantidad = parseInt(cantidadSuerte, 10);
-
+    const cantidad = parseInt(cantidadSuerte, 10);
     if (isNaN(cantidad) || cantidad <= 0) {
       alert("⚠️ Ingresa una cantidad válida mayor a 0.");
       return;
@@ -66,13 +61,11 @@ const SeleccionBoletos = () => {
 
     const nuevos = [];
     const disponibles = [...boletosDisponibles];
-
     while (nuevos.length < cantidad && disponibles.length > 0) {
       const index = Math.floor(Math.random() * disponibles.length);
       nuevos.push(disponibles[index]);
       disponibles.splice(index, 1);
     }
-
     setSeleccionados(nuevos);
   };
 
@@ -81,7 +74,11 @@ const SeleccionBoletos = () => {
       alert("⚠️ Debes seleccionar al menos un boleto.");
       return;
     }
+
     localStorage.setItem("boletos", JSON.stringify(seleccionados));
+    if (codigoPromo) {
+      localStorage.setItem("codigo_promocional", codigoPromo.trim());
+    }
     navigate(`/rifa/${id}/confirmar`);
   };
 
@@ -116,6 +113,7 @@ const SeleccionBoletos = () => {
           <h2 className="text-lg font-extrabold text-center text-white-400">
             Tus boletos seleccionados:
           </h2>
+
           <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md flex flex-col justify-start overflow-y-auto h-full">
             <div className="flex flex-wrap gap-[4px] justify-center">
               {seleccionados.map((n) => (
@@ -156,6 +154,21 @@ const SeleccionBoletos = () => {
               </button>
             </div>
           </div>
+
+          {/* Código promocional */}
+          <div className="text-center text-sm text-white/70 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
+            {mostrarCampoPromo ? "Ocultar código promocional" : "¿Tienes un código promocional?"}
+          </div>
+
+          {mostrarCampoPromo && (
+            <input
+              type="text"
+              value={codigoPromo}
+              onChange={(e) => setCodigoPromo(e.target.value)}
+              placeholder="Ingresa tu código aquí"
+              className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 focus:outline-none text-sm"
+            />
+          )}
 
           <button
             onClick={continuar}

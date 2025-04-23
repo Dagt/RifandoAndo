@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from cloudinary.models import CloudinaryField
 from django.utils.timezone import now
 import uuid
@@ -80,3 +81,41 @@ class BoletoSeleccionado(models.Model):
 
     def __str__(self):
         return f"Boleto {self.numero} - Rifa: {self.rifa.nombre}"
+
+
+class CodigoPromocional(models.Model):
+    TIPO_CHOICES = [
+        ("porcentaje", "Descuento por porcentaje"),
+        ("boletos_extra", "Boletos extra"),
+    ]
+
+    codigo = models.CharField(max_length=50, unique=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    valor = models.PositiveIntegerField(help_text="Porcentaje (ej. 10) o número de boletos extra (ej. 2)")
+    compra_minima = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha_expiracion = models.DateTimeField(null=True, blank=True)
+    usos_maximos = models.PositiveIntegerField(null=True, blank=True)
+    usos_actuales = models.PositiveIntegerField(default=0)
+    rifas = models.ManyToManyField("Rifa", blank=True, help_text="Rifas en las que aplica este código")
+
+    def esta_activo(self):
+        if self.fecha_expiracion and timezone.now() > self.fecha_expiracion:
+            return False
+        if self.usos_maximos is not None and self.usos_actuales >= self.usos_maximos:
+            return False
+        return True
+
+    def __str__(self):
+        return self.codigo
+
+
+class CodigoUsado(models.Model):
+    codigo = models.ForeignKey(CodigoPromocional, on_delete=models.CASCADE)
+    telefono = models.CharField(max_length=15)  # o email si prefieres
+    fecha_uso = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('codigo', 'telefono')  # evita múltiples usos por persona
+
+    def __str__(self):
+        return f"{self.telefono} usó {self.codigo.codigo}"

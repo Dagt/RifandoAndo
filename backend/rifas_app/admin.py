@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Rifa, Galeria, Transaccion, BoletoSeleccionado
+from .models import Rifa, Galeria, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado
 
 @admin.register(Rifa)
 class RifaAdmin(admin.ModelAdmin):
@@ -28,3 +28,20 @@ class BoletoSeleccionadoAdmin(admin.ModelAdmin):
     list_filter = ('apartado', 'pagado')
     search_fields = ('numero', 'rifa__nombre', 'transaccion__folio')
     ordering = ('rifa', 'numero')
+
+@admin.register(CodigoPromocional)
+class CodigoPromocionalAdmin(admin.ModelAdmin):
+    list_display = (
+        'codigo', 'tipo', 'valor', 'usos_maximos', 'usos_actuales',
+        'fecha_expiracion', 'compra_minima'
+    )
+    list_filter = ('tipo', 'rifas')
+    search_fields = ('codigo',)
+    ordering = ('-fecha_expiracion',)
+
+@admin.register(CodigoUsado)
+class CodigoUsadoAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'telefono', 'fecha_uso')
+    list_filter = ('codigo',)
+    search_fields = ('codigo__codigo', 'telefono')
+    ordering = ('-fecha_uso',)
