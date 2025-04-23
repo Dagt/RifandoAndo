@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import RutaProtegida from "./utils/RutaProtegida";
 import CrearRifa from "./pages/CrearRifa";
+import CodigosPromocionales from "./pages/CodigosPromocionales";
 import Estadisticas from "./pages/Estadisticas";
 import EditarRifa from "./pages/EditarRifa"
 import RifasAdmin from "./pages/RifasAdmin";
@@ -48,6 +49,7 @@ function App() {
           <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
           <Route path="/panel/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
+          <Route path="/panel/codigos-promocion" element={<RutaProtegida> <CodigosPromocionales /></RutaProtegida>} />
           <Route path="/panel/estadisticas" element={<RutaProtegida> <Estadisticas /></RutaProtegida>} />
           <Route path="/panel/rifa/:id/editar" element={<RutaProtegida><EditarRifa /></RutaProtegida>} />
           <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />

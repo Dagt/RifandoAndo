@@ -13,10 +13,13 @@ const RifaCard = ({
   boletos_disponibles,
   total_boletos,
   fecha_fin,
-  mostrarBoton=true,
-  mostrarCompartir=true,
+  mostrarBoton = true,
+  mostrarCompartir = true,
 }) => {
   const [tiempoRestante, setTiempoRestante] = useState("");
+  const agotada = boletos_disponibles === 0;
+  const boletosVendidos = total_boletos - boletos_disponibles;
+  const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
 
   useEffect(() => {
     const calcularTiempo = () => {
@@ -45,9 +48,6 @@ const RifaCard = ({
     return () => clearInterval(interval);
   }, [fecha_fin]);
 
-  const boletosVendidos = total_boletos - boletos_disponibles;
-  const porcentajeVendido = (boletosVendidos / total_boletos) * 100;
-
   const compartirRifa = () => {
     const url = `https://www.rifandoando.club/rifa/${id}`;
     const texto = `¡Mira esta rifa: "${nombre}" en Rifando Ando!\nParticipa aquí:`;
@@ -68,7 +68,23 @@ const RifaCard = ({
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 w-full max-w-sm text-white">
+    <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 w-full max-w-sm text-white">
+
+      {/* 🔴 Sello AGOTADO */}
+      {agotada && (
+       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+        <div className="transform rotate-[-20deg] bg-red-500/80 text-white text-5xl md:text-4xl font-extrabold px-10 py-3 rounded-xl shadow-2xl border-4 border-white/30"
+         style={{
+           fontFamily: "'Courier New', Courier, monospace",
+           textShadow: '2px 2px 8px rgba(0,0,0,0.6)',
+           backdropFilter: 'blur(4px)',
+           mixBlendMode: 'multiply'
+         }}>
+      ¡AGOTADO!
+    </div>
+  </div>
+)}
+
       <Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false}>
         {imagenes.length > 0 ? (
           imagenes.map((img, i) => (
@@ -119,24 +135,31 @@ const RifaCard = ({
         </p>
 
         <>
-  {mostrarBoton && (
-    <Link to={`/rifa/${id}/participar`}>
-      <button className="w-full bg-pink-500 text-white py-2 font-semibold rounded-xl hover:bg-pink-600 transition">
-        Participar
-      </button>
-    </Link>
-  )}
+          {mostrarBoton && (
+            <Link to={agotada ? "#" : `/rifa/${id}/participar`}>
+              <button
+                disabled={agotada}
+                className={`w-full py-2 font-semibold rounded-xl transition ${
+                  agotada
+                    ? "bg-gray-500 cursor-not-allowed text-white/60"
+                    : "bg-pink-500 hover:bg-pink-600 text-white"
+                }`}
+              >
+                {agotada ? "Agotado" : "Participar"}
+              </button>
+            </Link>
+          )}
 
-  {mostrarCompartir && (
-    <button
-      onClick={compartirRifa}
-      className="mt-2 w-full border border-white/20 text-white py-2 font-semibold rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
-    >
-      <Share2 className="w-5 h-5" />
-      Compartir
-    </button>
-  )}
-</>
+          {mostrarCompartir && (
+            <button
+              onClick={compartirRifa}
+              className="mt-2 w-full border border-white/20 text-white py-2 font-semibold rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
+            >
+              <Share2 className="w-5 h-5" />
+              Compartir
+            </button>
+          )}
+        </>
       </div>
     </div>
   );

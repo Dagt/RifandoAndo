@@ -30,3 +30,7 @@ Commands.txt
 Thumbs.db
 ehthumbs.db
 *.orig
+
+
+__pycache__/
+*.pyc

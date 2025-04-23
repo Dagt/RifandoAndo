@@ -156,7 +156,7 @@ const SeleccionBoletos = () => {
           </div>
 
           {/* Código promocional */}
-          <div className="text-center text-sm text-white/70 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
+          <div className="text-center text-sm font-bold text-white/70 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
             {mostrarCampoPromo ? "Ocultar código promocional" : "¿Tienes un código promocional?"}
           </div>
 

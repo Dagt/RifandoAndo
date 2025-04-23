@@ -108,4 +108,4 @@ class TransaccionSerializer(serializers.ModelSerializer):
 class CodigoPromocionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodigoPromocional
-        fields = '__all__'
+        fields = "__all__"

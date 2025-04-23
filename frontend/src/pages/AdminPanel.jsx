@@ -65,6 +65,14 @@ const AdminPanel = () => {
           <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🎟 Buscar boleto por No.</h2>
           <p className="text-sm text-white/80">Encuentra detalles sobre un boleto.</p>
         </div>
+        {/* Codigos Promocionales */}
+        <div
+          onClick={() => navigate("/panel/codigos-promocion")}
+          className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
+        >
+          <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🏷️ Codigos de promoción.</h2>
+          <p className="text-sm text-white/80">Crea y gestiona códigos de promoción.</p>
+        </div>
       </div>
     </div>
   );

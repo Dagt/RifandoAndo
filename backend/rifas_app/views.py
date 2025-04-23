@@ -676,3 +676,18 @@ def validar_codigo(request):
 
     serializer = CodigoPromocionalSerializer(codigo)
     return Response({"valido": True, "detalle": serializer.data})
+
+@api_view(["GET"])
+def listar_codigos_promocionales(request):
+    codigos = CodigoPromocional.objects.all().order_by("-id")
+    serializer = CodigoPromocionalSerializer(codigos, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+def crear_codigo_promocional(request):
+    serializer = CodigoPromocionalSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)

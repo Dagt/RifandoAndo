@@ -18,7 +18,9 @@ from .views import (
     cancelar_transaccion,
     buscar_boleto,
     conekta_success,
-    validar_codigo
+    validar_codigo,
+    listar_codigos_promocionales,
+    crear_codigo_promocional
 )
 
 urlpatterns = [
@@ -41,5 +43,6 @@ urlpatterns = [
     path("buscar-boletos/", buscar_boleto, name="buscar_boleto"),
     path("conekta/success/<str:order_id>/", conekta_success),
     path("validar-codigo/", validar_codigo, name="validar_codigo"),
-
+    path("codigos-promocionales/", listar_codigos_promocionales),
+    path("codigos-promocionales/crear/", crear_codigo_promocional),
 ]
