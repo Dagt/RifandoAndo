@@ -689,10 +689,13 @@ def listar_codigos_promocionales(request):
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
+        rifas = serializer.validated_data.pop("rifas", [])  # 🔥 extraemos rifas
         codigo = CodigoPromocional(**serializer.validated_data)
+
         try:
-            codigo.full_clean()  # 🔍 esto llama al método clean() que definiste en el modelo
+            codigo.full_clean()  # validación lógica definida en el modelo
             codigo.save()
+            codigo.rifas.set(rifas)  # ahora sí asociamos rifas
             serializer = CodigoPromocionalSerializer(codigo)
             return Response(serializer.data, status=201)
         except ValidationError as e:
