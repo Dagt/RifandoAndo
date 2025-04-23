@@ -240,7 +240,7 @@ const CodigosPromocionalesAdmin = () => {
 </form>
 
       <div className="overflow-x-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start backdrop-blur-md md:items-center mb-4 gap-4">
           <div className="flex gap-2">
             {["todos", "activos", "expirados", "agotados"].map((filtro) => (
               <button key={filtro} onClick={() => setFiltroEstado(filtro)} className={`px-3 py-1 rounded-full text-sm font-semibold ${filtroEstado === filtro ? "bg-yellow-400 text-indigo-900" : "bg-white/10 text-white hover:bg-white/20"}`}>
@@ -251,7 +251,7 @@ const CodigosPromocionalesAdmin = () => {
           <input type="text" placeholder="🔍 Buscar código" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="px-3 py-1 rounded bg-white/10 text-white text-sm w-full md:w-64 border border-white/20" />
         </div>
 
-        <table className="min-w-full text-sm text-white text-left border border-white/10">
+        <table className="min-w-full text-sm text-white text-left border backdrop-blur-md border-white/10">
           <thead className="bg-white/10">
             <tr>
               <th className="p-2">Código</th>
