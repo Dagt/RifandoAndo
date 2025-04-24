@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { TicketCheck, Gift, PieChart, Banknote, Sparkles, Percent } from "lucide-react";
+import { TicketCheck, Gift, PieChart, Banknote, Percent } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
@@ -34,7 +34,6 @@ const Estadisticas = () => {
       { métrica: "Rifas finalizadas", valor: data.finalizadas },
       { métrica: "Boletos vendidos", valor: data.boletos_vendidos },
       { métrica: "Monto total recaudado", valor: data.ingresos_totales },
-      { métrica: "Precio promedio por rifa", valor: data.promedio_precio_por_rifa },
     ];
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -95,7 +94,7 @@ const Estadisticas = () => {
           <Percent className="w-10 h-10 text-pink-400" />
           <div>
             <p className="text-sm">Promedio por rifa</p>
-            <p className="text-xl font-bold text-pink-300">${data.promedio_precio_por_rifa.toFixed(2)}</p>
+            <p className="text-xl font-bold text-pink-300">${data.promedio_precio_general.toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -124,7 +123,6 @@ const Estadisticas = () => {
               xaxis: {
                 categories: data.boletos_por_rifa.map(r => r.nombre),
                 labels: { style: { colors: "#ffffff" } },
-                tickPlacement: 'on',
               },
               yaxis: { labels: { style: { colors: "#ffffff" } } },
               colors: ["#facc15"]
@@ -170,7 +168,6 @@ const Estadisticas = () => {
             options={{
               xaxis: {
                 categories: Object.keys(data.porcentaje_vendidos_por_tamano),
-                title: { text: "Tamaño de rifa", style: { color: "#ffffff" } },
                 labels: { style: { colors: "#ffffff" } }
               },
               yaxis: { labels: { style: { colors: "#ffffff" } } },
@@ -183,11 +180,10 @@ const Estadisticas = () => {
           <h3 className="text-center font-semibold mb-2 text-white">% de Ventas por Precio</h3>
           <Chart
             type="bar"
-            series={[{ name: "Porcentaje de ventas", data: Object.values(data.porcentaje_por_precio) }]}
+            series={[{ name: "Porcentaje", data: Object.values(data.porcentaje_por_precio) }]}
             options={{
               xaxis: {
                 categories: Object.keys(data.porcentaje_por_precio),
-                title: { text: "Precio del boleto", style: { color: "#ffffff" } },
                 labels: { style: { colors: "#ffffff" } }
               },
               yaxis: { labels: { style: { colors: "#ffffff" } } },
@@ -196,36 +192,25 @@ const Estadisticas = () => {
           />
         </div>
 
-        {/* Códigos promocionales más usados */}
-        {data.codigos_promocionales?.length > 0 && (
-          <div className="col-span-full">
-            <h3 className="text-center text-lg font-semibold text-white mt-8 mb-4">🔥 Códigos Promocionales Usados</h3>
-            <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4">
-              <table className="min-w-full text-sm text-white">
-                <thead>
-                  <tr className="text-left border-b border-white/10">
-                    <th className="p-2">Código</th>
-                    <th className="p-2">Usos</th>
-                    <th className="p-2">Boletos vendidos</th>
-                    <th className="p-2">Monto generado</th>
-                    <th className="p-2">Rifas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.codigos_promocionales.map((c) => (
-                    <tr key={c.codigo} className="border-t border-white/10">
-                      <td className="p-2 font-bold text-yellow-300">{c.codigo}</td>
-                      <td className="p-2">{c.usos}</td>
-                      <td className="p-2">{c.boletos}</td>
-                      <td className="p-2">${c.monto.toLocaleString()}</td>
-                      <td className="p-2">{c.rifas}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <div className={chartStyle + " col-span-full"}>
+          <h3 className="text-center font-semibold mb-2 text-white">🎯 Precio Promedio por Rifa</h3>
+          <table className="w-full text-sm text-white text-left">
+            <thead className="border-b border-white/10">
+              <tr>
+                <th className="p-2">Rifa</th>
+                <th className="p-2">Promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.promedio_precio_por_rifa.map((r) => (
+                <tr key={r.nombre} className="border-t border-white/10">
+                  <td className="p-2">{r.nombre}</td>
+                  <td className="p-2">${r.promedio?.toFixed(2) || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
