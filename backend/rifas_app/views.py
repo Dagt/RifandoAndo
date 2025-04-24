@@ -294,103 +294,100 @@ def subir_imagen_rifa(request, rifa_id):
 #Endpoint para regresar estadisticas personalizadas
 @api_view(["GET"])
 def resumen_estadisticas(request):
-    try:
-        total_rifas = Rifa.objects.count()
-        activas = Rifa.objects.filter(estado='activa').count()
-        en_espera = Rifa.objects.filter(estado='en_espera').count()
-        finalizadas = Rifa.objects.filter(estado='finalizada').count()
+    total_rifas = Rifa.objects.count()
+    activas = Rifa.objects.filter(estado='activa').count()
+    en_espera = Rifa.objects.filter(estado='en_espera').count()
+    finalizadas = Rifa.objects.filter(estado='finalizada').count()
 
-        boletos_vendidos = BoletoSeleccionado.objects.filter(pagado=True).count()
-        ingresos_totales = Transaccion.objects.filter(estado='completado').aggregate(total=Sum("monto"))["total"] or 0
+    boletos_vendidos = BoletoSeleccionado.objects.filter(pagado=True).count()
+    ingresos_totales = Transaccion.objects.filter(estado='completado').aggregate(total=Sum("monto"))["total"] or 0
 
-        boletos_por_rifa = list(
-            Rifa.objects.annotate(vendidos=Count('boletoseleccionado', filter=Q(boletoseleccionado__pagado=True)))
-            .values("nombre", "vendidos")
-        )
+    # Boletos vendidos por rifa
+    boletos_por_rifa = list(
+        Rifa.objects.annotate(vendidos=Count('boletoseleccionado', filter=Q(boletoseleccionado__pagado=True)))
+        .values("nombre", "vendidos")
+    )
 
-        rifas_por_mes = defaultdict(int)
-        for rifa in Rifa.objects.all():
-            if rifa.fecha_inicio:
-                mes = rifa.fecha_inicio.strftime("%B")
-                rifas_por_mes[mes] += 1
+    # Rifas por mes
+    rifas_por_mes = defaultdict(int)
+    for rifa in Rifa.objects.all():
+        mes = rifa.fecha_inicio.strftime("%B")
+        rifas_por_mes[mes] += 1
 
-        metodos_pago = defaultdict(int)
-        pagos = Transaccion.objects.filter(estado='completado').values("metodo_pago").annotate(total=Count("id"))
-        for pago in pagos:
-            metodo = pago["metodo_pago"].upper()
-            metodos_pago[metodo] = pago["total"]
+    # Métodos de pago
+    metodos_pago = defaultdict(int)
+    pagos = Transaccion.objects.filter(estado='completado').values("metodo_pago").annotate(total=Count("id"))
+    for pago in pagos:
+        metodo = pago["metodo_pago"].upper()
+        metodos_pago[metodo] = pago["total"]
 
-        porcentaje_por_tamano = defaultdict(lambda: {"vendidos": 0, "total": 0})
-        for rifa in Rifa.objects.all():
-            total = rifa.total_boletos or 0
-            vendidos = rifa.boletoseleccionado_set.filter(pagado=True).count()
-            porcentaje_por_tamano[total]["total"] += total
-            porcentaje_por_tamano[total]["vendidos"] += vendidos
+    # % de boletos vendidos por tamaño
+    porcentaje_por_tamano = defaultdict(lambda: {"vendidos": 0, "total": 0})
+    for rifa in Rifa.objects.all():
+        total = rifa.total_boletos
+        vendidos = rifa.boletoseleccionado_set.filter(pagado=True).count()
+        porcentaje_por_tamano[total]["total"] += total
+        porcentaje_por_tamano[total]["vendidos"] += vendidos
 
-        porcentaje_vendidos = {
-            str(k): round((v["vendidos"] / v["total"]) * 100, 2) if v["total"] > 0 else 0
-            for k, v in porcentaje_por_tamano.items()
-        }
+    porcentaje_vendidos = {
+        str(k): round((v["vendidos"] / v["total"]) * 100, 2) if v["total"] > 0 else 0
+        for k, v in porcentaje_por_tamano.items()
+    }
 
-        boletos_por_precio = (
-            BoletoSeleccionado.objects
-            .filter(pagado=True)
-            .values(precio=F("rifa__precio_boleto"))
-            .annotate(total=Count("id"))
-        )
-        total_vendidos = sum(b["total"] for b in boletos_por_precio)
-        porcentaje_por_precio = {
-            str(b["precio"]): round((b["total"] / total_vendidos) * 100, 2) if total_vendidos > 0 else 0
-            for b in boletos_por_precio
-        }
+    # % de ventas por precio
+    boletos_por_precio = (
+        BoletoSeleccionado.objects
+        .filter(pagado=True)
+        .values(precio=F("rifa__precio_boleto"))
+        .annotate(total=Count("id"))
+    )
+    total_vendidos = sum(b["total"] for b in boletos_por_precio)
+    porcentaje_por_precio = {
+        str(b["precio"]): round((b["total"] / total_vendidos) * 100, 2) if total_vendidos > 0 else 0
+        for b in boletos_por_precio
+    }
 
-        rifas_con_info = Rifa.objects.annotate(
-            monto_total=Sum("transaccion__monto", filter=Q(transaccion__estado='completado')),
-            boletos=Count("boletoseleccionado", filter=Q(boletoseleccionado__pagado=True))
-        )
+    # Precio promedio por rifa
+    promedio_precio_por_rifa = []
+    suma_total = 0
+    total_conteo = 0
 
-        promedio_precio_por_rifa = []
-        total_monto = 0
-        total_rifas_con_promedio = 0
+    for rifa in Rifa.objects.all():
+        boletos_pagados = rifa.boletoseleccionado_set.filter(pagado=True)
+        conteo = boletos_pagados.count()
+        total_monto = boletos_pagados.aggregate(suma=Sum('transaccion__monto'))['suma'] or 0
+        if conteo > 0 and total_monto:
+            promedio = float(total_monto) / conteo
+            promedio_precio_por_rifa.append({"nombre": rifa.nombre, "promedio": round(promedio, 2)})
+            suma_total += promedio
+            total_conteo += 1
 
-        for rifa in rifas_con_info:
-            if rifa.boletos and rifa.monto_total:
-                promedio = float(rifa.monto_total) / rifa.boletos
-                promedio_precio_por_rifa.append({"nombre": rifa.nombre, "promedio": round(promedio, 2)})
-                total_monto += promedio
-                total_rifas_con_promedio += 1
+    promedio_precio_general = round(suma_total / total_conteo, 2) if total_conteo else 0
 
-        promedio_precio_general = round(total_monto / total_rifas_con_promedio, 2) if total_rifas_con_promedio else 0
+    # Códigos más usados
+    codigos_mas_usados = list(
+        CodigoUsado.objects
+        .values("codigo__codigo")
+        .annotate(total=Count("id"))
+        .order_by("-total")[:10]
+    )
 
-        codigos_mas_usados = list(
-            CodigoUsado.objects
-            .values("codigo__codigo")
-            .annotate(total=Count("id"))
-            .order_by("-total")[:10]
-        )
-
-        return Response({
-            "total_rifas": total_rifas,
-            "activas": activas,
-            "en_espera": en_espera,
-            "finalizadas": finalizadas,
-            "boletos_vendidos": boletos_vendidos,
-            "ingresos_totales": ingresos_totales,
-            "boletos_por_rifa": boletos_por_rifa,
-            "rifas_por_mes": dict(rifas_por_mes),
-            "metodos_pago": dict(metodos_pago),
-            "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
-            "porcentaje_por_precio": porcentaje_por_precio,
-            "promedio_precio_general": promedio_precio_general,
-            "promedio_precio_por_rifa": promedio_precio_por_rifa,
-            "codigos_mas_usados": codigos_mas_usados,
-        })
-
-    except Exception as e:
-        print("❌ ERROR EN /api/estadisticas/")
-        traceback.print_exc()
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    return Response({
+        "total_rifas": total_rifas,
+        "activas": activas,
+        "en_espera": en_espera,
+        "finalizadas": finalizadas,
+        "boletos_vendidos": boletos_vendidos,
+        "ingresos_totales": ingresos_totales,
+        "boletos_por_rifa": boletos_por_rifa,
+        "rifas_por_mes": rifas_por_mes,
+        "metodos_pago": metodos_pago,
+        "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
+        "porcentaje_por_precio": porcentaje_por_precio,
+        "promedio_precio_general": promedio_precio_general,
+        "promedio_precio_por_rifa": promedio_precio_por_rifa,
+        "codigos_mas_usados": codigos_mas_usados,
+    })
 
 
 #Endpoint para listar rifas
