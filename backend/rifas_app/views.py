@@ -346,12 +346,11 @@ def resumen_estadisticas(request):
 
     rifas_con_info = rifas.annotate(
         monto_total=Sum("boletoseleccionado__transaccion__monto", filter=Q(boletoseleccionado__pagado=True)),
-        boletos_vendidos=Count("boletoseleccionado", filter=Q(boletoseleccionado__pagado=True)),
         transacciones_total=Count("boletoseleccionado__transaccion", filter=Q(boletoseleccionado__pagado=True), distinct=True)
     )
     ticket_promedio_por_rifa = [
         {"nombre": r.nombre, "ticket_promedio": round(float(r.monto_total) / r.transacciones_total, 2)}
-        for r in rifas_con_info if r.transacciones_total
+        for r in rifas_con_info if r.transacciones_total and r.monto_total
     ]
 
     total_boletos = BoletoSeleccionado.objects.filter(pagado=True).count()
@@ -435,7 +434,6 @@ def resumen_estadisticas(request):
         "ingresos_por_codigo": ingresos_por_codigo,
         "usos_por_codigo_por_mes": usos_por_mes
     })
-
 
 #Endpoint para listar rifas
 @api_view(["GET"])

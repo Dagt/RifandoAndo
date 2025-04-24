@@ -1,7 +1,10 @@
-// Nuevo componente Estadisticas.jsx
+// src/pages/Estadisticas.jsx
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset, BarChart2, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp,
+  TimerReset, BarChart2, ThumbsUp, ThumbsDown
+} from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
@@ -118,13 +121,10 @@ const Estadisticas = () => {
       <div className="mt-12 text-white/80 text-sm space-y-4">
         <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar estas gráficas:</h4>
         <ul className="list-disc pl-6">
-          <li><b>Rifas por Estado</b>: cuántas rifas están activas, en espera o finalizadas actualmente.</li>
-          <li><b>Boletos Vendidos por Rifa</b>: muestra qué rifas han vendido más boletos.</li>
-          <li><b>Métodos de Pago</b>: compara la popularidad de SPEI, OXXO y tarjeta.</li>
-          <li><b>Ticket Promedio por Rifa</b>: cuánto gasta en promedio un comprador por rifa.</li>
-          <li><b>Distribución de Códigos</b>: distingue códigos de porcentaje vs boletos extra.</li>
-          <li><b>Top Códigos por Ingreso</b>: qué códigos han generado más ventas.</li>
-          <li><b>% de su(s) rifa(s)</b>: qué tanto del total de ventas en las rifas aplicables se generó con ese código.</li>
+          <li><b>Rifas por Estado</b>: cuántas rifas están activas, en espera o finalizadas.</li>
+          <li><b>% Boletos por Tamaño</b>: qué tamaño de rifa tiene mejor venta proporcional.</li>
+          <li><b>Ticket Promedio por Rifa</b>: cuánto se gasta por compra en cada rifa.</li>
+          <li><b>% de su(s) rifa(s)</b>: cuánto representa el código en las rifas en las que se usó.</li>
         </ul>
       </div>
     </div>
