@@ -795,22 +795,26 @@ def listar_codigos_promocionales(request):
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
-        rifas = request.data.get("rifas", [])
+        rifas_ids = request.data.get("rifas", [])
 
-        # Si no se enviaron rifas, se asignan todas las rifas activas automáticamente
-        if not rifas:
+        # Si no se especifican rifas, se asignan todas las activas
+        if not rifas_ids:
             rifas = Rifa.objects.filter(estado="activa")
         else:
-            rifas = Rifa.objects.filter(id__in=rifas)
+            rifas = Rifa.objects.filter(id__in=rifas_ids)
 
-        codigo = CodigoPromocional(**serializer.validated_data)
+        # Limpiamos los datos validados para evitar conflicto al crear el objeto
+        validated_data = serializer.validated_data.copy()
+        validated_data.pop("rifas", None)
+
+        codigo = CodigoPromocional(**validated_data)
 
         try:
-            codigo.full_clean()  # validación lógica definida en el modelo
+            codigo.full_clean()  # validación del modelo
             codigo.save()
-            codigo.rifas.set(rifas)
-            serializer = CodigoPromocionalSerializer(codigo)
-            return Response(serializer.data, status=201)
+            codigo.rifas.set(rifas)  # ahora sí, establecemos las rifas
+            return Response(CodigoPromocionalSerializer(codigo).data, status=201)
         except ValidationError as e:
             return Response({"error": e.message_dict}, status=400)
+
     return Response(serializer.errors, status=400)
