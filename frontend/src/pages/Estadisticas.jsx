@@ -69,7 +69,7 @@ const Estadisticas = () => {
     document.body.removeChild(link);
   };
 
-  if (!data) return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
+  if (!data || typeof data !== 'object') return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
   const ticketPromedioVisible = Array.isArray(data.ticket_promedio_por_rifa) ? data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10) : [];
@@ -84,7 +84,7 @@ const Estadisticas = () => {
         <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="bg-white/10 px-2 py-1 rounded" />
         <select value={rifaSeleccionada} onChange={e => setRifaSeleccionada(e.target.value)} className="bg-white/10 px-2 py-1 rounded">
           <option value="">Todas las rifas</option>
-          {rifasDisponibles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
+          {Array.isArray(rifasDisponibles) && rifasDisponibles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
         </select>
         <button onClick={cargarEstadisticas} className="bg-emerald-500 hover:bg-emerald-600 px-4 py-1 rounded text-sm font-bold">Filtrar</button>
       </div>
@@ -187,10 +187,10 @@ const ChartCard = ({ title, type, series, categories, color }) => (
     <h3 className="text-center font-semibold mb-2 text-white">{title}</h3>
     <Chart
       type={type}
-      series={series}
+      series={Array.isArray(series) && series.length && typeof series[0] === 'object' && series[0].data ? series : [{ name: title, data: Array.isArray(series) ? series : [] }]}
       options={{
-        labels: categories,
-        xaxis: { categories, labels: { style: { colors: "#ffffff" } } },
+        labels: Array.isArray(categories) ? categories : [],
+        xaxis: { categories: Array.isArray(categories) ? categories : [], labels: { style: { colors: "#ffffff" } } },
         yaxis: { labels: { style: { colors: "#ffffff" } } },
         colors: Array.isArray(color) ? color : [color],
         legend: { labels: { colors: "#ffffff" } },
