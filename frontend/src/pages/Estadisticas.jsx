@@ -1,10 +1,7 @@
-// src/pages/Estadisticas.jsx
+// Estadisticas.jsx
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import {
-  TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp,
-  TimerReset, BarChart2, ThumbsUp, ThumbsDown
-} from "lucide-react";
+import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
@@ -55,13 +52,16 @@ const Estadisticas = () => {
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
 
+  // Limitar rifas con ticket promedio absurdo (>10k)
+  const ticketPromedioVisible = data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10);
+
   return (
     <div className="min-h-screen p-6 text-white">
       <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
 
       <div className="flex justify-center gap-4 mb-8">
-        <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar PDF</button>
-        <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar CSV</button>
+        <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold">Exportar PDF</button>
+        <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold">Exportar CSV</button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
@@ -72,18 +72,18 @@ const Estadisticas = () => {
         <Card icon={<Banknote />} label="Monto recaudado" value={`$${data.ingresos_totales.toLocaleString()}`} color="text-emerald-300" />
         <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
         <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
-        <Card icon={<TrendingUp />} label="Total generado por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
+        <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <ChartCard title="Rifas por Estado" type="pie" series={[data.activas, data.en_espera, data.finalizadas]} categories={["Activas", "En espera", "Finalizadas"]} color={["#f97316", "#facc15", "#a78bfa"]} />
-        <ChartCard title="Boletos Vendidos por Rifa" type="bar" series={[{ name: "Vendidos", data: data.boletos_por_rifa.map(r => r.vendidos) }]} categories={data.boletos_por_rifa.map(r => r.nombre)} color="#facc15" />
+        <ChartCard title="Boletos por Rifa" type="bar" series={[{ name: "Vendidos", data: data.boletos_por_rifa.map(r => r.vendidos) }]} categories={data.boletos_por_rifa.map(r => r.nombre)} color="#facc15" />
         <ChartCard title="Métodos de Pago" type="donut" series={["SPEI", "OXXO", "TARJETA"].map(m => data.metodos_pago[m] || 0)} categories={["SPEI", "OXXO", "TARJETA"]} color={["#22c55e", "#f97316", "#ef4444"]} />
         <ChartCard title="Rifas por Mes" type="area" series={[{ name: "Rifas", data: Object.values(data.rifas_por_mes) }]} categories={Object.keys(data.rifas_por_mes)} color="#38bdf8" />
         <ChartCard title="% Boletos por Tamaño" type="bar" series={[{ name: "% Vendido", data: Object.values(data.porcentaje_vendidos_por_tamano) }]} categories={Object.keys(data.porcentaje_vendidos_por_tamano)} color="#34d399" />
         <ChartCard title="% Ventas por Precio" type="bar" series={[{ name: "% Ventas", data: Object.values(data.porcentaje_por_precio) }]} categories={Object.keys(data.porcentaje_por_precio)} color="#f87171" />
         <ChartCard title="Ticket Promedio por Método" type="bar" series={[{ name: "Promedio", data: Object.values(data.ticket_promedio_por_metodo) }]} categories={Object.keys(data.ticket_promedio_por_metodo)} color="#7c3aed" />
-        <ChartCard title="Ticket Promedio por Rifa" type="bar" series={[{ name: "Promedio", data: data.ticket_promedio_por_rifa.map(r => r.ticket_promedio) }]} categories={data.ticket_promedio_por_rifa.map(r => r.nombre)} color="#4ade80" />
+        <ChartCard title="Ticket Promedio por Rifa" type="bar" series={[{ name: "Promedio", data: ticketPromedioVisible.map(r => r.ticket_promedio) }]} categories={ticketPromedioVisible.map(r => r.nombre)} color="#4ade80" />
         <ChartCard title="Top Códigos por Ingresos" type="bar" series={[{ name: "Ingresos", data: Object.values(data.ingresos_por_codigo) }]} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
         <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />
         <ChartCard title="Usos de Códigos por Mes" type="area" series={[{ name: "Usos", data: Object.values(data.usos_por_codigo_por_mes) }]} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
@@ -118,13 +118,12 @@ const Estadisticas = () => {
         </table>
       </div>
 
-      <div className="mt-12 text-white/80 text-sm space-y-4">
-        <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar estas gráficas:</h4>
+      <div className="mt-8 text-white/80 text-sm space-y-4">
+        <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>
         <ul className="list-disc pl-6">
-          <li><b>Rifas por Estado</b>: cuántas rifas están activas, en espera o finalizadas.</li>
-          <li><b>% Boletos por Tamaño</b>: qué tamaño de rifa tiene mejor venta proporcional.</li>
-          <li><b>Ticket Promedio por Rifa</b>: cuánto se gasta por compra en cada rifa.</li>
-          <li><b>% de su(s) rifa(s)</b>: cuánto representa el código en las rifas en las que se usó.</li>
+          <li><b>% Boletos por Tamaño</b> indica qué tamaños de rifas están vendiendo mejor proporcionalmente. No necesariamente suma 100%.</li>
+          <li><b>Ticket Promedio por Rifa</b> está filtrado para evitar valores anómalos (> $10,000).</li>
+          <li>Los filtros por fecha aún no están activos, pero están planificados.</li>
         </ul>
       </div>
     </div>
