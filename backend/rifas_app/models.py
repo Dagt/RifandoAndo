@@ -58,6 +58,13 @@ class Transaccion(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_expiracion = models.DateTimeField(null=True, blank=True)
     rifa_nombre = models.CharField(max_length=200, blank=True, null=True)
+    codigo_usado = models.ForeignKey(
+        "CodigoUsado",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="transacciones"
+    )
 
     def save(self, *args, **kwargs):
         if not self.folio:
@@ -130,7 +137,7 @@ class CodigoUsado(models.Model):
     codigo = models.ForeignKey(CodigoPromocional, on_delete=models.CASCADE)
     telefono = models.CharField(max_length=15)  # o email si prefieres
     fecha_uso = models.DateTimeField(auto_now_add=True)
-
+    monto_generado = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     class Meta:
         unique_together = ('codigo', 'telefono')  # evita múltiples usos por persona
 
