@@ -54,13 +54,13 @@ const Estadisticas = () => {
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
 
   return (
-    <div className="min-h-screen p-6 text-white bg-gradient-to-br from-black to-gray-900">
-      <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
+  <div className="p-6 text-white container mx-auto">
+    <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
 
-      <div className="flex justify-center gap-4 mb-8">
-        <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar PDF</button>
-        <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar CSV</button>
-      </div>
+    <div className="flex justify-center gap-4 mb-8">
+      <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar PDF</button>
+      <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar CSV</button>
+    </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
         <Card icon={<Gift />} label="Rifas activas" value={data.activas} color="text-orange-300" />
