@@ -756,11 +756,11 @@ def conekta_success(request):
 @api_view(["POST"])
 def validar_codigo(request):
     codigo_txt = request.data.get("codigo", "").strip()
-    telefono = request.data.get("telefono")
+    telefono = request.data.get("telefono")  # puede venir vacío
     rifa_id = request.data.get("rifa_id")
     monto = float(request.data.get("monto", 0))
 
-    if not all([codigo_txt, telefono, rifa_id]):
+    if not all([codigo_txt, rifa_id]):
         return Response({"error": "Faltan datos para validar el código."}, status=400)
 
     try:
@@ -777,7 +777,8 @@ def validar_codigo(request):
     if codigo.compra_minima and monto < float(codigo.compra_minima):
         return Response({"error": f"El monto mínimo para usar este código es de ${codigo.compra_minima}."}, status=400)
 
-    if CodigoUsado.objects.filter(codigo=codigo, telefono=telefono).exists():
+    # ✅ Solo si ya se tiene el teléfono validamos que no lo haya usado antes
+    if telefono and CodigoUsado.objects.filter(codigo=codigo, telefono=telefono).exists():
         return Response({"error": "Este código ya fue usado por este número."}, status=400)
 
     serializer = CodigoPromocionalSerializer(codigo)
@@ -794,13 +795,20 @@ def listar_codigos_promocionales(request):
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
-        rifas = serializer.validated_data.pop("rifas", [])
+        rifas = request.data.get("rifas", [])
+
+        # Si no se enviaron rifas, se asignan todas las rifas activas automáticamente
+        if not rifas:
+            rifas = Rifa.objects.filter(estado="activa")
+        else:
+            rifas = Rifa.objects.filter(id__in=rifas)
+
         codigo = CodigoPromocional(**serializer.validated_data)
 
         try:
             codigo.full_clean()  # validación lógica definida en el modelo
             codigo.save()
-            codigo.rifas.set(rifas)  # ahora sí asociamos rifas
+            codigo.rifas.set(rifas)
             serializer = CodigoPromocionalSerializer(codigo)
             return Response(serializer.data, status=201)
         except ValidationError as e:
