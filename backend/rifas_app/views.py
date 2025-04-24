@@ -760,7 +760,7 @@ def listar_codigos_promocionales(request):
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
-        rifas = serializer.validated_data.pop("rifas", [])  # 🔥 extraemos rifas
+        rifas = serializer.validated_data.pop("rifas", [])
         codigo = CodigoPromocional(**serializer.validated_data)
 
         try:
