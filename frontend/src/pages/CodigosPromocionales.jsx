@@ -56,6 +56,9 @@ const CodigosPromocionalesAdmin = () => {
     usos_maximos: nuevoCodigo.usos_maximos || null,
     fecha_expiracion: nuevoCodigo.fecha_expiracion || null,
   };
+  if (payload.rifas.length === 0) {
+    delete payload.rifas;
+  }
 
   if (nuevoCodigo.tipo === "porcentaje") {
     payload.valor = parseInt(nuevoCodigo.valor, 10);
