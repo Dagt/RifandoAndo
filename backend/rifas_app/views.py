@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils.timezone import now, timedelta, localtime, datetime,  get_current_timezone
 from django.core.cache import cache
 from django.db.models import Sum, Count, Q, F
+from django.db.models.functions import NullIf
 from datetime import timedelta
 from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta
@@ -344,7 +345,7 @@ def resumen_estadisticas(request):
             monto_total=Sum(F("transaccion__monto"), filter=Q(transaccion__estado='completado')),
             boletos=Count("boletoseleccionado", filter=Q(boletoseleccionado__pagado=True))
         )
-        .annotate(promedio=F("monto_total") / F("boletos"))
+        .annotate(promedio=F("monto_total") / NullIf(F("boletos"), 0))
         .values("nombre", "promedio")
     )
 

@@ -240,8 +240,8 @@ const CodigosPromocionalesAdmin = () => {
 </form>
 
       <div className="overflow-x-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start backdrop-blur-md md:items-center mb-4 gap-4">
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+          <div className="flex gap-2 backdrop-blur-md">
             {["todos", "activos", "expirados", "agotados"].map((filtro) => (
               <button key={filtro} onClick={() => setFiltroEstado(filtro)} className={`px-3 py-1 rounded-full text-sm font-semibold ${filtroEstado === filtro ? "bg-yellow-400 text-indigo-900" : "bg-white/10 text-white hover:bg-white/20"}`}>
                 {filtro.charAt(0).toUpperCase() + filtro.slice(1)}
