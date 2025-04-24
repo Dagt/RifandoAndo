@@ -291,6 +291,7 @@ def subir_imagen_rifa(request, rifa_id):
     return Response({"success": True})
 
 #Endpoint para regresar estadisticas personalizadas
+
 @api_view(["GET"])
 def resumen_estadisticas(request):
     total_rifas = Rifa.objects.count()
@@ -300,21 +301,23 @@ def resumen_estadisticas(request):
 
     boletos_vendidos = BoletoSeleccionado.objects.filter(pagado=True).count()
     ingresos_totales = Transaccion.objects.filter(estado='completado').aggregate(total=Sum("monto"))["total"] or 0
+    if isinstance(ingresos_totales, Decimal):
+        ingresos_totales = float(ingresos_totales)
 
     boletos_por_rifa = list(
         Rifa.objects.annotate(vendidos=Count('boletoseleccionado', filter=Q(boletoseleccionado__pagado=True)))
         .values("nombre", "vendidos")
     )
 
-    rifas_por_mes = {}
+    rifas_por_mes = defaultdict(int)
     for rifa in Rifa.objects.all():
         mes = rifa.fecha_inicio.strftime("%B")
-        rifas_por_mes[mes] = rifas_por_mes.get(mes, 0) + 1
+        rifas_por_mes[mes] += 1
 
-    metodos_pago = {}
+    metodos_pago = defaultdict(int)
     pagos = Transaccion.objects.filter(estado='completado').values("metodo_pago").annotate(total=Count("id"))
     for pago in pagos:
-        metodo = (pago["metodo_pago"] or "").upper()
+        metodo = pago["metodo_pago"].upper()
         metodos_pago[metodo] = pago["total"]
 
     porcentaje_por_tamano = defaultdict(lambda: {"vendidos": 0, "total": 0})
@@ -353,10 +356,7 @@ def resumen_estadisticas(request):
     for rifa in rifas_con_info:
         if rifa.boletos and rifa.monto_total:
             promedio = float(rifa.monto_total) / rifa.boletos
-            promedio_precio_por_rifa.append({
-                "nombre": rifa.nombre,
-                "promedio": round(promedio, 2)
-            })
+            promedio_precio_por_rifa.append({"nombre": rifa.nombre, "promedio": round(promedio, 2)})
             total_monto += promedio
             total_rifas_con_promedio += 1
 
@@ -375,10 +375,10 @@ def resumen_estadisticas(request):
         "en_espera": en_espera,
         "finalizadas": finalizadas,
         "boletos_vendidos": boletos_vendidos,
-        "ingresos_totales": float(ingresos_totales),
+        "ingresos_totales": ingresos_totales,
         "boletos_por_rifa": boletos_por_rifa,
-        "rifas_por_mes": rifas_por_mes,
-        "metodos_pago": metodos_pago,
+        "rifas_por_mes": dict(rifas_por_mes),
+        "metodos_pago": dict(metodos_pago),
         "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
         "porcentaje_por_precio": porcentaje_por_precio,
         "promedio_precio_general": promedio_precio_general,
