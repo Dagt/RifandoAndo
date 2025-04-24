@@ -10,6 +10,10 @@ const SeleccionBoletos = () => {
   const [mostrarCampoPromo, setMostrarCampoPromo] = useState(false);
   const [codigoPromo, setCodigoPromo] = useState("");
   const navigate = useNavigate();
+  const [infoCodigo, setInfoCodigo] = useState(null);
+  const [modalMensaje, setModalMensaje] = useState("");
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [codigoValido, setCodigoValido] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -36,6 +40,59 @@ const SeleccionBoletos = () => {
         alert("Error al cargar datos de la rifa.");
       });
   }, [id]);
+
+  useEffect(() => {
+  if (codigoPromo.trim().length >= 4) {
+    const delay = setTimeout(() => {
+      fetch("/api/validar-codigo/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          codigo: codigoPromo.trim(),
+          telefono: "", // todavía no se pide en esta vista
+          rifa_id: id,
+          monto: seleccionados.length * parseFloat(localStorage.getItem("precio_boleto") || "0")
+        }),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.valido && res.detalle) {
+            const detalle = res.detalle;
+            setCodigoValido(true);
+            setInfoCodigo(detalle);
+
+            if (detalle.tipo === "porcentaje") {
+              setModalMensaje(`🎉 Este código otorga un ${detalle.descuento}% de descuento en tu compra.`);
+            } else if (detalle.tipo === "boletos" && detalle.x && detalle.y) {
+              const grupos = Math.floor(seleccionados.length / detalle.x);
+              const boletosExtra = grupos * detalle.y;
+              setModalMensaje(`🎁 Este código te regala ${detalle.y} boleto(s) por cada ${detalle.x} que compres. Total extra: ${boletosExtra}`);
+            }
+
+            setMostrarModal(true);
+            localStorage.setItem("codigo_promocional", detalle.codigo);
+          } else {
+            setCodigoValido(false);
+            setModalMensaje("❌ Código inválido o no aplica para esta rifa.");
+            setMostrarModal(true);
+            localStorage.removeItem("codigo_promocional");
+          }
+        })
+        .catch((err) => {
+          console.error("Error al validar código:", err);
+          setModalMensaje("❌ No se pudo validar el código. Intenta más tarde.");
+          setMostrarModal(true);
+          setCodigoValido(false);
+        });
+    }, 800); // Espera 800ms después de escribir
+
+    return () => clearTimeout(delay);
+  } else {
+    setCodigoValido(false);
+    setInfoCodigo(null);
+    setMostrarModal(false);
+  }
+}, [codigoPromo, seleccionados]);
 
   const padLength = String(totalBoletos - 1).length;
 
@@ -70,17 +127,33 @@ const SeleccionBoletos = () => {
   };
 
   const continuar = () => {
-    if (seleccionados.length === 0) {
-      alert("⚠️ Debes seleccionar al menos un boleto.");
-      return;
-    }
+  if (seleccionados.length === 0) {
+    alert("⚠️ Debes seleccionar al menos un boleto.");
+    return;
+  }
 
-    localStorage.setItem("boletos", JSON.stringify(seleccionados));
-    if (codigoPromo) {
-      localStorage.setItem("codigo_promocional", codigoPromo.trim());
+  let finalBoletos = [...seleccionados];
+
+  if (infoCodigo?.tipo === "boletos" && infoCodigo.x && infoCodigo.y) {
+    const grupos = Math.floor(seleccionados.length / infoCodigo.x);
+    const boletosExtra = grupos * infoCodigo.y;
+    const disponibles = boletosDisponibles.filter((b) => !finalBoletos.includes(b));
+
+    while (finalBoletos.length < seleccionados.length + boletosExtra && disponibles.length > 0) {
+      const random = disponibles.splice(Math.floor(Math.random() * disponibles.length), 1)[0];
+      finalBoletos.push(random);
     }
-    navigate(`/rifa/${id}/confirmar`);
-  };
+  }
+
+  localStorage.setItem("boletos", JSON.stringify(finalBoletos));
+
+  if (codigoValido) {
+    localStorage.setItem("codigo_promocional", codigoPromo.trim());
+  }
+
+  navigate(`/rifa/${id}/confirmar`);
+};
+
 
   return (
     <div className="min-h-screen p-6 text-white">
@@ -169,6 +242,12 @@ const SeleccionBoletos = () => {
               className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 focus:outline-none text-sm"
             />
           )}
+          {mostrarModal && (
+  <div className="bg-black/80 text-white text-sm rounded-xl mt-2 p-3 text-center shadow-lg border border-white/20">
+    {modalMensaje}
+  </div>
+)}
+
 
           <button
             onClick={continuar}
