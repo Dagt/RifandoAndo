@@ -1,4 +1,4 @@
-// Estadisticas.jsx
+// Estadisticas.jsx mejorado con paginación y visualización explicativa mejorada
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
@@ -8,6 +8,8 @@ import Papa from "papaparse";
 
 const Estadisticas = () => {
   const [data, setData] = useState(null);
+  const [pagina, setPagina] = useState(0);
+  const codigosPorPagina = 10;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,9 +53,8 @@ const Estadisticas = () => {
   if (!data) return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
-
-  // Limitar rifas con ticket promedio absurdo (>10k)
   const ticketPromedioVisible = data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10);
+  const codigosPaginados = data.codigos_mas_usados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina);
 
   return (
     <div className="min-h-screen p-6 text-white">
@@ -80,7 +81,7 @@ const Estadisticas = () => {
         <ChartCard title="Boletos por Rifa" type="bar" series={[{ name: "Vendidos", data: data.boletos_por_rifa.map(r => r.vendidos) }]} categories={data.boletos_por_rifa.map(r => r.nombre)} color="#facc15" />
         <ChartCard title="Métodos de Pago" type="donut" series={["SPEI", "OXXO", "TARJETA"].map(m => data.metodos_pago[m] || 0)} categories={["SPEI", "OXXO", "TARJETA"]} color={["#22c55e", "#f97316", "#ef4444"]} />
         <ChartCard title="Rifas por Mes" type="area" series={[{ name: "Rifas", data: Object.values(data.rifas_por_mes) }]} categories={Object.keys(data.rifas_por_mes)} color="#38bdf8" />
-        <ChartCard title="% Boletos por Tamaño" type="bar" series={[{ name: "% Vendido", data: Object.values(data.porcentaje_vendidos_por_tamano) }]} categories={Object.keys(data.porcentaje_vendidos_por_tamano)} color="#34d399" />
+        <ChartCard title="% Boletos vendidos por Tamaño" type="bar" series={[{ name: "% Vendido", data: Object.values(data.porcentaje_vendidos_por_tamano) }]} categories={Object.keys(data.porcentaje_vendidos_por_tamano)} color="#34d399" />
         <ChartCard title="% Ventas por Precio" type="bar" series={[{ name: "% Ventas", data: Object.values(data.porcentaje_por_precio) }]} categories={Object.keys(data.porcentaje_por_precio)} color="#f87171" />
         <ChartCard title="Ticket Promedio por Método" type="bar" series={[{ name: "Promedio", data: Object.values(data.ticket_promedio_por_metodo) }]} categories={Object.keys(data.ticket_promedio_por_metodo)} color="#7c3aed" />
         <ChartCard title="Ticket Promedio por Rifa" type="bar" series={[{ name: "Promedio", data: ticketPromedioVisible.map(r => r.ticket_promedio) }]} categories={ticketPromedioVisible.map(r => r.nombre)} color="#4ade80" />
@@ -90,7 +91,7 @@ const Estadisticas = () => {
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
-      <div className={chartStyle + " col-span-full mt-10 overflow-x-auto"}>
+      <div className={chartStyle + " col-span-full mt-20 overflow-x-auto"}>
         <h3 className="text-center font-semibold mb-4 text-white text-xl">🔥 Códigos Promocionales</h3>
         <table className="w-full text-sm text-white text-left border-collapse">
           <thead className="border-b border-white/10">
@@ -104,7 +105,7 @@ const Estadisticas = () => {
             </tr>
           </thead>
           <tbody>
-            {data.codigos_mas_usados.map(c => (
+            {codigosPaginados.map(c => (
               <tr key={c.codigo} className={c.porcentaje_del_total >= 25 ? "bg-yellow-800/20" : "border-t border-white/10"}>
                 <td className="p-2 font-bold text-yellow-300">{c.codigo}</td>
                 <td className="p-2">{c.tipo}</td>
@@ -116,14 +117,26 @@ const Estadisticas = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-center mt-4 space-x-2">
+          <button disabled={pagina === 0} onClick={() => setPagina(p => p - 1)} className="bg-white/10 px-3 py-1 rounded hover:bg-white/20">Anterior</button>
+          <button disabled={(pagina + 1) * codigosPorPagina >= data.codigos_mas_usados.length} onClick={() => setPagina(p => p + 1)} className="bg-white/10 px-3 py-1 rounded hover:bg-white/20">Siguiente</button>
+        </div>
       </div>
 
-      <div className="mt-8 text-white/80 text-sm space-y-4">
+      <div className="mt-10 bg-white/5 p-6 rounded-xl space-y-4">
         <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>
-        <ul className="list-disc pl-6">
-          <li><b>% Boletos por Tamaño</b> indica qué tamaños de rifas están vendiendo mejor proporcionalmente. No necesariamente suma 100%.</li>
-          <li><b>Ticket Promedio por Rifa</b> está filtrado para evitar valores anómalos (> $10,000).</li>
-          <li>Los filtros por fecha aún no están activos, pero están planificados.</li>
+        <ul className="list-disc pl-6 space-y-2">
+          <li><b>Rifas por Estado:</b> cantidad actual de rifas activas, en espera y finalizadas.</li>
+          <li><b>Boletos por Rifa:</b> muestra cuáles rifas han vendido más boletos.</li>
+          <li><b>Métodos de Pago:</b> compara la popularidad de SPEI, OXXO y tarjeta.</li>
+          <li><b>% Boletos por Tamaño:</b> qué tanto se están vendiendo proporcionalmente las rifas según su tamaño total de boletos (no suma 100%).</li>
+          <li><b>% Ventas por Precio:</b> qué precios de boleto generan más ventas.</li>
+          <li><b>Ticket Promedio por Método:</b> cuánto gasta en promedio un usuario por tipo de pago.</li>
+          <li><b>Ticket Promedio por Rifa:</b> gasto promedio por comprador en cada rifa (se omiten valores extremos > $10,000).</li>
+          <li><b>Top Códigos por Ingresos:</b> qué códigos han generado más dinero.</li>
+          <li><b>Distribución por Tipo de Código:</b> tipos de códigos usados (porcentaje o boletos gratis).</li>
+          <li><b>Usos de Códigos por Mes:</b> evolución mensual del uso de códigos.</li>
+          <li><b>Estado de Transacciones:</b> transacciones completadas vs canceladas.</li>
         </ul>
       </div>
     </div>
