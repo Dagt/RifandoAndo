@@ -1,6 +1,7 @@
+// Nuevo componente Estadisticas.jsx
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { TicketCheck, Gift, PieChart, Banknote, Percent, Star, TrendingUp, TimerReset } from "lucide-react";
+import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset, BarChart2, ThumbsUp, ThumbsDown } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
@@ -11,13 +12,13 @@ const Estadisticas = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     fetch("/api/estadisticas/")
-      .then((res) => res.json())
+      .then(res => res.json())
       .then(setData)
-      .catch((err) => console.error("Error cargando estadísticas:", err));
+      .catch(err => console.error("Error cargando estadísticas:", err));
   }, []);
 
   const exportToPDF = () => {
-    html2canvas(document.body, { scale: 2 }).then((canvas) => {
+    html2canvas(document.body, { scale: 2 }).then(canvas => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -47,20 +48,18 @@ const Estadisticas = () => {
     document.body.removeChild(link);
   };
 
-  if (!data) {
-    return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
-  }
+  if (!data) return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
 
   return (
-  <div className="p-6 text-white container mx-auto">
-    <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
+    <div className="min-h-screen p-6 text-white">
+      <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
 
-    <div className="flex justify-center gap-4 mb-8">
-      <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar PDF</button>
-      <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar CSV</button>
-    </div>
+      <div className="flex justify-center gap-4 mb-8">
+        <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar PDF</button>
+        <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold text-white">Exportar CSV</button>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
         <Card icon={<Gift />} label="Rifas activas" value={data.activas} color="text-orange-300" />
@@ -68,7 +67,6 @@ const Estadisticas = () => {
         <Card icon={<PieChart />} label="Rifas finalizadas" value={data.finalizadas} color="text-purple-300" />
         <Card icon={<TicketCheck />} label="Boletos vendidos" value={data.boletos_vendidos} color="text-green-300" />
         <Card icon={<Banknote />} label="Monto recaudado" value={`$${data.ingresos_totales.toLocaleString()}`} color="text-emerald-300" />
-        <Card icon={<Percent />} label="Promedio por rifa" value={`$${data.promedio_precio_general.toFixed(2)}`} color="text-pink-300" />
         <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
         <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
         <Card icon={<TrendingUp />} label="Total generado por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
@@ -82,6 +80,11 @@ const Estadisticas = () => {
         <ChartCard title="% Boletos por Tamaño" type="bar" series={[{ name: "% Vendido", data: Object.values(data.porcentaje_vendidos_por_tamano) }]} categories={Object.keys(data.porcentaje_vendidos_por_tamano)} color="#34d399" />
         <ChartCard title="% Ventas por Precio" type="bar" series={[{ name: "% Ventas", data: Object.values(data.porcentaje_por_precio) }]} categories={Object.keys(data.porcentaje_por_precio)} color="#f87171" />
         <ChartCard title="Ticket Promedio por Método" type="bar" series={[{ name: "Promedio", data: Object.values(data.ticket_promedio_por_metodo) }]} categories={Object.keys(data.ticket_promedio_por_metodo)} color="#7c3aed" />
+        <ChartCard title="Ticket Promedio por Rifa" type="bar" series={[{ name: "Promedio", data: data.ticket_promedio_por_rifa.map(r => r.ticket_promedio) }]} categories={data.ticket_promedio_por_rifa.map(r => r.nombre)} color="#4ade80" />
+        <ChartCard title="Top Códigos por Ingresos" type="bar" series={[{ name: "Ingresos", data: Object.values(data.ingresos_por_codigo) }]} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
+        <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />
+        <ChartCard title="Usos de Códigos por Mes" type="area" series={[{ name: "Usos", data: Object.values(data.usos_por_codigo_por_mes) }]} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
+        <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
       <div className={chartStyle + " col-span-full mt-10 overflow-x-auto"}>
@@ -94,7 +97,7 @@ const Estadisticas = () => {
               <th className="p-2">Usos</th>
               <th className="p-2">Monto generado</th>
               <th className="p-2">Ticket promedio</th>
-              <th className="p-2">% del total</th>
+              <th className="p-2">% de su(s) rifa(s)</th>
             </tr>
           </thead>
           <tbody>
@@ -111,12 +114,25 @@ const Estadisticas = () => {
           </tbody>
         </table>
       </div>
+
+      <div className="mt-12 text-white/80 text-sm space-y-4">
+        <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar estas gráficas:</h4>
+        <ul className="list-disc pl-6">
+          <li><b>Rifas por Estado</b>: cuántas rifas están activas, en espera o finalizadas actualmente.</li>
+          <li><b>Boletos Vendidos por Rifa</b>: muestra qué rifas han vendido más boletos.</li>
+          <li><b>Métodos de Pago</b>: compara la popularidad de SPEI, OXXO y tarjeta.</li>
+          <li><b>Ticket Promedio por Rifa</b>: cuánto gasta en promedio un comprador por rifa.</li>
+          <li><b>Distribución de Códigos</b>: distingue códigos de porcentaje vs boletos extra.</li>
+          <li><b>Top Códigos por Ingreso</b>: qué códigos han generado más ventas.</li>
+          <li><b>% de su(s) rifa(s)</b>: qué tanto del total de ventas en las rifas aplicables se generó con ese código.</li>
+        </ul>
+      </div>
     </div>
   );
 };
 
 const Card = ({ icon, label, value, color }) => (
-  <div className="bg-white/10 p-4 rounded-xl flex items-center gap-4">
+  <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl flex items-center gap-4">
     <div className={`w-10 h-10 text-xl ${color}`}>{icon}</div>
     <div>
       <p className="text-sm text-white/80">{label}</p>
