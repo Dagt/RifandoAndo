@@ -1,4 +1,4 @@
-// Estadisticas.jsx mejorado con paginación y visualización explicativa mejorada
+// Estadisticas.jsx mejorado con filtros por fecha y rifa, paginación y visualización explicativa mejorada
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
@@ -10,13 +10,32 @@ const Estadisticas = () => {
   const [data, setData] = useState(null);
   const [pagina, setPagina] = useState(0);
   const codigosPorPagina = 10;
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
+  const [rifaSeleccionada, setRifaSeleccionada] = useState("");
+  const [rifasDisponibles, setRifasDisponibles] = useState([]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    fetch("/api/estadisticas/")
+    fetch("/api/rifas/")
+      .then(res => res.json())
+      .then(setRifasDisponibles);
+  }, []);
+
+  const cargarEstadisticas = () => {
+    let url = "/api/estadisticas/?";
+    if (fechaInicio) url += `fecha_inicio=${fechaInicio}&`;
+    if (fechaFin) url += `fecha_fin=${fechaFin}&`;
+    if (rifaSeleccionada) url += `rifa_id=${rifaSeleccionada}`;
+
+    fetch(url)
       .then(res => res.json())
       .then(setData)
       .catch(err => console.error("Error cargando estadísticas:", err));
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    cargarEstadisticas();
   }, []);
 
   const exportToPDF = () => {
@@ -59,6 +78,16 @@ const Estadisticas = () => {
   return (
     <div className="min-h-screen p-6 text-white">
       <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
+
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
+        <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="bg-white/10 px-2 py-1 rounded" />
+        <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="bg-white/10 px-2 py-1 rounded" />
+        <select value={rifaSeleccionada} onChange={e => setRifaSeleccionada(e.target.value)} className="bg-white/10 px-2 py-1 rounded">
+          <option value="">Todas las rifas</option>
+          {rifasDisponibles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
+        </select>
+        <button onClick={cargarEstadisticas} className="bg-emerald-500 hover:bg-emerald-600 px-4 py-1 rounded text-sm font-bold">Filtrar</button>
+      </div>
 
       <div className="flex justify-center gap-4 mb-8">
         <button onClick={exportToPDF} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-bold">Exportar PDF</button>
