@@ -1,4 +1,4 @@
-// Estadisticas.jsx mejorado con filtros por fecha y rifa, paginación y visualización explicativa mejorada
+// Estadisticas.jsx mejorado con filtros por fecha y rifa, paginación y validaciones robustas
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
@@ -50,14 +50,14 @@ const Estadisticas = () => {
   };
 
   const exportToCSV = () => {
-    const csvData = data.codigos_mas_usados.map(c => ({
+    const csvData = Array.isArray(data?.codigos_mas_usados) ? data.codigos_mas_usados.map(c => ({
       codigo: c.codigo,
       tipo: c.tipo,
       usos: c.usos,
       monto_generado: c.monto_generado,
       ticket_promedio: c.ticket_promedio,
       porcentaje_total: c.porcentaje_del_total
-    }));
+    })) : [];
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -72,8 +72,8 @@ const Estadisticas = () => {
   if (!data) return <p className="text-white text-center mt-10">Cargando estadísticas...</p>;
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
-  const ticketPromedioVisible = data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10);
-  const codigosPaginados = data.codigos_mas_usados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina);
+  const ticketPromedioVisible = Array.isArray(data.ticket_promedio_por_rifa) ? data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10) : [];
+  const codigosPaginados = Array.isArray(data.codigos_mas_usados) ? data.codigos_mas_usados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina) : [];
 
   return (
     <div className="min-h-screen p-6 text-white">
