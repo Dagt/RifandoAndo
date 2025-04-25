@@ -6,7 +6,7 @@ const ConfirmarCompra = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [boletosExtra, setBoletosExtra] = useState([]);
-
+  const [infoCodigo, setInfoCodigo] = useState(null);
   const [formulario, setFormulario] = useState({
     nombre: "",
     correo: "",
@@ -211,29 +211,29 @@ if (codigoGuardado) {
         </h2>
 
         <div className="bg-white/10 text-white text-center p-3 rounded mb-4 space-y-1">
-  <p className="text-sm">
-    Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
-  </p>
+          <p className="text-sm">
+            Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
+          </p>
 
-  {/* ✅ Mostrar mensaje si es descuento por porcentaje */}
-  {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
-    <div className="text-sm text-green-300 mt-1">
-      🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento gracias al código <strong>{infoCodigo.codigo}</strong>.
-    </div>
-  )}
+          {/* ✅ Mostrar mensaje si es descuento por porcentaje */}
+          {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
+            <div className="text-sm text-green-300 mt-1">
+              🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento gracias al código <strong>{infoCodigo.codigo}</strong>.
+            </div>
+          )}
 
-  {/* 🎁 Mostrar boletos extra si hay */}
-  {boletosExtra.length > 0 && (
-    <div className="text-sm text-green-300 mt-1">
-      🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
-      {boletosExtra.map((n) => (
-        <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-          {n.toString().padStart(5, "0")}
-        </span>
-      ))}
-    </div>
-  )}
-</div>
+          {/* 🎁 Mostrar boletos extra si hay */}
+          {boletosExtra.length > 0 && (
+            <div className="text-sm text-green-300 mt-1">
+              🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
+              {boletosExtra.map((n) => (
+                <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
+                  {n.toString().padStart(5, "0")}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
