@@ -106,7 +106,7 @@ const Estadisticas = () => {
       </div>
     </div>
   );
-
+    console.log("DATA ESTADISTICAS:", data);
   return (
     <div className="min-h-screen p-6 text-white">
       <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>

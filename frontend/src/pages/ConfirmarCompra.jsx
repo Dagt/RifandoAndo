@@ -71,10 +71,11 @@ if (codigoGuardado) {
           setBoletos(final);
           setBoletosExtra(extras);
         }
-
+        setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo });
       } else {
         setMonto(baseMonto);
         setBoletosExtra([]);
+        setInfoCodigo(null);
       }
     })
     .catch((err) => {
