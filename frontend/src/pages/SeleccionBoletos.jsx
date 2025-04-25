@@ -146,7 +146,7 @@ const SeleccionBoletos = () => {
 
   let finalBoletos = [...seleccionados];
 
-  if (infoCodigo?.tipo === "boletos" && infoCodigo.x && infoCodigo.y) {
+  if (infoCodigo?.tipo === "boletos" && infoCodigo.x && infoCodigo.y && infoCodigo.cumple_minimo) {
     const grupos = Math.floor(seleccionados.length / infoCodigo.x);
     const boletosExtra = grupos * infoCodigo.y;
     const disponibles = boletosDisponibles.filter((b) => !finalBoletos.includes(b));
