@@ -6,7 +6,6 @@ const ConfirmarCompra = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [boletosExtra, setBoletosExtra] = useState([]);
-  const [infoCodigo, setInfoCodigo] = useState(null);
   const [formulario, setFormulario] = useState({
     nombre: "",
     correo: "",
@@ -71,12 +70,9 @@ if (codigoGuardado) {
           setBoletos(final);
           setBoletosExtra(extras);
         }
-        setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo });
-        localStorage.setItem("codigo_promocional", detalle.codigo);
       } else {
         setMonto(baseMonto);
         setBoletosExtra([]);
-        setInfoCodigo(null);
       }
     })
     .catch((err) => {
@@ -215,14 +211,6 @@ if (codigoGuardado) {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
-
-          {/* ✅ Mostrar mensaje si es descuento por porcentaje */}
-          {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
-            <div className="text-sm text-green-300 mt-1">
-              🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento gracias al código <strong>{infoCodigo.codigo}</strong>.
-            </div>
-          )}
-
           {/* 🎁 Mostrar boletos extra si hay */}
           {boletosExtra.length > 0 && (
             <div className="text-sm text-green-300 mt-1">
