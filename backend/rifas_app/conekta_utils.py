@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 import re
 
-def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
+def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
     try:
         if expires_at is None:
             expires_at = int((timezone.now() + timedelta(hours=2)).timestamp())
@@ -32,7 +32,11 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
                     "type": "oxxo_cash",
                     "expires_at": expires_at
                 }
-            }]
+            }],
+            "metadata": {
+                "folio": folio,
+                "codigo_promocional": codigo_promocional or ""
+            }
         }
 
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
@@ -59,7 +63,7 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
         print("❌ Excepción inesperada:", str(e))
         return None
 
-def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
+def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
     try:
         if expires_at is None:
             expires_at = int((datetime.now() + timedelta(hours=2)).timestamp())
@@ -92,7 +96,8 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
             }],
             "metadata": {
                 "folio": folio,
-                "concepto": folio  # este es solo para que quede claro en Conekta
+                "concepto": folio,
+                "codigo_promocional": codigo_promocional or ""
             }
         }
 
@@ -122,7 +127,7 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
 def limpiar_nombre(nombre):
     return re.sub(r"[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]", "", nombre)
 
-def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None):
+def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
     try:
         if expires_at is None:
             expires_at = int((timezone.now() + timedelta(hours=2)).timestamp())
@@ -154,7 +159,8 @@ def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None)
                 "failure_url": "https://www.rifandoando.club/fallo-pago"
             },
             "metadata": {
-                "folio": folio
+                "folio": folio,
+                "codigo_promocional": codigo_promocional or ""
             }
         }
 

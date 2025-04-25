@@ -46,58 +46,43 @@ if (codigoGuardado) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res?.valido && res.detalle) {
-  const detalle = res.detalle;
-  let nuevoMonto = baseMonto;
-  let mensaje = "";
+      if (res?.valido && res.detalle && res.cumple_minimo) {
+        const detalle = res.detalle;
+        let nuevoMonto = baseMonto;
 
-  const cumpleMinimo = res.cumple_minimo;
+        if (detalle.tipo === "porcentaje" && detalle.descuento) {
+          nuevoMonto = baseMonto * (1 - detalle.descuento / 100);
+          setMonto(nuevoMonto);
+        }
 
-  if (detalle.tipo === "porcentaje" && cumpleMinimo && detalle.descuento) {
-    nuevoMonto = baseMonto * (1 - detalle.descuento / 100);
-    mensaje = `🎉 Se aplicó un ${detalle.descuento}% de descuento.`;
-    setMonto(nuevoMonto);
-  }
+        if (detalle.tipo === "boletos" && detalle.x && detalle.y) {
+          const grupos = Math.floor(seleccionados.length / detalle.x);
+          const cantidadExtras = grupos * detalle.y;
+          const disponibles = JSON.parse(localStorage.getItem("boletos_disponibles")) || [];
+          const extras = [];
 
-  if (detalle.tipo === "boletos" && cumpleMinimo && detalle.x && detalle.y) {
-    const grupos = Math.floor(seleccionados.length / detalle.x);
-    const boletosExtra = grupos * detalle.y;
-    if (boletosExtra > 0) {
-      const disponibles = JSON.parse(localStorage.getItem("boletos_disponibles")) || [];
-      const extras = [];
+          const disponiblesFiltrados = disponibles.filter(n => !seleccionados.includes(n));
+          while (extras.length < cantidadExtras && disponiblesFiltrados.length > 0) {
+            const index = Math.floor(Math.random() * disponiblesFiltrados.length);
+            extras.push(disponiblesFiltrados.splice(index, 1)[0]);
+          }
 
-      const disponiblesFiltrados = disponibles.filter(n => !seleccionados.includes(n));
-      while (extras.length < boletosExtra && disponiblesFiltrados.length > 0) {
-        const index = Math.floor(Math.random() * disponiblesFiltrados.length);
-        extras.push(disponiblesFiltrados.splice(index, 1)[0]);
+          const final = [...seleccionados, ...extras];
+          setBoletos(final);
+          setBoletosExtra(extras);
+        }
+
+      } else {
+        setMonto(baseMonto);
+        setBoletosExtra([]);
       }
-
-      const final = [...seleccionados, ...extras];
-      setBoletos(final);
-      setBoletosExtra(extras);
-
-      mensaje = `🎁 Tienes ${extras.length} boleto(s) extra con el código.`;
-    }
-  }
-
-  // Mostrar mensaje si hay alguno
-  if (mensaje) {
-    const div = document.createElement("div");
-    div.textContent = mensaje;
-    div.className = "text-sm text-yellow-300 mt-2 text-center font-semibold";
-    const form = document.querySelector("form");
-    if (form) form.prepend(div);
-  }
-} else {
-  setMonto(baseMonto); // reset si no cumple
-}
-
     })
     .catch((err) => {
       console.error("Error validando código:", err);
       setMonto(baseMonto);
     });
-} else {
+}
+ else {
   setMonto(baseMonto);
 }
 
