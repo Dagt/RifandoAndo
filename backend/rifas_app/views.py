@@ -63,7 +63,7 @@ def confirmar_compra(request):
         return Response({"error": "Faltan campos obligatorios"}, status=400)
 
     try:
-        rifa = Rifa.objects.get(pk=data["rifa_id"])
+        rifa = Rifa.objects.get(pk=int(data["rifa_id"]))
     except Rifa.DoesNotExist:
         return Response({"error": "La rifa no existe"}, status=404)
 
