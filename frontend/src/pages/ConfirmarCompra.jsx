@@ -55,7 +55,7 @@ if (codigoGuardado) {
           setMonto(nuevoMonto);
         }
 
-        if (detalle.tipo === "boletos" && detalle.x && detalle.y) {
+        if (detalle.tipo === "boletos_extra" && detalle.x && detalle.y) {
           const grupos = Math.floor(seleccionados.length / detalle.x);
           const cantidadExtras = grupos * detalle.y;
           const disponibles = JSON.parse(localStorage.getItem("boletos_disponibles")) || [];
