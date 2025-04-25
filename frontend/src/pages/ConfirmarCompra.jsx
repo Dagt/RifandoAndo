@@ -140,8 +140,7 @@ if (codigoGuardado) {
     e.preventDefault();
     if (!validar()) return;
 
-    const codigoGuardado = localStorage.getItem("codigo_promocional");
-    const codigoFinal = (codigoGuardado && infoCodigo && infoCodigo.cumple_minimo) ? codigoGuardado : null;
+    const codigoFinal = localStorage.getItem("codigo_promocional") || null;
     const payload = {
       nombre: formulario.nombre,
       correo: formulario.correo,

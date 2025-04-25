@@ -171,9 +171,9 @@ const Estadisticas = () => {
                 <td className="p-2 font-bold text-yellow-300">{c.codigo || "—"}</td>
                 <td className="p-2">{c.tipo || "—"}</td>
                 <td className="p-2">{c.usos ?? "—"}</td>
-                <td className="p-2">${(c.monto_generado ?? 0).toFixed(2)}</td>
-                <td className="p-2">${(c.ticket_promedio ?? 0).toFixed(2)}</td>
-                <td className="p-2">{(c.porcentaje_del_total ?? 0).toFixed(2)}%</td>
+                <td className="p-2">${typeof c.monto_generado === "number" ? c.monto_generado.toFixed(2) : "0.00"}</td>
+                <td className="p-2">${typeof c.ticket_promedio === "number" ? c.ticket_promedio.toFixed(2) : "0.00"}</td>
+                <td className="p-2">{typeof c.porcentaje_del_total === "number" ? c.porcentaje_del_total.toFixed(2) : "0.00"}%</td>
               </tr>
             ))}
           </tbody>
