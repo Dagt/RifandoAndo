@@ -95,7 +95,6 @@ def confirmar_compra(request):
                     telefono=telefono,
                     monto_generado=data["monto"]
                 )
-                promo.usos_actuales += 1
                 promo.save()
         except CodigoPromocional.DoesNotExist:
             print("⚠️ Código promocional no encontrado")
