@@ -49,7 +49,7 @@ const SeleccionBoletos = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           codigo: codigoPromo.trim(),
-          telefono: "", // todavía no se pide en esta vista
+          telefono: "", // vacío aquí
           rifa_id: id,
           monto: seleccionados.length * parseFloat(localStorage.getItem("precio_boleto") || "0")
         }),
@@ -59,32 +59,34 @@ const SeleccionBoletos = () => {
           if (res.valido && res.detalle) {
             const detalle = res.detalle;
             setCodigoValido(true);
-            setInfoCodigo(detalle);
+            setInfoCodigo({
+              ...detalle,
+              cumple_minimo: res.cumple_minimo
+            });
 
             if (detalle.tipo === "porcentaje") {
-              setModalMensaje(`🎉 Este código otorga un ${detalle.descuento}% de descuento en tu compra.`);
+              setModalMensaje(`🎉 Este código otorga un ${detalle.descuento}% de descuento en tu compra. Mínimo de compra: $${detalle.compra_minima}`);
             } else if (detalle.tipo === "boletos" && detalle.x && detalle.y) {
-              const grupos = Math.floor(seleccionados.length / detalle.x);
-              const boletosExtra = grupos * detalle.y;
-              setModalMensaje(`🎁 Este código te regala ${detalle.y} boleto(s) por cada ${detalle.x} que compres. Total extra: ${boletosExtra}`);
+              setModalMensaje(`🎁 Te regala ${detalle.y} boleto(s) por cada ${detalle.x} que compres.`);
             }
 
-            setMostrarModal(true);
             localStorage.setItem("codigo_promocional", detalle.codigo);
           } else {
             setCodigoValido(false);
-            setModalMensaje("❌ Código inválido o no aplica para esta rifa.");
-            setMostrarModal(true);
+            setInfoCodigo(null);
+            setModalMensaje(res.razon || "❌ Código inválido.");
             localStorage.removeItem("codigo_promocional");
           }
+
+          setMostrarModal(true);
         })
         .catch((err) => {
           console.error("Error al validar código:", err);
-          setModalMensaje("❌ No se pudo validar el código. Intenta más tarde.");
-          setMostrarModal(true);
+          setModalMensaje("❌ No se pudo validar el código.");
           setCodigoValido(false);
+          setMostrarModal(true);
         });
-    }, 800); // Espera 800ms después de escribir
+    }, 800);
 
     return () => clearTimeout(delay);
   } else {
@@ -93,6 +95,7 @@ const SeleccionBoletos = () => {
     setMostrarModal(false);
   }
 }, [codigoPromo, seleccionados]);
+
 
   const padLength = String(totalBoletos - 1).length;
 
@@ -243,10 +246,23 @@ const SeleccionBoletos = () => {
             />
           )}
           {mostrarModal && (
-  <div className="bg-black/80 text-white text-sm rounded-xl mt-2 p-3 text-center shadow-lg border border-white/20">
-    {modalMensaje}
+  <div className="bg-white/10 text-white p-4 rounded-xl border border-yellow-400 shadow-xl text-center text-sm backdrop-blur-md">
+    <p className="font-bold text-yellow-300 mb-2">Código promocional</p>
+    {codigoValido ? (
+      <>
+        <p>{modalMensaje}</p>
+        {!infoCodigo?.cumple_minimo && (
+          <p className="mt-1 text-red-300">
+            ⚠️ Aún no cumples el mínimo requerido para que el código sea válido.
+          </p>
+        )}
+      </>
+    ) : (
+      <p className="text-red-300">{modalMensaje}</p>
+    )}
   </div>
 )}
+
 
 
           <button

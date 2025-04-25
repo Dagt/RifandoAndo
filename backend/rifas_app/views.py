@@ -792,29 +792,34 @@ def listar_codigos_promocionales(request):
 
 
 @api_view(["POST"])
-def crear_codigo_promocional(request):
-    serializer = CodigoPromocionalSerializer(data=request.data)
-    if serializer.is_valid():
-        rifas_ids = request.data.get("rifas", [])
+def validar_codigo(request):
+    codigo_txt = request.data.get("codigo", "").strip()
+    telefono = request.data.get("telefono")  # puede venir vacío
+    rifa_id = request.data.get("rifa_id")
+    monto = float(request.data.get("monto", 0))
 
-        # Si no se especifican rifas, se asignan todas las activas
-        if not rifas_ids:
-            rifas = Rifa.objects.filter(estado="activa")
-        else:
-            rifas = Rifa.objects.filter(id__in=rifas_ids)
+    if not all([codigo_txt, rifa_id]):
+        return Response({"error": "Faltan datos para validar el código."}, status=400)
 
-        # Limpiamos los datos validados para evitar conflicto al crear el objeto
-        validated_data = serializer.validated_data.copy()
-        validated_data.pop("rifas", None)
+    try:
+        codigo = CodigoPromocional.objects.get(codigo__iexact=codigo_txt)
+    except CodigoPromocional.DoesNotExist:
+        return Response({"valido": False, "razon": "Código no válido."}, status=200)
 
-        codigo = CodigoPromocional(**validated_data)
+    if not codigo.esta_activo():
+        return Response({"valido": False, "razon": "Este código ya expiró o alcanzó su límite de usos."}, status=200)
 
-        try:
-            codigo.full_clean()  # validación del modelo
-            codigo.save()
-            codigo.rifas.set(rifas)  # ahora sí, establecemos las rifas
-            return Response(CodigoPromocionalSerializer(codigo).data, status=201)
-        except ValidationError as e:
-            return Response({"error": e.message_dict}, status=400)
+    if not codigo.rifas.filter(id=rifa_id).exists():
+        return Response({"valido": False, "razon": "Este código no aplica para esta rifa."}, status=200)
 
-    return Response(serializer.errors, status=400)
+    ya_usado = telefono and CodigoUsado.objects.filter(codigo=codigo, telefono=telefono).exists()
+
+    serializer = CodigoPromocionalSerializer(codigo)
+    return Response({
+        "valido": True,
+        "detalle": serializer.data,
+        "ya_usado": ya_usado,
+        "cumple_minimo": not codigo.compra_minima or monto >= float(codigo.compra_minima),
+        "razon": None
+    })
+
