@@ -71,7 +71,7 @@ if (codigoGuardado) {
             if (!disponibles.includes(n)) disponibles.push(n);
           }
           setBoletos(disponibles);
-          setBoletosExtra(extras);
+          setBoletosExtra(disponibles.slice(seleccionados.length));
         }
 
         setMonto(nuevoMonto);
@@ -161,6 +161,7 @@ if (codigoGuardado) {
       rifa_id: id,
       boletos: boletos,
       monto: montoFinal,
+      codigo_promocional: localStorage.getItem("codigo_promocional") || null
     };
 
     try {

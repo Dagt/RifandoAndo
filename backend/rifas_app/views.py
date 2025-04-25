@@ -602,11 +602,24 @@ def completar_transaccion(request, folio):
         return Response({"mensaje": "La transacción ya está marcada como completada."})
 
     # Marcar transacción como completada
-    transaccion.estado = "completado"  # 👈 Asegúrate que sea igual al valor en tu modelo
+    transaccion.estado = "completado"
     transaccion.save()
 
     # Marcar boletos como pagados y dejar de estar apartados
     BoletoSeleccionado.objects.filter(transaccion=transaccion).update(pagado=True, apartado=False)
+
+    # Verificar si tiene código promocional
+    if transaccion.codigo_promocional:
+        try:
+            codigo = CodigoPromocional.objects.get(codigo=transaccion.codigo_promocional)
+
+            # Aumentar contador de usos
+            codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
+            codigo.save()
+
+
+        except CodigoPromocional.DoesNotExist:
+            print("❌ Código promocional asociado no existe. No se registró uso.")
 
     return Response({"mensaje": "Transacción completada y boletos actualizados."})
 
