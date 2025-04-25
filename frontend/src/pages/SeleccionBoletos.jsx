@@ -159,9 +159,11 @@ const SeleccionBoletos = () => {
 
   localStorage.setItem("boletos", JSON.stringify(finalBoletos));
 
-  if (codigoValido) {
-    localStorage.setItem("codigo_promocional", codigoPromo.trim());
-  }
+  if (codigoValido && codigoPromo.trim()) {
+  localStorage.setItem("codigo_promocional", codigoPromo.trim());
+} else {
+  localStorage.removeItem("codigo_promocional");
+}
 
   navigate(`/rifa/${id}/confirmar`);
 };
