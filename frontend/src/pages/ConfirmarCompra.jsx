@@ -6,6 +6,7 @@ const ConfirmarCompra = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [boletosExtra, setBoletosExtra] = useState([]);
+
   const [formulario, setFormulario] = useState({
     nombre: "",
     correo: "",
@@ -70,6 +71,7 @@ if (codigoGuardado) {
           setBoletos(final);
           setBoletosExtra(extras);
         }
+
       } else {
         setMonto(baseMonto);
         setBoletosExtra([]);
@@ -136,7 +138,6 @@ if (codigoGuardado) {
     e.preventDefault();
     if (!validar()) return;
 
-    const codigoFinal = localStorage.getItem("codigo_promocional") || null;
     const payload = {
       nombre: formulario.nombre,
       correo: formulario.correo,
@@ -146,7 +147,7 @@ if (codigoGuardado) {
       rifa_id: id,
       boletos: boletos,
       monto: montoFinal,
-      codigo_promocional: codigoFinal
+      codigo_promocional: localStorage.getItem("codigo_promocional") || null
     };
 
     try {
@@ -211,17 +212,19 @@ if (codigoGuardado) {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
-          {/* 🎁 Mostrar boletos extra si hay */}
+
           {boletosExtra.length > 0 && (
-            <div className="text-sm text-green-300 mt-1">
-              🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
-              {boletosExtra.map((n) => (
-                <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-                  {n.toString().padStart(5, "0")}
-                </span>
-              ))}
-            </div>
-          )}
+  <div className="text-sm text-green-300 mt-1">
+    🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
+    {boletosExtra.map((n) => (
+      <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
+        {n.toString().padStart(5, "0")}
+      </span>
+    ))}
+  </div>
+)}
+
+
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
