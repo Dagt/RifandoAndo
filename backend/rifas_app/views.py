@@ -626,11 +626,9 @@ def completar_transaccion(request, folio):
     BoletoSeleccionado.objects.filter(transaccion=transaccion).update(pagado=True, apartado=False)
 
     # Verificar si tiene código promocional
-    if transaccion.codigo_promocional:
+    if transaccion.codigo_usado:
         try:
-            codigo = CodigoPromocional.objects.get(codigo=transaccion.codigo_promocional)
-
-            # Aumentar contador de usos
+            codigo = transaccion.codigo_usado.codigo
             codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
             codigo.save()
 
