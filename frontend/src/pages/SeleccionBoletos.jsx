@@ -195,7 +195,7 @@ const SeleccionBoletos = () => {
             Tus boletos seleccionados:
           </h2>
 
-          <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md flex flex-col justify-start overflow-y-auto h-full">
+          <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md flex-1 min-h-[150px] overflow-y-auto">
             <div className="flex flex-wrap gap-[4px] justify-center">
               {seleccionados.map((n) => (
                 <div
@@ -223,7 +223,7 @@ const SeleccionBoletos = () => {
                 max={boletosDisponibles.length}
                 value={cantidadSuerte}
                 onChange={(e) => setCantidadSuerte(e.target.value)}
-                className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none w-full lg:w-auto px-3 py-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none text-sm text-center"
+                className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none w-full lg:w-auto px-3 py-2 rounded bg-white/20 text-white border border-white/30 focus:outline-none text-base text-center"
                 placeholder="Cantidad"
               />
 
@@ -247,11 +247,11 @@ const SeleccionBoletos = () => {
               value={codigoPromo}
               onChange={(e) => setCodigoPromo(e.target.value)}
               placeholder="Ingresa tu código aquí"
-              className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 focus:outline-none text-sm"
+              className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border backdrop-blur-md border-white/30 focus:outline-none text-sm"
             />
           )}
           {mostrarModal && (
-  <div className="bg-white/10 text-white p-4 rounded-xl border border-yellow-400 shadow-xl text-center text-sm backdrop-blur-md">
+  <div className="bg-white/10 text-white p-4 rounded-xl border border-yellow-400 shadow-xl text-center text-base backdrop-blur-md">
     <p className="font-bold text-yellow-300 mb-2">Código promocional</p>
     {codigoValido ? (
       <>

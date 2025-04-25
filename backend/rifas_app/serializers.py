@@ -112,5 +112,13 @@ class CodigoPromocionalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CodigoPromocional
-        fields = '__all__'  # sigue incluyendo todo
-        # puedes reemplazar esto si prefieres enumerar los campos
+        fields = '__all__'
+
+    def get_descuento(self, obj):
+        return obj.valor if obj.tipo == "porcentaje" else None
+
+    def get_x(self, obj):
+        return obj.minimo_boletos_para_regalo if obj.tipo == "boletos_extra" else None
+
+    def get_y(self, obj):
+        return obj.boletos_regalo if obj.tipo == "boletos_extra" else None
