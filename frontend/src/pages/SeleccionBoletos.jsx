@@ -33,8 +33,12 @@ const SeleccionBoletos = () => {
       })
       .then((res) => res?.json?.())
       .then((data) => {
-        if (data?.disponibles) setBoletosDisponibles(data.disponibles);
-      })
+  if (data?.disponibles) {
+    setBoletosDisponibles(data.disponibles);
+    localStorage.setItem("boletos_disponibles", JSON.stringify(data.disponibles));
+  }
+})
+
       .catch((err) => {
         console.error("Error al cargar datos:", err);
         alert("Error al cargar datos de la rifa.");
@@ -195,7 +199,7 @@ const SeleccionBoletos = () => {
             Tus boletos seleccionados:
           </h2>
 
-          <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md flex-1 min-h-[150px] overflow-y-auto">
+          <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md max-h-[200px] overflow-y-auto">
             <div className="flex flex-wrap gap-[4px] justify-center">
               {seleccionados.map((n) => (
                 <div

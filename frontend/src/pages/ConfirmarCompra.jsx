@@ -46,7 +46,7 @@ if (codigoGuardado) {
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res?.valido && res.detalle) {
+      if (res?.valido && res.detalle && res.cumple_minimo) {
         const detalle = res.detalle;
         let nuevoMonto = baseMonto;
         let mensaje = "";
@@ -63,15 +63,18 @@ if (codigoGuardado) {
           const boletosExtra = grupos * detalle.y;
           mensaje = `🎁 Tienes ${boletosExtra} boletos extra con el código.`;
 
-          const disponibles = seleccionados.concat();
-          while (
-            disponibles.length < seleccionados.length + boletosExtra
-          ) {
-            const n = Math.floor(Math.random() * 99999);
-            if (!disponibles.includes(n)) disponibles.push(n);
-          }
-          setBoletos(disponibles);
-          setBoletosExtra(disponibles.slice(seleccionados.length));
+          const disponibles = JSON.parse(localStorage.getItem("boletos_disponibles")) || [];
+const extras = [];
+
+const disponiblesFiltrados = disponibles.filter(n => !seleccionados.includes(n));
+while (extras.length < boletosExtra && disponiblesFiltrados.length > 0) {
+  const index = Math.floor(Math.random() * disponiblesFiltrados.length);
+  extras.push(disponiblesFiltrados.splice(index, 1)[0]);
+}
+
+const final = [...seleccionados, ...extras];
+setBoletos(final);
+setBoletosExtra(extras);
         }
 
         setMonto(nuevoMonto);
