@@ -6,6 +6,7 @@ const ConfirmarCompra = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [boletosExtra, setBoletosExtra] = useState([]);
+  const [infoCodigo, setInfoCodigo] = useState(null);
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -71,15 +72,17 @@ if (codigoGuardado) {
           setBoletos(final);
           setBoletosExtra(extras);
         }
-
+        setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo, codigo: codigoGuardado });
       } else {
         setMonto(baseMonto);
         setBoletosExtra([]);
+        setInfoCodigo(null);
       }
     })
     .catch((err) => {
       console.error("Error validando código:", err);
       setMonto(baseMonto);
+      setInfoCodigo(null);
     });
 }
  else {
@@ -138,6 +141,9 @@ if (codigoGuardado) {
     e.preventDefault();
     if (!validar()) return;
 
+    const codigoGuardado = localStorage.getItem("codigo_promocional");
+    const codigoFinal = (codigoGuardado && infoCodigo?.cumple_minimo) ? codigoGuardado : null;
+
     const payload = {
       nombre: formulario.nombre,
       correo: formulario.correo,
@@ -147,7 +153,7 @@ if (codigoGuardado) {
       rifa_id: id,
       boletos: boletos,
       monto: montoFinal,
-      codigo_promocional: localStorage.getItem("codigo_promocional") || null
+      codigo_promocional: codigoFinal
     };
 
     try {
@@ -212,7 +218,11 @@ if (codigoGuardado) {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
-
+          {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
+            <div className="text-sm text-green-300 mt-1">
+              🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento con el código <strong>{infoCodigo.codigo}</strong>.
+            </div>
+          )}
           {boletosExtra.length > 0 && (
             <div className="text-sm text-green-300 mt-1">
               🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
@@ -224,6 +234,7 @@ if (codigoGuardado) {
             </div>
           )}
         </div>
+
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
