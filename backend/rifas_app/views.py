@@ -123,7 +123,8 @@ def confirmar_compra(request):
                 telefono=telefono,
                 monto=data["monto"],
                 folio=transaccion.folio,
-                expires_at=expires_at
+                expires_at=expires_at,
+
             )
         elif metodo == "spei":
             instrucciones = crear_orden_spei(

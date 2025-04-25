@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 import re
 
-def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
+def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
     try:
         if expires_at is None:
             expires_at = int((timezone.now() + timedelta(hours=2)).timestamp())
@@ -34,13 +34,10 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None, co
                 }
             }],
             "metadata": {
-                "folio": folio,
-                "codigo_promocional": codigo_promocional or ""
+                "folio": folio
             }
         }
-        print("====== Payload enviado a Conekta ======")
-        print(data)
-        print("=======================================")
+
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
 
         if response.status_code not in [200, 201]:
@@ -65,7 +62,7 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None, co
         print("❌ Excepción inesperada:", str(e))
         return None
 
-def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
+def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
     try:
         if expires_at is None:
             expires_at = int((datetime.now() + timedelta(hours=2)).timestamp())
@@ -98,13 +95,9 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None, co
             }],
             "metadata": {
                 "folio": folio,
-                "concepto": folio,
-                "codigo_promocional": codigo_promocional or ""
+                "concepto": folio
             }
         }
-        print("====== Payload enviado a Conekta ======")
-        print(data)
-        print("=======================================")
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
 
         if response.status_code not in [200, 201]:
@@ -131,7 +124,7 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None, co
 def limpiar_nombre(nombre):
     return re.sub(r"[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]", "", nombre)
 
-def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None, codigo_promocional=None):
+def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None):
     try:
         if expires_at is None:
             expires_at = int((timezone.now() + timedelta(hours=2)).timestamp())
@@ -163,13 +156,9 @@ def crear_orden_tarjeta(nombre, correo, telefono, monto, folio, expires_at=None,
                 "failure_url": "https://www.rifandoando.club/fallo-pago"
             },
             "metadata": {
-                "folio": folio,
-                "codigo_promocional": codigo_promocional or ""
+                "folio": folio
             }
         }
-        print("====== Payload enviado a Conekta ======")
-        print(data)
-        print("=======================================")
 
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
 
