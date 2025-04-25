@@ -214,17 +214,15 @@ if (codigoGuardado) {
           </p>
 
           {boletosExtra.length > 0 && (
-  <div className="text-sm text-green-300 mt-1">
-    🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
-    {boletosExtra.map((n) => (
-      <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-        {n.toString().padStart(5, "0")}
-      </span>
-    ))}
-  </div>
-)}
-
-
+            <div className="text-sm text-green-300 mt-1">
+              🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
+              {boletosExtra.map((n) => (
+                <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
+                  {n.toString().padStart(5, "0")}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
