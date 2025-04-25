@@ -143,7 +143,6 @@ if (codigoGuardado) {
       correo: formulario.correo,
       telefono: formulario.telefono,
       nacimiento: formulario.nacimiento,
-      acepta: formulario.acepta,
       metodo_pago: formulario.metodo,
       rifa_id: id,
       boletos: boletos,
