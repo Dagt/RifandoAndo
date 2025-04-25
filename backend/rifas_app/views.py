@@ -49,9 +49,10 @@ def boletos_disponibles(request, rifa_id):
 #Endpoint encargado de recabar la informacion de una venta
 @api_view(["POST"])
 def confirmar_compra(request):
-    from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
-    from .sms_utils import enviar_sms
 
+    print("====== Datos recibidos en confirmar_compra ======")
+    print(request.data)  # 🛑 Agrega esta línea temporalmente
+    print("==================================================")
     data = request.data
     campos_requeridos = [
         "nombre", "correo", "telefono", "nacimiento",
