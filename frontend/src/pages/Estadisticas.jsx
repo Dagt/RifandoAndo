@@ -73,7 +73,8 @@ const Estadisticas = () => {
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
   const ticketPromedioVisible = Array.isArray(data.ticket_promedio_por_rifa) ? data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10) : [];
-  const codigosPaginados = Array.isArray(data.codigos_mas_usados) ? data.codigos_mas_usados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina) : [];
+  const codigosPaginados = Array.isArray(data.codigos_mas_usados)  ? data.codigos_mas_usados.filter(c => c && typeof c === "object" && c.codigo).slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina)  : [];
+
 
   const safeArray = arr => Array.isArray(arr) && arr.length ? arr : [0];
   const safeObjectArray = arr => Array.isArray(arr) && arr.length && typeof arr[0] === 'object' && 'data' in arr[0] ? arr : [{ name: "", data: [] }];
@@ -167,12 +168,12 @@ const Estadisticas = () => {
           <tbody>
             {codigosPaginados.map(c => (
               <tr key={c.codigo} className={c.porcentaje_del_total >= 25 ? "bg-yellow-800/20" : "border-t border-white/10"}>
-                <td className="p-2 font-bold text-yellow-300">{c.codigo}</td>
-                <td className="p-2">{c.tipo}</td>
-                <td className="p-2">{c.usos}</td>
-                <td className="p-2">${c.monto_generado.toFixed(2)}</td>
-                <td className="p-2">${c.ticket_promedio.toFixed(2)}</td>
-                <td className="p-2">{c.porcentaje_del_total.toFixed(2)}%</td>
+                <td className="p-2 font-bold text-yellow-300">{c.codigo || "—"}</td>
+                <td className="p-2">{c.tipo || "—"}</td>
+                <td className="p-2">{c.usos ?? "—"}</td>
+                <td className="p-2">${(c.monto_generado ?? 0).toFixed(2)}</td>
+                <td className="p-2">${(c.ticket_promedio ?? 0).toFixed(2)}</td>
+                <td className="p-2">{(c.porcentaje_del_total ?? 0).toFixed(2)}%</td>
               </tr>
             ))}
           </tbody>
@@ -192,7 +193,7 @@ const Estadisticas = () => {
           <li><b>% Boletos por Tamaño:</b> qué tanto se están vendiendo proporcionalmente las rifas según su tamaño total de boletos (no suma 100%).</li>
           <li><b>% Ventas por Precio:</b> qué precios de boleto generan más ventas.</li>
           <li><b>Ticket Promedio por Método:</b> cuánto gasta en promedio un usuario por tipo de pago.</li>
-          <li><b>Ticket Promedio por Rifa:</b> gasto promedio por comprador en cada rifa (se omiten valores extremos > $10,000).</li>
+          <li><b>Ticket Promedio por Rifa:</b> gasto promedio por comprador en cada rifa.</li>
           <li><b>Top Códigos por Ingresos:</b> qué códigos han generado más dinero.</li>
           <li><b>Distribución por Tipo de Código:</b> tipos de códigos usados (porcentaje o boletos gratis).</li>
           <li><b>Usos de Códigos por Mes:</b> evolución mensual del uso de códigos.</li>

@@ -20,6 +20,7 @@ const ConfirmarCompra = () => {
   const [monto, setMonto] = useState(0);
   const montoFinal = formulario.metodo === "OXXO" ? monto + 12 : monto;
   const [errores, setErrores] = useState({});
+  const [infoCodigo, setInfoCodigo] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -214,6 +215,7 @@ if (codigoGuardado) {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
+
           {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
             <div className="text-sm text-green-300 mt-1">
               🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento gracias al código <strong>{infoCodigo.codigo}</strong>.
