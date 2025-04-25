@@ -49,9 +49,9 @@ const SeleccionBoletos = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           codigo: codigoPromo.trim(),
-          telefono: "", // vacío aquí
+          telefono: "",
           rifa_id: id,
-          monto: seleccionados.length * parseFloat(localStorage.getItem("precio_boleto") || "0")
+          monto: seleccionados.length * parseFloat(localStorage.getItem("precio_boleto") || "0"),
         }),
       })
         .then((res) => res.json())
@@ -61,15 +61,19 @@ const SeleccionBoletos = () => {
             setCodigoValido(true);
             setInfoCodigo({
               ...detalle,
-              cumple_minimo: res.cumple_minimo
+              cumple_minimo: res.cumple_minimo,
             });
 
+            let mensaje = "";
             if (detalle.tipo === "porcentaje") {
-              setModalMensaje(`🎉 Este código otorga un ${detalle.descuento}% de descuento en tu compra. Mínimo de compra: $${detalle.compra_minima}`);
-            } else if (detalle.tipo === "boletos" && detalle.x && detalle.y) {
-              setModalMensaje(`🎁 Te regala ${detalle.y} boleto(s) por cada ${detalle.x} que compres.`);
+              const porcentaje = detalle.descuento || detalle.valor || 0;
+              const minimo = detalle.compra_minima !== null ? `$${detalle.compra_minima}` : "$0";
+              mensaje = `🎉 Este código otorga un ${porcentaje}% de descuento en tu compra. Mínimo de compra: ${minimo}`;
+            } else if (detalle.tipo === "boletos_extra" && detalle.x && detalle.y) {
+              mensaje = `🎁 Te regala ${detalle.y} boleto(s) por cada ${detalle.x} que compres.`;
             }
 
+            setModalMensaje(mensaje);
             localStorage.setItem("codigo_promocional", detalle.codigo);
           } else {
             setCodigoValido(false);
@@ -95,6 +99,7 @@ const SeleccionBoletos = () => {
     setMostrarModal(false);
   }
 }, [codigoPromo, seleccionados]);
+
 
 
   const padLength = String(totalBoletos - 1).length;

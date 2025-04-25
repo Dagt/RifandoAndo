@@ -764,7 +764,7 @@ def validar_codigo(request):
         return Response({"error": "Faltan datos para validar el código."}, status=400)
 
     try:
-        codigo = CodigoPromocional.objects.get(codigo__iexact=codigo_txt)
+        codigo = CodigoPromocional.objects.get(codigo=codigo_txt)
     except CodigoPromocional.DoesNotExist:
         return Response({"valido": False, "razon": "Código no válido."}, status=200)
 

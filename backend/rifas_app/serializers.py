@@ -106,6 +106,11 @@ class TransaccionSerializer(serializers.ModelSerializer):
         ]
 
 class CodigoPromocionalSerializer(serializers.ModelSerializer):
+    descuento = serializers.SerializerMethodField()
+    x = serializers.SerializerMethodField()
+    y = serializers.SerializerMethodField()
+
     class Meta:
         model = CodigoPromocional
-        fields = '__all__'
+        fields = '__all__'  # sigue incluyendo todo
+        # puedes reemplazar esto si prefieres enumerar los campos
