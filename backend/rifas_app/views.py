@@ -84,20 +84,33 @@ def confirmar_compra(request):
     expires_at = int(tiempo_expiracion.timestamp())
 
     # Código promocional (si aplica)
-    codigo_usado = None
     codigo_promocional = data.get("codigo_promocional")
+    codigo_usado = None
     if codigo_promocional:
         try:
             promo = CodigoPromocional.objects.get(codigo=codigo_promocional)
-            if promo.esta_activo():
-                codigo_usado = CodigoUsado.objects.create(
-                    codigo=promo,
-                    telefono=telefono,
-                    monto_generado=data["monto"]
-                )
-                promo.save()
-        except CodigoPromocional.DoesNotExist:
-            print("⚠️ Código promocional no encontrado")
+            if not promo.esta_activo():
+                raise ValidationError("Código promocional no activo o expirado.")
+
+            if not promo.rifas.filter(id=data["rifa_id"]).exists():
+                raise ValidationError("El código no aplica para esta rifa.")
+
+            rifa = Rifa.objects.get(pk=data["rifa_id"])
+            monto_minimo = promo.compra_minima or 0
+            monto_real = Decimal(data["monto"])
+
+            if monto_real < monto_minimo:
+                raise ValidationError("No se cumple el mínimo de compra requerido para este código.")
+
+            codigo_usado = CodigoUsado.objects.create(
+                codigo=promo,
+                telefono=telefono,
+                monto_generado=monto_real
+            )
+            promo.save()
+
+        except (CodigoPromocional.DoesNotExist, ValidationError) as e:
+            print(f"❌ Código inválido en servidor: {str(e)}")
 
     # Creamos la transacción pero no asignamos boletos aún
     transaccion = Transaccion.objects.create(

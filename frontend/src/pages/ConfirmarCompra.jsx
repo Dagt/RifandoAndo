@@ -138,6 +138,8 @@ if (codigoGuardado) {
     e.preventDefault();
     if (!validar()) return;
 
+    const codigoGuardado = localStorage.getItem("codigo_promocional");
+    const codigoFinal = (codigoGuardado && infoCodigo && infoCodigo.cumple_minimo) ? codigoGuardado : null;
     const payload = {
       nombre: formulario.nombre,
       correo: formulario.correo,
@@ -147,7 +149,7 @@ if (codigoGuardado) {
       rifa_id: id,
       boletos: boletos,
       monto: montoFinal,
-      codigo_promocional: localStorage.getItem("codigo_promocional") || null
+      codigo_promocional: codigoFinal
     };
 
     try {
@@ -212,17 +214,22 @@ if (codigoGuardado) {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
+          {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
+            <div className="text-sm text-green-300 mt-1">
+              🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento gracias al código <strong>{infoCodigo.codigo}</strong>.
+            </div>
+          )}
 
           {boletosExtra.length > 0 && (
-  <div className="text-sm text-green-300 mt-1">
-    🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
-    {boletosExtra.map((n) => (
-      <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-        {n.toString().padStart(5, "0")}
-      </span>
-    ))}
-  </div>
-)}
+            <div className="text-sm text-green-300 mt-1">
+              🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
+              {boletosExtra.map((n) => (
+              <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
+                {n.toString().padStart(5, "0")}
+              </span>
+              ))}
+            </div>
+          )}
 
 
         </div>
