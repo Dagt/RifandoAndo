@@ -49,10 +49,9 @@ def boletos_disponibles(request, rifa_id):
 #Endpoint encargado de recabar la informacion de una venta
 @api_view(["POST"])
 def confirmar_compra(request):
+    from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
+    from .sms_utils import enviar_sms
 
-    print("====== Datos recibidos en confirmar_compra ======")
-    print(request.data)  # 🛑 Agrega esta línea temporalmente
-    print("==================================================")
     data = request.data
     campos_requeridos = [
         "nombre", "correo", "telefono", "nacimiento",
@@ -63,7 +62,7 @@ def confirmar_compra(request):
         return Response({"error": "Faltan campos obligatorios"}, status=400)
 
     try:
-        rifa = Rifa.objects.get(pk=int(data["rifa_id"]))
+        rifa = Rifa.objects.get(pk=data["rifa_id"])
     except Rifa.DoesNotExist:
         return Response({"error": "La rifa no existe"}, status=404)
 
@@ -93,8 +92,7 @@ def confirmar_compra(request):
         monto=data["monto"],
         metodo_pago=data["metodo_pago"],
         fecha_expiracion=tiempo_expiracion,
-        rifa_nombre=rifa.nombre,
-        codigo_promocional=data.get("codigo_promocional")
+        rifa_nombre=rifa.nombre
     )
 
     metodo = data["metodo_pago"].lower()
@@ -203,7 +201,6 @@ def confirmar_compra(request):
     }
 
     return Response(response_data)
-
 
 #Endpoint para verificar los folios y regresa la informacion de una transaccion
 @api_view(['GET'])
