@@ -32,10 +32,7 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
                     "type": "oxxo_cash",
                     "expires_at": expires_at
                 }
-            }],
-            "metadata": {
-                "folio": folio
-            }
+            }]
         }
 
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
@@ -95,9 +92,10 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
             }],
             "metadata": {
                 "folio": folio,
-                "concepto": folio
+                "concepto": folio  # este es solo para que quede claro en Conekta
             }
         }
+
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
 
         if response.status_code not in [200, 201]:

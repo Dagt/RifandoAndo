@@ -62,7 +62,7 @@ def confirmar_compra(request):
         return Response({"error": "Faltan campos obligatorios"}, status=400)
 
     try:
-        rifa = Rifa.objects.get(pk=int(data["rifa_id"]))
+        rifa = Rifa.objects.get(pk=data["rifa_id"])
     except Rifa.DoesNotExist:
         return Response({"error": "La rifa no existe"}, status=404)
 
@@ -109,7 +109,7 @@ def confirmar_compra(request):
         metodo_pago=data["metodo_pago"],
         fecha_expiracion=tiempo_expiracion,
         rifa_nombre=rifa.nombre,
-        codigo_usado=codigo_usado
+        codigo_usado = codigo_usado
     )
 
     metodo = data["metodo_pago"].lower()
@@ -123,8 +123,7 @@ def confirmar_compra(request):
                 telefono=telefono,
                 monto=data["monto"],
                 folio=transaccion.folio,
-                expires_at=expires_at,
-
+                expires_at=expires_at
             )
         elif metodo == "spei":
             instrucciones = crear_orden_spei(
