@@ -62,7 +62,7 @@ def confirmar_compra(request):
         return Response({"error": "Faltan campos obligatorios"}, status=400)
 
     try:
-        rifa = Rifa.objects.get(pk=data["rifa_id"])
+        rifa = Rifa.objects.get(pk=int(data["rifa_id"]))
     except Rifa.DoesNotExist:
         return Response({"error": "La rifa no existe"}, status=404)
 
@@ -83,6 +83,23 @@ def confirmar_compra(request):
     tiempo_expiracion = timezone.now() + timedelta(hours=2)
     expires_at = int(tiempo_expiracion.timestamp())
 
+    # Código promocional (si aplica)
+    codigo_usado = None
+    codigo_promocional = data.get("codigo_promocional")
+    if codigo_promocional:
+        try:
+            promo = CodigoPromocional.objects.get(codigo=codigo_promocional)
+            if promo.esta_activo():
+                codigo_usado = CodigoUsado.objects.create(
+                    codigo=promo,
+                    telefono=telefono,
+                    monto_generado=data["monto"]
+                )
+                promo.usos_actuales += 1
+                promo.save()
+        except CodigoPromocional.DoesNotExist:
+            print("⚠️ Código promocional no encontrado")
+
     # Creamos la transacción pero no asignamos boletos aún
     transaccion = Transaccion.objects.create(
         nombre_completo=data["nombre"],
@@ -92,7 +109,8 @@ def confirmar_compra(request):
         monto=data["monto"],
         metodo_pago=data["metodo_pago"],
         fecha_expiracion=tiempo_expiracion,
-        rifa_nombre=rifa.nombre
+        rifa_nombre=rifa.nombre,
+        codigo_usado=codigo_usado
     )
 
     metodo = data["metodo_pago"].lower()
@@ -201,6 +219,7 @@ def confirmar_compra(request):
     }
 
     return Response(response_data)
+
 
 #Endpoint para verificar los folios y regresa la informacion de una transaccion
 @api_view(['GET'])
