@@ -72,6 +72,7 @@ if (codigoGuardado) {
           setBoletosExtra(extras);
         }
         setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo });
+        localStorage.setItem("codigo_promocional", detalle.codigo);
       } else {
         setMonto(baseMonto);
         setBoletosExtra([]);
