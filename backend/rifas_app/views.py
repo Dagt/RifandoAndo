@@ -756,7 +756,6 @@ def conekta_success(request):
 @api_view(["POST"])
 def validar_codigo(request):
     codigo_txt = request.data.get("codigo", "").strip()
-    telefono = request.data.get("telefono")  # puede venir vacío
     rifa_id = request.data.get("rifa_id")
     monto = float(request.data.get("monto", 0))
 
@@ -774,13 +773,11 @@ def validar_codigo(request):
     if not codigo.rifas.filter(id=rifa_id).exists():
         return Response({"valido": False, "razon": "Este código no aplica para esta rifa."}, status=200)
 
-    ya_usado = telefono and CodigoUsado.objects.filter(codigo=codigo, telefono=telefono).exists()
 
     serializer = CodigoPromocionalSerializer(codigo)
     return Response({
         "valido": True,
         "detalle": serializer.data,
-        "ya_usado": ya_usado,
         "cumple_minimo": not codigo.compra_minima or monto >= float(codigo.compra_minima),
         "razon": None
     })

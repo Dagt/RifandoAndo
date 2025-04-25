@@ -190,7 +190,7 @@ const SeleccionBoletos = () => {
         </div>
 
         {/* Ventana de selección + botones */}
-        <div className="w-full lg:flex-1 flex flex-col gap-4 h-[70vh] lg:h-[80vh]">
+        <div className="w-full flex flex-col gap-4 lg:h-[80vh] lg:flex-1">
           <h2 className="text-lg font-extrabold text-center text-white-400">
             Tus boletos seleccionados:
           </h2>

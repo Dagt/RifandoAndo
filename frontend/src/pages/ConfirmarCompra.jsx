@@ -5,6 +5,7 @@ import { ShieldCheck, CreditCard, Landmark, Receipt } from "lucide-react";
 const ConfirmarCompra = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [boletosExtra, setBoletosExtra] = useState([]);
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -30,6 +31,74 @@ const ConfirmarCompra = () => {
     setBoletos(seleccionados);
     const precioGuardado = parseFloat(localStorage.getItem("precio_boleto")) || 0;
     setMonto(precioGuardado * seleccionados.length);
+    const baseMonto = precioGuardado * seleccionados.length;
+const codigoGuardado = localStorage.getItem("codigo_promocional") || "";
+
+if (codigoGuardado) {
+  fetch("/api/validar-codigo/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      codigo: codigoGuardado,
+      rifa_id: id,
+      monto: baseMonto,
+    }),
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res?.valido && res.detalle) {
+        const detalle = res.detalle;
+        let nuevoMonto = baseMonto;
+        let mensaje = "";
+
+        if (detalle.tipo === "porcentaje" && detalle.descuento) {
+          nuevoMonto = baseMonto * (1 - detalle.descuento / 100);
+          mensaje = `🎉 Se aplicó un ${detalle.descuento}% de descuento.`;
+        } else if (
+          detalle.tipo === "boletos" &&
+          detalle.x &&
+          detalle.y
+        ) {
+          const grupos = Math.floor(seleccionados.length / detalle.x);
+          const boletosExtra = grupos * detalle.y;
+          mensaje = `🎁 Tienes ${boletosExtra} boletos extra con el código.`;
+
+          const disponibles = seleccionados.concat();
+          while (
+            disponibles.length < seleccionados.length + boletosExtra
+          ) {
+            const n = Math.floor(Math.random() * 99999);
+            if (!disponibles.includes(n)) disponibles.push(n);
+          }
+          setBoletos(disponibles);
+          setBoletosExtra(extras);
+        }
+
+        setMonto(nuevoMonto);
+
+        if (mensaje) {
+          const div = document.createElement("div");
+          div.textContent = mensaje;
+          div.className =
+            "text-sm text-yellow-300 mt-2 text-center font-semibold";
+          const form = document.querySelector("form");
+          if (form) {
+            form.prepend(div);
+          }
+        }
+      } else {
+        console.warn("Código no válido al confirmar:", res?.error);
+        setMonto(baseMonto);
+      }
+    })
+    .catch((err) => {
+      console.error("Error validando código:", err);
+      setMonto(baseMonto);
+    });
+} else {
+  setMonto(baseMonto);
+}
+
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -156,6 +225,18 @@ const ConfirmarCompra = () => {
           <p className="text-sm">
             Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
+
+          {boletosExtra.length > 0 && (
+  <div className="text-sm text-green-300 mt-1">
+    🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
+    {boletosExtra.map((n) => (
+      <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
+        {n.toString().padStart(5, "0")}
+      </span>
+    ))}
+  </div>
+)}
+
 
         </div>
 
