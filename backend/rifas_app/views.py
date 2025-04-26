@@ -414,7 +414,7 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    # CORRECCION: AGRUPAR USOS SOLO POR TRANSACCIONES COMPLETADAS Y SACAR % CORRECTO
+    # CORRECCIÓN FINAL DE CODIGOS
     codigos_agrupados = defaultdict(lambda: {
         "tipo": "",
         "usos": 0,
@@ -426,7 +426,7 @@ def resumen_estadisticas(request):
         codigo_txt = cu.codigo.codigo
         transaccion = Transaccion.objects.filter(codigo_usado=cu, estado="completado").first()
         if not transaccion:
-            continue  # Solo contar usos si la transacción fue completada
+            continue
 
         codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
         codigos_agrupados[codigo_txt]["usos"] += 1
@@ -444,7 +444,7 @@ def resumen_estadisticas(request):
         .values("rifa_nombre")
         .annotate(total=Sum("monto"))
     )
-    ventas_por_rifa_dict = {v["rifa_nombre"]: v["total"] for v in ventas_por_rifa}
+    ventas_por_rifa_dict = {v["rifa_nombre"]: v["total"] or 0 for v in ventas_por_rifa}
 
     codigos_resumen = []
     for codigo, datos in codigos_agrupados.items():
@@ -466,6 +466,9 @@ def resumen_estadisticas(request):
             "ticket_promedio": round(datos["monto_generado"] / datos["usos"], 2) if datos["usos"] else 0,
             "porcentaje_del_total": porcentaje_rifa
         })
+
+    if not codigos_resumen:
+        codigos_resumen = []
 
     return Response({
         "activas": activas,
@@ -494,7 +497,6 @@ def resumen_estadisticas(request):
         "ingresos_por_codigo": ingresos_por_codigo,
         "usos_por_codigo_por_mes": usos_por_mes
     })
-
 
 
 #Endpoint para listar rifas
