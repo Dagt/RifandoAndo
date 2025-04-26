@@ -204,14 +204,7 @@ if (codigoGuardado) {
     }
   };
   const totalBoletos = parseInt(localStorage.getItem("total_boletos") || "100", 10);
-  let padLength = 0;
-  if (totalBoletos > 999) {
-    padLength = 4;
-  } else if (totalBoletos > 99) {
-      padLength = 3;
-  } else {
-  padLength = 0;
-  }
+const padLength = totalBoletos ? String(totalBoletos - 1).length : 2;
 
   return (
     <div className="min-h-screen p-6 text-white flex items-center justify-center">
@@ -235,7 +228,7 @@ if (codigoGuardado) {
               🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
               {boletosExtra.map((n) => (
                 <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-                  {padLength ? n.toString().padStart(padLength, "0") : n.toString()}
+                  {n.toString().padStart(padLength, "0")}
                 </span>
               ))}
             </div>

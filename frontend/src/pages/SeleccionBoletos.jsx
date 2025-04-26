@@ -104,14 +104,7 @@ const SeleccionBoletos = () => {
     setMostrarModal(false);
   }
 }, [codigoPromo, seleccionados]);
-let padLength = 0;
-if (totalBoletos > 999) {
-  padLength = 4;
-} else if (totalBoletos > 99) {
-    padLength = 3;
-} else {
-  padLength = 0;
-}
+
 
   const toggleBoleto = (numero) => {
     setSeleccionados((prev) =>
@@ -173,6 +166,7 @@ if (totalBoletos > 999) {
   navigate(`/rifa/${id}/confirmar`);
 };
 
+  const padLength = totalBoletos ? String(totalBoletos - 1).length : 2;
 
   return (
     <div className="min-h-screen p-6 text-white">
@@ -194,7 +188,8 @@ if (totalBoletos > 999) {
                     : "bg-transparent text-white border-white hover:bg-white hover:text-indigo-800"
                 }`}
               >
-                {padLength ? n.toString().padStart(padLength, "0") : n.toString()}
+                {n.toString().padStart(padLength, "0")
+}
               </button>
             ))}
           </div>

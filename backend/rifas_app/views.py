@@ -49,9 +49,7 @@ def boletos_disponibles(request, rifa_id):
 #Endpoint encargado de recabar la informacion de una venta
 @api_view(["POST"])
 def confirmar_compra(request):
-    from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
-    from .sms_utils import enviar_sms
-
+    logger = logging.getLogger(__name__)
     data = request.data
     campos_requeridos = [
         "nombre", "correo", "telefono", "nacimiento",
@@ -165,11 +163,9 @@ def confirmar_compra(request):
             for numero in boletos_solicitados
         ])
 
-
     except Exception as e:
         transaccion.delete()
-        print("❌ Error al generar la orden:")
-        traceback.print_exc()
+        logger.error("❌ Error al generar la orden", exc_info=True)
         return Response({"error": f"Error al generar la orden: {str(e)}"}, status=400)
 
     # SMS
