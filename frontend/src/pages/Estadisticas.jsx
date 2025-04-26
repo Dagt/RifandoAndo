@@ -150,10 +150,6 @@ const Estadisticas = () => {
       </div>
 
       <div className={chartStyle + " col-span-full mt-20 overflow-x-auto"}>
-        <h3 className="text-center font-semibold mb-4 text-white text-xl">🔥 Códigos Promocionales</h3>
-        <div className="flex justify-center mb-4">
-        </div>
-
         <div className="col-span-full mt-20">
             <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
         </div>
