@@ -57,21 +57,12 @@ if (codigoGuardado) {
         }
 
         if (detalle.tipo === "boletos_extra" && detalle.x && detalle.y) {
-          const grupos = Math.floor(seleccionados.length / detalle.x);
-          const cantidadExtras = grupos * detalle.y;
-          const disponibles = JSON.parse(localStorage.getItem("boletos_disponibles")) || [];
-          const extras = [];
-
-          const disponiblesFiltrados = disponibles.filter(n => !seleccionados.includes(n));
-          while (extras.length < cantidadExtras && disponiblesFiltrados.length > 0) {
-            const index = Math.floor(Math.random() * disponiblesFiltrados.length);
-            extras.push(disponiblesFiltrados.splice(index, 1)[0]);
-          }
-
-          const final = [...seleccionados, ...extras];
-          setBoletos(final);
-          setBoletosExtra(extras);
-          localStorage.setItem("boletos", JSON.stringify(final));
+          const extras = seleccionados.slice().filter((n, i) => i >= detalle.x * Math.floor(seleccionados.length / (detalle.x + detalle.y)));
+          const totalExtras = Math.floor(seleccionados.length / detalle.x) * detalle.y;
+          const boletosOriginales = seleccionados.slice(0, seleccionados.length - totalExtras);
+          const extrasDetectados = seleccionados.slice(seleccionados.length - totalExtras);
+          setBoletos(seleccionados);
+          setBoletosExtra(extrasDetectados);
         }
         setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo, codigo: codigoGuardado });
       } else {
