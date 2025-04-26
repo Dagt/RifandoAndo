@@ -199,12 +199,20 @@ if (codigoGuardado) {
         alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
       }
     } catch (err) {
-  console.error("❌ Error al conectar con el servidor:", err);
-  alert("❌ Error al conectar con el servidor:\n" + (err.message || JSON.stringify(err)));
-}
+      console.error(err);
+      alert("❌ Error al conectar con el servidor.");
+    }
   };
   const totalBoletos = parseInt(localStorage.getItem("total_boletos") || "100", 10);
-  const padLength = totalBoletos >= 1000 ? 4 : totalBoletos >= 100 ? 3 : 2;
+  let padLength = 0;
+  if (totalBoletos > 999) {
+    padLength = 4;
+  } else if (totalBoletos > 99) {
+      padLength = 3;
+  } else {
+  padLength = 0;
+  }
+
   return (
     <div className="min-h-screen p-6 text-white flex items-center justify-center">
       <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 w-full max-w-xl shadow-lg">
@@ -214,8 +222,9 @@ if (codigoGuardado) {
 
         <div className="bg-white/10 text-white text-center p-3 rounded mb-4 space-y-1">
           <p className="text-sm">
-            Estás por comprar <strong>{boletos.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
+            Estás por comprar <strong>{boletos.length - boletosExtra.length}</strong> boletos por un subtotal de <strong>${monto}</strong>.
           </p>
+
           {infoCodigo?.tipo === "porcentaje" && infoCodigo?.cumple_minimo && (
             <div className="text-sm text-green-300 mt-1">
               🎉 Se aplicó un <strong>{infoCodigo.descuento || infoCodigo.valor}%</strong> de descuento con el código <strong>{infoCodigo.codigo}</strong>.
@@ -226,7 +235,7 @@ if (codigoGuardado) {
               🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
               {boletosExtra.map((n) => (
                 <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-                  {n.toString().padStart(padLength, "0")}
+                  {padLength ? n.toString().padStart(padLength, "0") : n.toString()}
                 </span>
               ))}
             </div>

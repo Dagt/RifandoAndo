@@ -165,8 +165,11 @@ def confirmar_compra(request):
             for numero in boletos_solicitados
         ])
 
+
     except Exception as e:
         transaccion.delete()
+        print("❌ Error al generar la orden:")
+        traceback.print_exc()
         return Response({"error": f"Error al generar la orden: {str(e)}"}, status=400)
 
     # SMS

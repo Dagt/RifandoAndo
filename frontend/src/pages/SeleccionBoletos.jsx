@@ -104,10 +104,14 @@ const SeleccionBoletos = () => {
     setMostrarModal(false);
   }
 }, [codigoPromo, seleccionados]);
-
-
-
-  const padLength = String(totalBoletos - 1).length;
+let padLength = 0;
+if (totalBoletos > 999) {
+  padLength = 4;
+} else if (totalBoletos > 99) {
+    padLength = 3;
+} else {
+  padLength = 0;
+}
 
   const toggleBoleto = (numero) => {
     setSeleccionados((prev) =>
@@ -190,7 +194,7 @@ const SeleccionBoletos = () => {
                     : "bg-transparent text-white border-white hover:bg-white hover:text-indigo-800"
                 }`}
               >
-                {n.toString().padStart(padLength, "0")}
+                {padLength ? n.toString().padStart(padLength, "0") : n.toString()}
               </button>
             ))}
           </div>
