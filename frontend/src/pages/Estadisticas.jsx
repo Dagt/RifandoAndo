@@ -148,11 +148,7 @@ const Estadisticas = () => {
         <ChartCard title="Usos de Códigos por Mes" type="area" series={[{ name: "Usos", data: Object.values(data.usos_por_codigo_por_mes) }]} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
-
-      <div className={chartStyle + " col-span-full mt-20 overflow-x-auto"}>
-          <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
-      </div>
-
+        <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
       <div className="mt-10 bg-white/5 p-6 rounded-xl space-y-4">
         <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>
         <ul className="list-disc pl-6 space-y-2">
