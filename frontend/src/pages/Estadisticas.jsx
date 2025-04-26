@@ -14,6 +14,7 @@ const Estadisticas = () => {
   const [fechaFin, setFechaFin] = useState("");
   const [rifaSeleccionada, setRifaSeleccionada] = useState("");
   const [rifasDisponibles, setRifasDisponibles] = useState([]);
+  const [filtroCodigo, setFiltroCodigo] = useState("");
 
   useEffect(() => {
     fetch("/api/rifas/")
@@ -73,8 +74,8 @@ const Estadisticas = () => {
 
   const chartStyle = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md";
   const ticketPromedioVisible = Array.isArray(data.ticket_promedio_por_rifa) ? data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000).slice(0, 10) : [];
-  const codigosPaginados = Array.isArray(data.codigos_mas_usados)  ? data.codigos_mas_usados.filter(c => c && typeof c === "object" && c.codigo).slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina)  : [];
-
+  const codigosFiltrados = Array.isArray(data.codigos_mas_usados) ? data.codigos_mas_usados.filter(c => c && typeof c === "object" && c.codigo && c.codigo.toLowerCase().includes(filtroCodigo.toLowerCase())) : [];
+  const codigosPaginados = codigosFiltrados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina);
 
   const safeArray = arr => Array.isArray(arr) && arr.length ? arr : [0];
   const safeObjectArray = arr => Array.isArray(arr) && arr.length && typeof arr[0] === 'object' && 'data' in arr[0] ? arr : [{ name: "", data: [] }];
@@ -154,6 +155,19 @@ const Estadisticas = () => {
 
       <div className={chartStyle + " col-span-full mt-20 overflow-x-auto"}>
         <h3 className="text-center font-semibold mb-4 text-white text-xl">🔥 Códigos Promocionales</h3>
+        <div className="flex justify-center mb-4">
+        <input
+            type="text"
+            placeholder="Buscar código promocional..."
+            className="bg-white/10 px-4 py-2 rounded-md text-white w-full md:w-1/2"
+            value={filtroCodigo}
+            onChange={e => {
+                setPagina(0); // reiniciar paginación si filtramos
+                setFiltroCodigo(e.target.value);
+            }}
+        />
+        </div>
+
         <table className="w-full text-sm text-white text-left border-collapse">
           <thead className="border-b border-white/10">
             <tr>
