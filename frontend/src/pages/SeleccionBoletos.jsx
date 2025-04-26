@@ -29,6 +29,7 @@ const SeleccionBoletos = () => {
         localStorage.setItem("precio_boleto", data.precio_boleto);
         localStorage.setItem("nombre_rifa", data.nombre);
         setTotalBoletos(data.total_boletos);
+        localStorage.setItem("total_boletos", data.total_boletos || 100);
         return fetch(`/api/rifas/${id}/boletos-disponibles/`);
       })
       .then((res) => res?.json?.())

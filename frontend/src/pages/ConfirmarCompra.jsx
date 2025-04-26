@@ -71,6 +71,7 @@ if (codigoGuardado) {
           const final = [...seleccionados, ...extras];
           setBoletos(final);
           setBoletosExtra(extras);
+          localStorage.setItem("boletos", JSON.stringify(final));
         }
         setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo, codigo: codigoGuardado });
       } else {
@@ -166,37 +167,40 @@ if (codigoGuardado) {
       const data = await response.json();
 
       if (data.success) {
-  const instrucciones = data.instrucciones || null;
-
-  if (formulario.metodo === "OXXO" && instrucciones?.referencia) {
-    navigate("/instrucciones-pago", {
-      state: {
-        ...instrucciones,
-        nombre: formulario.nombre,
-        boletos: boletos,
-        rifa: data.rifa,
-        monto: data.monto,
-        expira_pago: instrucciones.expires_at,
-      },
-    });
-  } else if (formulario.metodo === "SPEI" && instrucciones?.clabe) {
-    navigate("/instrucciones-transferencia", {
-      state: {
-        ...instrucciones,
-        nombre: formulario.nombre,
-        boletos: boletos,
-        rifa: data.rifa,
-        monto: monto,
-        expira_pago: instrucciones.expires_at,
-        concepto: instrucciones.concepto,
-      },
-    });
-  } else if (formulario.metodo === "tarjeta" && instrucciones?.checkout_url) {
+        const instrucciones = data.instrucciones || null;
+        localStorage.removeItem("boletos");
+        localStorage.removeItem("codigo_promocional");
+        localStorage.removeItem("precio_boleto");
+        localStorage.removeItem("boletos_disponibles");
+        if (formulario.metodo === "OXXO" && instrucciones?.referencia) {
+          navigate("/instrucciones-pago", {
+          state: {
+            ...instrucciones,
+            nombre: formulario.nombre,
+            boletos: boletos,
+            rifa: data.rifa,
+            monto: data.monto,
+            expira_pago: instrucciones.expires_at,
+          },
+        });
+      } else if (formulario.metodo === "SPEI" && instrucciones?.clabe) {
+          navigate("/instrucciones-transferencia", {
+          state: {
+            ...instrucciones,
+            nombre: formulario.nombre,
+            boletos: boletos,
+            rifa: data.rifa,
+            monto: monto,
+            expira_pago: instrucciones.expires_at,
+            concepto: instrucciones.concepto,
+          },
+      });
+    } else if (formulario.metodo === "tarjeta" && instrucciones?.checkout_url) {
     window.location.href = instrucciones.checkout_url;
-  } else {
-    alert("❌ No se pudieron generar las instrucciones de pago. Intenta de nuevo o prueba otro método.");
+    } else {
+      alert("❌ No se pudieron generar las instrucciones de pago. Intenta de nuevo o prueba otro método.");
+    }
   }
-}
 
  else {
         alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
@@ -206,7 +210,8 @@ if (codigoGuardado) {
       alert("❌ Error al conectar con el servidor.");
     }
   };
-
+  const totalBoletos = parseInt(localStorage.getItem("total_boletos") || "100", 10);
+  const padLength = totalBoletos >= 1000 ? 4 : totalBoletos >= 100 ? 3 : 2;
   return (
     <div className="min-h-screen p-6 text-white flex items-center justify-center">
       <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 w-full max-w-xl shadow-lg">
@@ -228,11 +233,12 @@ if (codigoGuardado) {
               🎁 Tu código promocional te regaló <strong>{boletosExtra.length}</strong> boleto(s) adicional(es):
               {boletosExtra.map((n) => (
                 <span key={n} className="inline-block bg-white/20 text-white ml-1 px-2 py-0.5 rounded-full text-xs">
-                  {n.toString().padStart(5, "0")}
+                  {n.toString().padStart(padLength, "0")}
                 </span>
               ))}
             </div>
           )}
+
         </div>
 
 
