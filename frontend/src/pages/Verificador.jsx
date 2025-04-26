@@ -51,9 +51,10 @@ const Verificador = () => {
 
   const formatearNumero = (n) => {
     if (!resultado || !resultado.total_boletos) return String(n);
-    const digitos = Math.max(3, String(resultado.total_boletos - 1).length);
+    const digitos = String(resultado.total_boletos - 1).length;
     return String(n).padStart(digitos, "0");
   };
+
 
   return (
     <div className="min-h-screen flex justify-center items-center p-6 text-white">

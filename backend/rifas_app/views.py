@@ -344,7 +344,6 @@ def resumen_estadisticas(request):
     finalizadas = rifas.filter(estado='finalizada').count()
 
     boletos_vendidos = boletos.count()
-    transacciones_completadas = transacciones
     transacciones_canceladas = Transaccion.objects.filter(estado="cancelado").count()
     total_transacciones = Transaccion.objects.all().count()
     ingresos_totales = transacciones.aggregate(total=Sum("monto"))['total'] or 0
@@ -385,7 +384,6 @@ def resumen_estadisticas(request):
         for b in boletos_por_precio
     }
 
-    # Ticket promedio por rifa (recalculado correctamente)
     ticket_promedio_raw = (
         transacciones
         .values("rifa_nombre")
@@ -421,35 +419,40 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    codigos = CodigoUsado.objects.select_related("codigo")
-    codigos_resumen = []
+    # ---- CORRECCIÓN: Agrupar correctamente los usos de códigos promocionales ----
+    codigos_agrupados = defaultdict(lambda: {
+        "tipo": "",
+        "usos": 0,
+        "monto_generado": 0,
+    })
     tipo_distribucion = defaultdict(int)
     ingresos_por_codigo = defaultdict(float)
     usos_por_mes = defaultdict(int)
 
-    for cu in codigos:
-        transacciones_codigo = Transaccion.objects.filter(codigo_usado=cu, estado="completado")
-        rifas_usables = cu.codigo.rifas.all()
-        rifas_usables_nombres = rifas_usables.values_list("nombre", flat=True)
-        total_rifas = Transaccion.objects.filter(estado="completado", rifa_nombre__in=rifas_usables_nombres).aggregate(total=Sum("monto"))['total'] or 1
-        total_codigo = transacciones_codigo.aggregate(total=Sum("monto"))['total'] or 0
-        usos = transacciones_codigo.count()
-        ticket_prom = round(total_codigo / usos, 2) if usos > 0 else 0
-        porcentaje_rifa = round((total_codigo / total_rifas) * 100, 2) if total_rifas else 0
-
-        codigos_resumen.append({
-            "codigo": cu.codigo.codigo,
-            "tipo": cu.codigo.tipo,
-            "usos": usos,
-            "monto_generado": total_codigo,
-            "ticket_promedio": ticket_prom,
-            "porcentaje_del_total": porcentaje_rifa
-        })
+    for cu in CodigoUsado.objects.select_related("codigo"):
+        codigo_txt = cu.codigo.codigo
+        codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
+        codigos_agrupados[codigo_txt]["usos"] += 1
+        codigos_agrupados[codigo_txt]["monto_generado"] += float(cu.monto_generado or 0)
 
         tipo_distribucion[cu.codigo.tipo] += 1
-        ingresos_por_codigo[cu.codigo.codigo] += total_codigo
+        ingresos_por_codigo[codigo_txt] += float(cu.monto_generado or 0)
         mes = cu.fecha_uso.strftime("%Y-%m")
         usos_por_mes[mes] += 1
+
+    total_generado_por_codigos = sum(c["monto_generado"] for c in codigos_agrupados.values()) or 1
+
+    codigos_resumen = []
+    for codigo, datos in codigos_agrupados.items():
+        codigos_resumen.append({
+            "codigo": codigo,
+            "tipo": datos["tipo"],
+            "usos": datos["usos"],
+            "monto_generado": datos["monto_generado"],
+            "ticket_promedio": round(datos["monto_generado"] / datos["usos"], 2) if datos["usos"] else 0,
+            "porcentaje_del_total": round((datos["monto_generado"] / total_generado_por_codigos) * 100, 2)
+        })
+    # ---- FIN DE LA CORRECCIÓN ----
 
     return Response({
         "activas": activas,
