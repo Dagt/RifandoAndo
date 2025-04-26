@@ -33,7 +33,7 @@ const ConfirmarCompra = () => {
     const precioGuardado = parseFloat(localStorage.getItem("precio_boleto")) || 0;
     setMonto(precioGuardado * seleccionados.length);
     const baseMonto = precioGuardado * seleccionados.length;
-const codigoGuardado = localStorage.getItem("codigo_promocional") || "";
+     const codigoGuardado = localStorage.getItem("codigo_promocional") || "";
 
 if (codigoGuardado) {
   fetch("/api/validar-codigo/", {
@@ -57,12 +57,14 @@ if (codigoGuardado) {
         }
 
         if (detalle.tipo === "boletos_extra" && detalle.x && detalle.y) {
-          const extras = seleccionados.slice().filter((n, i) => i >= detalle.x * Math.floor(seleccionados.length / (detalle.x + detalle.y)));
-          const totalExtras = Math.floor(seleccionados.length / detalle.x) * detalle.y;
-          const boletosOriginales = seleccionados.slice(0, seleccionados.length - totalExtras);
-          const extrasDetectados = seleccionados.slice(seleccionados.length - totalExtras);
+          const totalExtras = Math.floor(seleccionados.length / (detalle.x + detalle.y)) * detalle.y;
+          const extrasDetectados = seleccionados.slice().filter((n, i) => i >= seleccionados.length - totalExtras);
+          const boletosPagados = seleccionados.filter(n => !extrasDetectados.includes(n));
           setBoletos(seleccionados);
           setBoletosExtra(extrasDetectados);
+          const precioGuardado = parseFloat(localStorage.getItem("precio_boleto")) || 0;
+          const baseMonto = precioGuardado * boletosPagados.length;
+          setMonto(baseMonto);
         }
         setInfoCodigo({ ...detalle, cumple_minimo: res.cumple_minimo, codigo: codigoGuardado });
       } else {
@@ -197,9 +199,9 @@ if (codigoGuardado) {
         alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
       }
     } catch (err) {
-      console.error(err);
-      alert("❌ Error al conectar con el servidor.");
-    }
+  console.error("❌ Error al conectar con el servidor:", err);
+  alert("❌ Error al conectar con el servidor:\n" + (err.message || JSON.stringify(err)));
+}
   };
   const totalBoletos = parseInt(localStorage.getItem("total_boletos") || "100", 10);
   const padLength = totalBoletos >= 1000 ? 4 : totalBoletos >= 100 ? 3 : 2;
