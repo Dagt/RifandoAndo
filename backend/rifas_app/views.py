@@ -419,7 +419,11 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    # --- CORREGIR CÓDIGOS ---
+    # --- CÓDIGOS PROMOCIONALES ---
+    tipo_distribucion = defaultdict(int)
+    ingresos_por_codigo = defaultdict(float)
+    usos_por_mes = defaultdict(int)
+
     codigos_agrupados = defaultdict(lambda: {
         "tipo": "",
         "usos": 0,
@@ -438,6 +442,11 @@ def resumen_estadisticas(request):
         codigos_agrupados[codigo_txt]["monto_generado"] += float(transaccion.monto or 0)
         rifas_ids = cu.codigo.rifas.values_list('id', flat=True)
         codigos_agrupados[codigo_txt]["rifas_ids"].update(rifas_ids)
+
+        tipo_distribucion[cu.codigo.tipo] += 1
+        ingresos_por_codigo[codigo_txt] += float(transaccion.monto or 0)
+        mes = cu.fecha_uso.strftime("%Y-%m")
+        usos_por_mes[mes] += 1
 
     ventas_por_rifa = (
         Transaccion.objects
@@ -468,8 +477,13 @@ def resumen_estadisticas(request):
             "porcentaje_del_total": porcentaje_rifa
         })
 
-    # --- FIN CORRECCIÓN ---
+    # --- CONVERTIR defaultdict a dict normales ---
+    rifas_por_mes = dict(rifas_por_mes)
+    distribucion_tipo_codigo = dict(tipo_distribucion)
+    ingresos_por_codigo = dict(ingresos_por_codigo)
+    usos_por_codigo_por_mes = dict(usos_por_mes)
 
+    # --- RESPUESTA ---
     return Response({
         "activas": activas,
         "en_espera": en_espera,
@@ -493,10 +507,11 @@ def resumen_estadisticas(request):
         "transacciones_completadas": transacciones.count(),
         "transacciones_canceladas": transacciones_canceladas,
         "transacciones_totales": total_transacciones,
-        "distribucion_tipo_codigo": defaultdict(int),
-        "ingresos_por_codigo": defaultdict(float),
-        "usos_por_codigo_por_mes": defaultdict(int)
+        "distribucion_tipo_codigo": distribucion_tipo_codigo,
+        "ingresos_por_codigo": ingresos_por_codigo,
+        "usos_por_codigo_por_mes": usos_por_codigo_por_mes
     })
+
 
 
 #Endpoint para listar rifas
