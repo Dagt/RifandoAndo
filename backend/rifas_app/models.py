@@ -138,6 +138,6 @@ class CodigoUsado(models.Model):
     telefono = models.CharField(max_length=15)  # o email si prefieres
     fecha_uso = models.DateTimeField(auto_now_add=True)
     monto_generado = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+
     def __str__(self):
         return f"{self.telefono} usó {self.codigo.codigo}"

@@ -11,7 +11,7 @@ from django.db.models.functions import NullIf
 from decimal import Decimal
 from datetime import timedelta
 from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado
-from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta
+from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
@@ -313,11 +313,6 @@ def subir_imagen_rifa(request, rifa_id):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def resumen_estadisticas(request):
-    from collections import defaultdict
-    from django.utils.timezone import now
-    from django.db.models import Sum, Count, Q, F, Avg
-    from .models import Rifa, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado
-
     fecha_inicio = request.GET.get("fecha_inicio")
     fecha_fin = request.GET.get("fecha_fin")
     rifa_id = request.GET.get("rifa_id")
@@ -419,40 +414,58 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    # ---- CORRECCIÓN: Agrupar correctamente los usos de códigos promocionales ----
+    # CORRECCION: AGRUPAR USOS SOLO POR TRANSACCIONES COMPLETADAS Y SACAR % CORRECTO
     codigos_agrupados = defaultdict(lambda: {
         "tipo": "",
         "usos": 0,
         "monto_generado": 0,
+        "rifas_ids": set(),
     })
+
+    for cu in CodigoUsado.objects.select_related("codigo"):
+        codigo_txt = cu.codigo.codigo
+        transaccion = Transaccion.objects.filter(codigo_usado=cu, estado="completado").first()
+        if not transaccion:
+            continue  # Solo contar usos si la transacción fue completada
+
+        codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
+        codigos_agrupados[codigo_txt]["usos"] += 1
+        codigos_agrupados[codigo_txt]["monto_generado"] += float(transaccion.monto or 0)
+        rifas_ids = cu.codigo.rifas.values_list('id', flat=True)
+        codigos_agrupados[codigo_txt]["rifas_ids"].update(rifas_ids)
+
     tipo_distribucion = defaultdict(int)
     ingresos_por_codigo = defaultdict(float)
     usos_por_mes = defaultdict(int)
 
-    for cu in CodigoUsado.objects.select_related("codigo"):
-        codigo_txt = cu.codigo.codigo
-        codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
-        codigos_agrupados[codigo_txt]["usos"] += 1
-        codigos_agrupados[codigo_txt]["monto_generado"] += float(cu.monto_generado or 0)
-
-        tipo_distribucion[cu.codigo.tipo] += 1
-        ingresos_por_codigo[codigo_txt] += float(cu.monto_generado or 0)
-        mes = cu.fecha_uso.strftime("%Y-%m")
-        usos_por_mes[mes] += 1
-
-    total_generado_por_codigos = sum(c["monto_generado"] for c in codigos_agrupados.values()) or 1
+    ventas_por_rifa = (
+        Transaccion.objects
+        .filter(estado="completado")
+        .values("rifa_nombre")
+        .annotate(total=Sum("monto"))
+    )
+    ventas_por_rifa_dict = {v["rifa_nombre"]: v["total"] for v in ventas_por_rifa}
 
     codigos_resumen = []
     for codigo, datos in codigos_agrupados.items():
+        rifas_asociadas = datos["rifas_ids"]
+        monto_total_rifas = 0
+
+        for rifa_id in rifas_asociadas:
+            rifa = Rifa.objects.filter(id=rifa_id).first()
+            if rifa:
+                monto_total_rifas += ventas_por_rifa_dict.get(rifa.nombre, 0)
+
+        porcentaje_rifa = round((datos["monto_generado"] / monto_total_rifas) * 100, 2) if monto_total_rifas else 0
+
         codigos_resumen.append({
             "codigo": codigo,
             "tipo": datos["tipo"],
             "usos": datos["usos"],
             "monto_generado": datos["monto_generado"],
             "ticket_promedio": round(datos["monto_generado"] / datos["usos"], 2) if datos["usos"] else 0,
-            "porcentaje_del_total": round((datos["monto_generado"] / total_generado_por_codigos) * 100, 2)
+            "porcentaje_del_total": porcentaje_rifa
         })
-    # ---- FIN DE LA CORRECCIÓN ----
 
     return Response({
         "activas": activas,
@@ -481,6 +494,7 @@ def resumen_estadisticas(request):
         "ingresos_por_codigo": ingresos_por_codigo,
         "usos_por_codigo_por_mes": usos_por_mes
     })
+
 
 
 #Endpoint para listar rifas
