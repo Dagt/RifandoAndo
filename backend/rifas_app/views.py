@@ -313,6 +313,11 @@ def subir_imagen_rifa(request, rifa_id):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def resumen_estadisticas(request):
+    from collections import defaultdict
+    from django.utils.timezone import now
+    from django.db.models import Sum, Count, Q, F, Avg
+    from .models import Rifa, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado
+
     fecha_inicio = request.GET.get("fecha_inicio")
     fecha_fin = request.GET.get("fecha_fin")
     rifa_id = request.GET.get("rifa_id")
@@ -414,7 +419,7 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    # CORRECCIÓN FINAL DE CODIGOS
+    # --- CORREGIR CÓDIGOS ---
     codigos_agrupados = defaultdict(lambda: {
         "tipo": "",
         "usos": 0,
@@ -423,20 +428,16 @@ def resumen_estadisticas(request):
     })
 
     for cu in CodigoUsado.objects.select_related("codigo"):
-        codigo_txt = cu.codigo.codigo
         transaccion = Transaccion.objects.filter(codigo_usado=cu, estado="completado").first()
         if not transaccion:
             continue
 
+        codigo_txt = cu.codigo.codigo
         codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
         codigos_agrupados[codigo_txt]["usos"] += 1
         codigos_agrupados[codigo_txt]["monto_generado"] += float(transaccion.monto or 0)
         rifas_ids = cu.codigo.rifas.values_list('id', flat=True)
         codigos_agrupados[codigo_txt]["rifas_ids"].update(rifas_ids)
-
-    tipo_distribucion = defaultdict(int)
-    ingresos_por_codigo = defaultdict(float)
-    usos_por_mes = defaultdict(int)
 
     ventas_por_rifa = (
         Transaccion.objects
@@ -467,8 +468,7 @@ def resumen_estadisticas(request):
             "porcentaje_del_total": porcentaje_rifa
         })
 
-    if not codigos_resumen:
-        codigos_resumen = []
+    # --- FIN CORRECCIÓN ---
 
     return Response({
         "activas": activas,
@@ -493,9 +493,9 @@ def resumen_estadisticas(request):
         "transacciones_completadas": transacciones.count(),
         "transacciones_canceladas": transacciones_canceladas,
         "transacciones_totales": total_transacciones,
-        "distribucion_tipo_codigo": tipo_distribucion,
-        "ingresos_por_codigo": ingresos_por_codigo,
-        "usos_por_codigo_por_mes": usos_por_mes
+        "distribucion_tipo_codigo": defaultdict(int),
+        "ingresos_por_codigo": defaultdict(float),
+        "usos_por_codigo_por_mes": defaultdict(int)
     })
 
 
