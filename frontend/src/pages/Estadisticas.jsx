@@ -1,4 +1,5 @@
 // Estadisticas.jsx mejorado con filtros por fecha y rifa, paginación y validaciones robustas
+import TablaCodigosPromocionales from "@/components/TablaCodigosPromocionales";
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
@@ -113,7 +114,7 @@ const Estadisticas = () => {
     const handleSearchChange = debounce((value) => {
         setPagina(0);
         setFiltroCodigo(value);
-    }, 300);
+    }, 400);
 
   return (
     <div className="min-h-screen p-6 text-white">
@@ -172,30 +173,15 @@ const Estadisticas = () => {
         />
         </div>
 
-        <table className="w-full text-sm text-white text-left border-collapse">
-          <thead className="border-b border-white/10">
-            <tr>
-              <th className="p-2">Código</th>
-              <th className="p-2">Tipo</th>
-              <th className="p-2">Usos</th>
-              <th className="p-2">Monto generado</th>
-              <th className="p-2">Ticket promedio</th>
-              <th className="p-2">% de su(s) rifa(s)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {codigosPaginados.map(c => (
-              <tr key={c.codigo} className={c.porcentaje_del_total >= 25 ? "bg-yellow-800/20" : "border-t border-white/10"}>
-                <td className="p-2 font-bold text-yellow-300">{c.codigo || "—"}</td>
-                <td className="p-2">{c.tipo || "—"}</td>
-                <td className="p-2">{c.usos ?? "—"}</td>
-                <td className="p-2">${typeof c.monto_generado === "number" ? c.monto_generado.toFixed(2) : "0.00"}</td>
-                <td className="p-2">${typeof c.ticket_promedio === "number" ? c.ticket_promedio.toFixed(2) : "0.00"}</td>
-                <td className="p-2">{typeof c.porcentaje_del_total === "number" ? c.porcentaje_del_total.toFixed(2) : "0.00"}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="col-span-full mt-20">
+            <TablaCodigosPromocionales
+                codigos={codigosFiltrados}
+                pagina={pagina}
+                codigosPorPagina={codigosPorPagina}
+                setPagina={setPagina}
+            />
+        </div>
+
         <div className="flex justify-center mt-4 space-x-2">
           <button disabled={pagina === 0} onClick={() => setPagina(p => p - 1)} className="bg-white/10 px-3 py-1 rounded hover:bg-white/20">Anterior</button>
           <button disabled={(pagina + 1) * codigosPorPagina >= data.codigos_mas_usados.length} onClick={() => setPagina(p => p + 1)} className="bg-white/10 px-3 py-1 rounded hover:bg-white/20">Siguiente</button>
