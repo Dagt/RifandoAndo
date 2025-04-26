@@ -5,6 +5,7 @@ import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } f
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
+import debounce from 'lodash.debounce';
 
 const Estadisticas = () => {
   const [data, setData] = useState(null);
@@ -108,6 +109,12 @@ const Estadisticas = () => {
     </div>
   );
     console.log("DATA ESTADISTICAS:", data);
+
+    const handleSearchChange = debounce((value) => {
+        setPagina(0);
+        setFiltroCodigo(value);
+    }, 300);
+
   return (
     <div className="min-h-screen p-6 text-white">
       <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
@@ -161,10 +168,7 @@ const Estadisticas = () => {
             placeholder="Buscar código promocional..."
             className="bg-white/10 px-4 py-2 rounded-md text-white w-full md:w-1/2"
             value={filtroCodigo}
-            onChange={e => {
-                setPagina(0); // reiniciar paginación si filtramos
-                setFiltroCodigo(e.target.value);
-            }}
+            onChange={e => handleSearchChange(e.target.value)}
         />
         </div>
 
