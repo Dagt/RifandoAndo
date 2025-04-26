@@ -419,7 +419,6 @@ def resumen_estadisticas(request):
     ).count()
     expirados = CodigoPromocional.objects.count() - activos
 
-    # --- CÓDIGOS PROMOCIONALES ---
     tipo_distribucion = defaultdict(int)
     ingresos_por_codigo = defaultdict(float)
     usos_por_mes = defaultdict(int)
@@ -454,7 +453,7 @@ def resumen_estadisticas(request):
         .values("rifa_nombre")
         .annotate(total=Sum("monto"))
     )
-    ventas_por_rifa_dict = {v["rifa_nombre"]: v["total"] or 0 for v in ventas_por_rifa}
+    ventas_por_rifa_dict = {v["rifa_nombre"]: float(v["total"] or 0) for v in ventas_por_rifa}
 
     codigos_resumen = []
     for codigo, datos in codigos_agrupados.items():
@@ -466,7 +465,7 @@ def resumen_estadisticas(request):
             if rifa:
                 monto_total_rifas += ventas_por_rifa_dict.get(rifa.nombre, 0)
 
-        porcentaje_rifa = round((datos["monto_generado"] / monto_total_rifas) * 100, 2) if monto_total_rifas else 0
+        porcentaje_rifa = round((float(datos["monto_generado"]) / float(monto_total_rifas)) * 100, 2) if monto_total_rifas else 0
 
         codigos_resumen.append({
             "codigo": codigo,
@@ -477,13 +476,12 @@ def resumen_estadisticas(request):
             "porcentaje_del_total": porcentaje_rifa
         })
 
-    # --- CONVERTIR defaultdict a dict normales ---
+    # Conversión defaultdict -> dict
     rifas_por_mes = dict(rifas_por_mes)
     distribucion_tipo_codigo = dict(tipo_distribucion)
     ingresos_por_codigo = dict(ingresos_por_codigo)
     usos_por_codigo_por_mes = dict(usos_por_mes)
 
-    # --- RESPUESTA ---
     return Response({
         "activas": activas,
         "en_espera": en_espera,
@@ -511,8 +509,6 @@ def resumen_estadisticas(request):
         "ingresos_por_codigo": ingresos_por_codigo,
         "usos_por_codigo_por_mes": usos_por_codigo_por_mes
     })
-
-
 
 #Endpoint para listar rifas
 @api_view(["GET"])
