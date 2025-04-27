@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from collections import defaultdict
 import traceback
+import logging
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -22,8 +23,6 @@ from rest_framework.decorators import (
     permission_classes,
     parser_classes
 )
-import logging
-
 
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -1034,6 +1033,35 @@ def eliminar_regla_referidos(request):
         config.save()
 
         return Response({"success": True, "reglas_premios": config.reglas_premios})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+#Endpoint para regresar listado de todos los links de referidos
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def listar_links_referidos(request):
+    try:
+        links = LinkReferido.objects.select_related('transaccion_origen', 'rifa').order_by('-fecha_creacion')
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # Puedes ajustar el tamaño
+
+        resultado = paginator.paginate_queryset(links, request)
+
+        data = []
+        for link in resultado:
+            data.append({
+                "id": link.id,
+                "folio_transaccion": link.transaccion_origen.folio,
+                "nombre_cliente": link.transaccion_origen.nombre_completo,
+                "nombre_rifa": link.rifa.nombre,
+                "codigo": link.codigo,
+                "vence": link.fecha_expiracion,
+                "usado": link.usado,
+            })
+
+        return paginator.get_paginated_response(data)
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)

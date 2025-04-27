@@ -26,7 +26,8 @@ from .views import (
     toggle_campo_referidos,
     actualizar_minimos_referidos,
     agregar_regla_referidos,
-    eliminar_regla_referidos
+    eliminar_regla_referidos,
+    listar_links_referidos
 )
 
 urlpatterns = [
@@ -57,6 +58,5 @@ urlpatterns = [
     path("configuracion-referidos/actualizar-montos/", actualizar_minimos_referidos),
     path("configuracion-referidos/agregar-regla/", agregar_regla_referidos),
     path("configuracion-referidos/eliminar-regla/<int:index>/", eliminar_regla_referidos),
-
-
+    path("links-referidos/", listar_links_referidos),
 ]

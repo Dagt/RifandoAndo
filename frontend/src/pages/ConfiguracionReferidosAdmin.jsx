@@ -9,18 +9,23 @@ const ConfiguracionReferidosAdmin = () => {
   const [nuevoMinimoRegla, setNuevoMinimoRegla] = useState("");
   const [nuevoBoletosRegla, setNuevoBoletosRegla] = useState("");
   const token = localStorage.getItem("token");
+  const [links, setLinks] = useState([]);
+  const [paginaLinks, setPaginaLinks] = useState(1);
+  const [totalPaginasLinks, setTotalPaginasLinks] = useState(1);
 
   useEffect(() => {
-    fetch("/api/configuracion-referidos/", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setConfiguracion({
-        ...data,
-        reglas_premios: data.reglas_premios || []
-      }))
-      .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
-  }, [token]);
+  fetch("/api/configuracion-referidos/", {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then(res => res.json())
+    .then(data => setConfiguracion({
+      ...data,
+      reglas_premios: data.reglas_premios || []
+    }))
+    .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
+
+  fetchLinksReferidos(1); // Cargar links al inicio
+}, [token]);
 
   const toggleSwitch = (campo) => {
     fetch(`/api/configuracion-referidos/toggle/${campo}/`, {
@@ -87,6 +92,20 @@ const ConfiguracionReferidosAdmin = () => {
       }
     });
   };
+
+  const fetchLinksReferidos = (pagina) => {
+  fetch(`/api/links-referidos/?page=${pagina}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then(res => res.json())
+    .then(data => {
+      setLinks(data.results || []);
+      setTotalPaginasLinks(Math.ceil((data.count || 1) / 10));
+      setPaginaLinks(pagina);
+    })
+    .catch(() => setMensaje("❌ No se pudieron cargar los links."));
+};
+
 
   const eliminarRegla = (index) => {
     fetch(`/api/configuracion-referidos/eliminar-regla/${index}/`, {
@@ -210,6 +229,65 @@ const ConfiguracionReferidosAdmin = () => {
               </button>
             </div>
           </div>
+          <div className="mt-10 space-y-4">
+  <h3 className="text-xl font-bold">🔗 Links de Referidos Generados</h3>
+
+  {links.length === 0 ? (
+    <p className="text-white/60 italic">No se han generado links todavía.</p>
+  ) : (
+    <div className="overflow-x-auto bg-white/5 rounded-xl p-4">
+      <table className="w-full text-sm text-left">
+        <thead className="bg-white/10">
+          <tr>
+            <th className="p-2">Folio Transacción</th>
+            <th className="p-2">Nombre Cliente</th>
+            <th className="p-2">Nombre Rifa</th>
+            <th className="p-2">Código Link</th>
+            <th className="p-2">Vence en</th>
+            <th className="p-2 text-center">Usado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {links.map((link) => (
+            <tr key={link.id} className="border-t border-white/10">
+              <td className="p-2">{link.folio_transaccion}</td>
+              <td className="p-2">{link.nombre_cliente}</td>
+              <td className="p-2">{link.nombre_rifa}</td>
+              <td className="p-2 font-mono text-yellow-300">{link.codigo}</td>
+              <td className="p-2">{new Date(link.vence).toLocaleString()}</td>
+              <td className="p-2 text-center">
+                {link.usado ? (
+                  <span className="text-green-400">✅</span>
+                ) : (
+                  <span className="text-red-400">❌</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Paginación */}
+      <div className="flex justify-center mt-4 space-x-4 text-sm">
+        <button
+          onClick={() => fetchLinksReferidos(paginaLinks - 1)}
+          disabled={paginaLinks <= 1}
+          className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30"
+        >
+          ← Anterior
+        </button>
+        <span>Página {paginaLinks} de {totalPaginasLinks}</span>
+        <button
+          onClick={() => fetchLinksReferidos(paginaLinks + 1)}
+          disabled={paginaLinks >= totalPaginasLinks}
+          className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-30"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  )}
+</div>
         </>
       )}
     </div>
