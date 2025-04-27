@@ -5,11 +5,15 @@ const ConfiguracionReferidosAdmin = () => {
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    fetch("/api/configuracion-referidos/")
-      .then(res => res.json())
-      .then(data => setConfiguracion(data))
-      .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
+  fetch("/api/configuracion-referidos/", { credentials: "include" })
+    .then(res => res.json())
+    .then(data => setConfiguracion({
+      ...data,
+      reglas_premios: data.reglas_premios || []
+    }))
+    .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
   }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -53,7 +57,8 @@ const ConfiguracionReferidosAdmin = () => {
     fetch("/api/configuracion-referidos/actualizar/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nuevaConfig)
+      body: JSON.stringify(nuevaConfig),
+      credentials: "include"
     })
     .then(res => res.json())
     .then(data => {
