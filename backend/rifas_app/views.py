@@ -1051,19 +1051,41 @@ def listar_links_referidos(request):
 
         data = []
         for link in resultado:
+            transaccion_origen = link.transaccion_origen
+            transaccion_usada = link.transaccion_usada
+            rifa = link.rifa
+
             data.append({
                 "id": link.id,
-                "folio_transaccion": link.transaccion_origen.folio if link.transaccion_origen else "—",
-                "nombre_cliente": link.transaccion_origen.nombre_completo if link.transaccion_origen else "—",
-                "nombre_rifa": link.rifa.nombre if link.rifa else "—",
+                "folio_transaccion": transaccion_origen.folio if transaccion_origen else "—",
+                "nombre_cliente": transaccion_origen.nombre_completo if transaccion_origen else "—",
+                "nombre_rifa": rifa.nombre if rifa else "—",
                 "codigo": link.codigo,
                 "vence": link.fecha_expiracion,
-                "usado": link.usado,
-                "folio_usado": link.transaccion_usada.folio if link.transaccion_usada else "—",
+                "usado": "Sí" if link.usado else "No",
+                "folio_usado": transaccion_usada.folio if transaccion_usada else "—",
             })
 
         return paginator.get_paginated_response(data)
 
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        return Response({"error": f"Error en listar_links_referidos: {str(e)}"}, status=500)
 
+#Endpoint para invalidar links de referidos manualmente
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def invalidar_link_referido(request, link_id):
+    try:
+        link = LinkReferido.objects.get(id=link_id)
+        if link.usado:
+            return Response({"error": "El link ya estaba marcado como usado."}, status=400)
+
+        link.usado = True
+        link.fecha_expiracion = timezone.now()  # Opcional: marcar expirado ahora
+        link.save()
+
+        return Response({"success": True, "mensaje": "Link invalidado correctamente."})
+    except LinkReferido.DoesNotExist:
+        return Response({"error": "Link no encontrado."}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
