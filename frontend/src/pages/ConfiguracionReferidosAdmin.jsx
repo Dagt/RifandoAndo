@@ -20,19 +20,24 @@ const ConfiguracionReferidosAdmin = () => {
   }, []);
 
   const toggleSwitch = (campo) => {
-    fetch("/api/configuracion-referidos/actualizar/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ [campo]: !configuracion[campo] })
-    })
+  fetch(`/api/configuracion-referidos/actualizar/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include", // 🔥 Asegura que mande la cookie
+    body: JSON.stringify({
+      [campo]: !configuracion[campo],  // Mandamos el nuevo valor invertido
+    }),
+  })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
         setConfiguracion(prev => ({ ...prev, [campo]: !prev[campo] }));
+      } else {
+        setMensaje("❌ Error al actualizar.");
       }
-    });
-  };
+    })
+    .catch(() => setMensaje("❌ Error de conexión."));
+};
 
   const actualizarMontosMinimos = () => {
     const payload = {};
