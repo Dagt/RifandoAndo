@@ -20,20 +20,21 @@ const ConfiguracionReferidosAdmin = () => {
   };
 
   const handlePremiosChange = (index, field, value) => {
-    const nuevosPremios = [...configuracion.reglas_premios];
+    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
     nuevosPremios[index][field] = parseInt(value, 10);
     setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
   };
 
   const agregarRegla = () => {
+    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
     setConfiguracion(prev => ({
       ...prev,
-      reglas_premios: [...prev.reglas_premios, { minimo: 0, boletos: 0 }]
+      reglas_premios: [...nuevosPremios, { minimo: 0, boletos: 0 }]
     }));
   };
 
   const eliminarRegla = (index) => {
-    const nuevosPremios = [...configuracion.reglas_premios];
+    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
     nuevosPremios.splice(index, 1);
     setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
   };
@@ -58,6 +59,8 @@ const ConfiguracionReferidosAdmin = () => {
   if (!configuracion) {
     return <p className="text-white text-center mt-10">Cargando configuración...</p>;
   }
+
+  const reglasPremios = Array.isArray(configuracion?.reglas_premios) ? configuracion.reglas_premios : [];
 
   return (
     <div className="min-h-screen p-6 text-white">
@@ -119,7 +122,7 @@ const ConfiguracionReferidosAdmin = () => {
         <div>
           <h3 className="text-xl font-bold mb-4">🎯 Reglas de Premios</h3>
 
-          {configuracion.reglas_premios.map((regla, index) => (
+          {reglasPremios.map((regla, index) => (
             <div key={index} className="flex items-center gap-2 mb-2">
               <input
                 type="number"
