@@ -26,7 +26,7 @@ import FalloPago from "./pages/FalloPago";
 import PoliticasCondiciones from "./pages/PoliticasCondiciones";
 import Contacto from "./pages/Contacto";
 import ComoFunciona from "./pages/ComoFunciona";
-
+import ConfiguracionReferidosAdmin from "./pages/ConfiguracionReferidosAdmin.jsx";
 
 function App() {
   return (
@@ -57,6 +57,7 @@ function App() {
           <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
           <Route path="/panel/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
           <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
+          <Route path="/panel/codigos-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
         </Route>
       </Routes>
     </Router>

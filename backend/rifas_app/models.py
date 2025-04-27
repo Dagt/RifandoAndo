@@ -141,3 +141,39 @@ class CodigoUsado(models.Model):
 
     def __str__(self):
         return f"{self.telefono} usó {self.codigo.codigo}"
+
+
+class LinkReferido(models.Model):
+    codigo = models.CharField(max_length=100, unique=True, editable=False)
+    transaccion_origen = models.ForeignKey('Transaccion', on_delete=models.CASCADE, related_name='referidos_generados')
+    rifa = models.ForeignKey('Rifa', on_delete=models.CASCADE)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_expiracion = models.DateTimeField()
+    usado = models.BooleanField(default=False)
+    transaccion_usada = models.ForeignKey('Transaccion', null=True, blank=True, related_name='referral_usado', on_delete=models.SET_NULL)
+
+    def save(self, *args, **kwargs):
+        if not self.codigo:
+            self.codigo = f"REF-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
+
+    def esta_activo(self):
+        return not self.usado and self.fecha_expiracion > timezone.now()
+
+    def __str__(self):
+        return f"Referido {self.codigo} para rifa {self.rifa.nombre}"
+
+    class ConfiguracionReferidos(models.Model):
+        activo = models.BooleanField(default=False)
+        monto_minimo_para_generar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+        monto_minimo_para_validar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+        permitir_cadena_referidos = models.BooleanField(default=False)
+        reglas_premios = models.JSONField(
+            default=list)  # Ejemplo: [{"minimo": 200, "boletos": 1}, {"minimo": 400, "boletos": 2}, ...]
+
+        def __str__(self):
+            return "Configuración Global de Referidos"
+
+        class Meta:
+            verbose_name = "Configuración de Referidos"
+            verbose_name_plural = "Configuraciones de Referidos"

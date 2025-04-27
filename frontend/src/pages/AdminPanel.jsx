@@ -73,6 +73,13 @@ const AdminPanel = () => {
           <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🏷️ Codigos de promoción.</h2>
           <p className="text-sm text-white/80">Crea y gestiona códigos de promoción.</p>
         </div>
+        <div
+          onClick={() => navigate("/panel/codigos-referidos")}
+          className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
+        >
+          <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🔗 Codigos de Referidos.</h2>
+          <p className="text-sm text-white/80">Crea y gestiona códigos de referidos.</p>
+        </div>
       </div>
     </div>
   );

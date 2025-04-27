@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Rifa, Galeria, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado
+from .models import Rifa, Galeria, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado, LinkReferido, ConfiguracionReferidos
 
 @admin.register(Rifa)
 class RifaAdmin(admin.ModelAdmin):
@@ -45,3 +45,14 @@ class CodigoUsadoAdmin(admin.ModelAdmin):
     list_filter = ('codigo',)
     search_fields = ('codigo__codigo', 'telefono')
     ordering = ('-fecha_uso',)
+
+@admin.register(LinkReferido)
+class LinkReferidoAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'rifa', 'transaccion_origen', 'usado', 'fecha_creacion', 'fecha_expiracion')
+    search_fields = ('codigo', 'transaccion_origen__folio', 'rifa__nombre')
+    list_filter = ('usado', 'rifa')
+
+@admin.register(ConfiguracionReferidos)
+class ConfiguracionReferidosAdmin(admin.ModelAdmin):
+    list_display = ('activo', 'monto_minimo_para_generar', 'monto_minimo_para_validar', 'permitir_cadena_referidos')
+    readonly_fields = ('id',)

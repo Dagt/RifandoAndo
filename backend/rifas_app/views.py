@@ -10,7 +10,7 @@ from django.db.models import Sum, Count, Q, F, Avg
 from django.db.models.functions import NullIf
 from decimal import Decimal
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
@@ -23,6 +23,7 @@ from rest_framework.decorators import (
     parser_classes
 )
 import logging
+
 
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -839,14 +840,14 @@ def validar_codigo(request):
         "razon": None
     })
 
-
+#Endpoint que regresa una lista de codigos promocionales
 @api_view(["GET"])
 def listar_codigos_promocionales(request):
     codigos = CodigoPromocional.objects.all().order_by("-id")
     serializer = CodigoPromocionalSerializer(codigos, many=True)
     return Response(serializer.data)
 
-
+#Endpoint que se encarga de crear un nuevo codigo de promocion
 @api_view(["POST"])
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
@@ -874,3 +875,48 @@ def crear_codigo_promocional(request):
             return Response({"error": e.message_dict}, status=400)
 
     return Response(serializer.errors, status=400)
+
+
+#Endpoint para consultar la configuracion del programa de referidos
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])  # Solo para usuarios admin autenticados
+def obtener_configuracion_referidos(request):
+    try:
+        configuracion = ConfiguracionReferidos.objects.first()
+        if not configuracion:
+            return Response({"error": "No se ha configurado el sistema de referidos aún."}, status=404)
+
+        data = {
+            "activo": configuracion.activo,
+            "monto_minimo_para_generar": float(configuracion.monto_minimo_para_generar),
+            "monto_minimo_para_validar": float(configuracion.monto_minimo_para_validar),
+            "permitir_cadena_referidos": configuracion.permitir_cadena_referidos,
+            "reglas_premios": configuracion.reglas_premios,
+        }
+        return Response(data)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+#Endpoint para actualizar la configuracion del programa de referidos
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])  # Solo admins
+def actualizar_configuracion_referidos(request):
+    try:
+        configuracion, created = ConfiguracionReferidos.objects.get_or_create(id=1)
+
+        data = request.data
+
+        configuracion.activo = data.get("activo", configuracion.activo)
+        configuracion.monto_minimo_para_generar = data.get("monto_minimo_para_generar", configuracion.monto_minimo_para_generar)
+        configuracion.monto_minimo_para_validar = data.get("monto_minimo_para_validar", configuracion.monto_minimo_para_validar)
+        configuracion.permitir_cadena_referidos = data.get("permitir_cadena_referidos", configuracion.permitir_cadena_referidos)
+        configuracion.reglas_premios = data.get("reglas_premios", configuracion.reglas_premios)
+
+        configuracion.save()
+
+        return Response({"success": True, "mensaje": "Configuración actualizada correctamente."})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

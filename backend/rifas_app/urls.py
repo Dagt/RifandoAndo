@@ -20,7 +20,9 @@ from .views import (
     conekta_success,
     validar_codigo,
     listar_codigos_promocionales,
-    crear_codigo_promocional
+    crear_codigo_promocional,
+    obtener_configuracion_referidos,
+    actualizar_configuracion_referidos
 )
 
 urlpatterns = [
@@ -45,4 +47,6 @@ urlpatterns = [
     path("validar-codigo/", validar_codigo, name="validar_codigo"),
     path("codigos-promocionales/", listar_codigos_promocionales),
     path("codigos-promocionales/crear/", crear_codigo_promocional),
+    path("configuracion-referidos/", obtener_configuracion_referidos),
+    path("api/configuracion-referidos/actualizar/", actualizar_configuracion_referidos),
 ]
