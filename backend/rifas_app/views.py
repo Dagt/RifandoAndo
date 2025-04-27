@@ -899,10 +899,11 @@ def obtener_configuracion_referidos(request):
 
 #Endpoint para actualizar la configuracion del programa de referidos
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])  # Solo admins
+@permission_classes([IsAuthenticated])
 def actualizar_configuracion_referidos(request):
     try:
-        configuracion, created = ConfiguracionReferidos.objects.get_or_create(id=1)
+        # 🔥 Este get_or_create garantiza que SIEMPRE haya una configuración
+        configuracion, _ = ConfiguracionReferidos.objects.get_or_create(id=1)
 
         data = request.data
 
@@ -918,6 +919,7 @@ def actualizar_configuracion_referidos(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
 
 
 # ---- Toggle "activo" o "permitir_cadena_referidos" ----
