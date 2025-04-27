@@ -132,7 +132,7 @@ style={{
                   <td className="px-4 py-3">${rifa.precio_boleto}</td>
                   <td className="px-4 py-3 text-center space-x-2">
   <button
-    onClick={() => navigate(`/admin/rifa/${rifa.id}/editar`)}
+    onClick={() => navigate(`/panel/rifa/${rifa.id}/editar`)}
     className="border border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 px-3 py-1 rounded text-sm transition"
   >
     <Pencil size={20} />

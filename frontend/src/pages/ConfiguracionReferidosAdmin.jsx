@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Trash2, PlusCircle, RefreshCcw } from "lucide-react";
+import { Trash2, PlusCircle, RefreshCcw, Check, X  } from "lucide-react";
 
 const ConfiguracionReferidosAdmin = () => {
   const [configuracion, setConfiguracion] = useState(null);
@@ -255,12 +255,16 @@ const ConfiguracionReferidosAdmin = () => {
               <td className="p-2">{link.nombre_rifa}</td>
               <td className="p-2 font-mono text-yellow-300">{link.codigo}</td>
               <td className="p-2">{new Date(link.vence).toLocaleString()}</td>
-              <td className="p-2 text-center">
+              <td className="px-4 py-2 text-center">
                 {link.usado ? (
-                  <span className="text-green-400">✅</span>
+                  <span className="text-red-400 flex items-center justify-center gap-1">
+                    <X size={18} /> Usado
+                  </span>
                 ) : (
-                  <span className="text-red-400">❌</span>
-                )}
+                <span className="text-green-400 flex items-center justify-center gap-1">
+                  <Check size={18} /> Disponible
+                </span>
+              )}
               </td>
             </tr>
           ))}
