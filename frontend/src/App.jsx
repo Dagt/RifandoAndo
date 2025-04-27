@@ -57,7 +57,7 @@ function App() {
           <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
           <Route path="/panel/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
           <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
-          <Route path="/panel/codigos-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
+          <Route path="/panel/links-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
         </Route>
       </Routes>
     </Router>

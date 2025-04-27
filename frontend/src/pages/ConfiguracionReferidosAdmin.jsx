@@ -131,34 +131,34 @@ const ConfiguracionReferidosAdmin = () => {
             Define los montos mínimos que debe gastar quien use tu link de referido para otorgar boletos de regalo.
           </p>
 
-          {configuracion.reglas_premios.length > 0 ? (
-            configuracion.reglas_premios.map((regla, index) => (
-              <div key={index} className="flex items-center gap-2 mb-2">
-                <input
-                  type="number"
-                  value={regla.minimo}
-                  onChange={e => handlePremiosChange(index, "minimo", e.target.value)}
-                  placeholder="Monto mínimo ($)"
-                  className="p-2 rounded bg-white/20 text-white w-32"
-                />
-                <input
-                  type="number"
-                  value={regla.boletos}
-                  onChange={e => handlePremiosChange(index, "boletos", e.target.value)}
-                  placeholder="Boletos de regalo"
-                  className="p-2 rounded bg-white/20 text-white w-32"
-                />
-                <button
-                  onClick={() => eliminarRegla(index)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  ✖
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-white/60 italic mb-4">No hay reglas configuradas aún.</p>
-          )}
+          {Array.isArray(configuracion.reglas_premios) && configuracion.reglas_premios.length > 0 ? (
+  configuracion.reglas_premios.map((regla, index) => (
+    <div key={index} className="flex items-center gap-2 mb-2">
+      <input
+        type="number"
+        value={regla.minimo}
+        onChange={e => handlePremiosChange(index, "minimo", e.target.value)}
+        placeholder="Monto mínimo ($)"
+        className="p-2 rounded bg-white/20 text-white w-32"
+      />
+      <input
+        type="number"
+        value={regla.boletos}
+        onChange={e => handlePremiosChange(index, "boletos", e.target.value)}
+        placeholder="Boletos de regalo"
+        className="p-2 rounded bg-white/20 text-white w-32"
+      />
+      <button
+        onClick={() => eliminarRegla(index)}
+        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+      >
+        ✖
+      </button>
+    </div>
+  ))
+) : (
+  <p className="text-white/60 italic mb-4">No hay reglas configuradas aún.</p>
+)}
 
           <button
             onClick={agregarRegla}

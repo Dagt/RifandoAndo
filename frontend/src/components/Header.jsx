@@ -87,7 +87,7 @@ const Header = () => {
                 <Link to="/panel/codigos-promocion" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <Tag className="w-4 h-4" /> Códigos
                 </Link>
-                <Link to="/panel/codigos-referidos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                <Link to="/panel/links-referidos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                 <LinkIcon className="w-4 h-4" /> Referidos
                 </Link>
                 <Link to="/panel/estadisticas" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
@@ -155,7 +155,7 @@ const Header = () => {
       <Link to="/panel/codigos-promocion" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <Tag className="w-4 h-4" /> Códigos
       </Link>
-      <Link to="/panel/codigos-referidos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+      <Link to="/panel/links-referidos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <LinkIcon className="w-4 h-4" /> Referidos
       </Link>
       <Link to="/panel/estadisticas" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
