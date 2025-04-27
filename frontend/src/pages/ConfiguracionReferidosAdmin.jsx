@@ -19,31 +19,41 @@ const ConfiguracionReferidosAdmin = () => {
     }));
   };
 
+  const handleSwitchToggle = (campo) => {
+    setConfiguracion(prev => ({
+      ...prev,
+      [campo]: !prev[campo]
+    }));
+  };
+
   const handlePremiosChange = (index, field, value) => {
-    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
+    const nuevosPremios = [...configuracion.reglas_premios];
     nuevosPremios[index][field] = parseInt(value, 10);
     setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
   };
 
   const agregarRegla = () => {
-    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
     setConfiguracion(prev => ({
       ...prev,
-      reglas_premios: [...nuevosPremios, { minimo: 0, boletos: 0 }]
+      reglas_premios: [...prev.reglas_premios, { minimo: 0, boletos: 0 }]
     }));
   };
 
   const eliminarRegla = (index) => {
-    const nuevosPremios = Array.isArray(configuracion?.reglas_premios) ? [...configuracion.reglas_premios] : [];
+    const nuevosPremios = [...configuracion.reglas_premios];
     nuevosPremios.splice(index, 1);
     setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
   };
 
   const guardarConfiguracion = () => {
+    // Ordenar reglas antes de guardar
+    const reglasOrdenadas = [...configuracion.reglas_premios].sort((a, b) => a.minimo - b.minimo);
+    const nuevaConfig = { ...configuracion, reglas_premios: reglasOrdenadas };
+
     fetch("/api/configuracion-referidos/actualizar/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(configuracion)
+      body: JSON.stringify(nuevaConfig)
     })
     .then(res => res.json())
     .then(data => {
@@ -60,8 +70,6 @@ const ConfiguracionReferidosAdmin = () => {
     return <p className="text-white text-center mt-10">Cargando configuración...</p>;
   }
 
-  const reglasPremios = Array.isArray(configuracion?.reglas_premios) ? configuracion.reglas_premios : [];
-
   return (
     <div className="min-h-screen p-6 text-white">
       <h2 className="text-3xl font-bold text-center mb-8 text-yellow-400">⚙️ Programa de Referidos</h2>
@@ -74,15 +82,14 @@ const ConfiguracionReferidosAdmin = () => {
 
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-md max-w-4xl mx-auto space-y-6">
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="font-semibold text-lg">Programa Activo:</label>
-          <input
-            type="checkbox"
-            name="activo"
-            checked={configuracion.activo}
-            onChange={handleInputChange}
-            className="w-5 h-5"
-          />
+          <button
+            onClick={() => handleSwitchToggle('activo')}
+            className={`w-14 h-8 rounded-full flex items-center px-1 ${configuracion.activo ? 'bg-emerald-400' : 'bg-white/20'}`}
+          >
+            <div className={`w-6 h-6 bg-white rounded-full transform ${configuracion.activo ? 'translate-x-6' : ''} transition`} />
+          </button>
         </div>
 
         <div className="flex flex-col gap-4 md:flex-row">
@@ -108,44 +115,50 @@ const ConfiguracionReferidosAdmin = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           <label className="font-semibold text-lg">Permitir cadenas de referidos:</label>
-          <input
-            type="checkbox"
-            name="permitir_cadena_referidos"
-            checked={configuracion.permitir_cadena_referidos}
-            onChange={handleInputChange}
-            className="w-5 h-5"
-          />
+          <button
+            onClick={() => handleSwitchToggle('permitir_cadena_referidos')}
+            className={`w-14 h-8 rounded-full flex items-center px-1 ${configuracion.permitir_cadena_referidos ? 'bg-emerald-400' : 'bg-white/20'}`}
+          >
+            <div className={`w-6 h-6 bg-white rounded-full transform ${configuracion.permitir_cadena_referidos ? 'translate-x-6' : ''} transition`} />
+          </button>
         </div>
 
         <div>
           <h3 className="text-xl font-bold mb-4">🎯 Reglas de Premios</h3>
+          <p className="text-sm text-white/80 mb-4">
+            Define los montos mínimos que debe gastar quien use tu link de referido para otorgar boletos de regalo.
+          </p>
 
-          {reglasPremios.map((regla, index) => (
-            <div key={index} className="flex items-center gap-2 mb-2">
-              <input
-                type="number"
-                value={regla.minimo}
-                onChange={e => handlePremiosChange(index, "minimo", e.target.value)}
-                placeholder="Monto mínimo"
-                className="p-2 rounded bg-white/20 text-white w-32"
-              />
-              <input
-                type="number"
-                value={regla.boletos}
-                onChange={e => handlePremiosChange(index, "boletos", e.target.value)}
-                placeholder="Boletos"
-                className="p-2 rounded bg-white/20 text-white w-32"
-              />
-              <button
-                onClick={() => eliminarRegla(index)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-              >
-                ✖
-              </button>
-            </div>
-          ))}
+          {configuracion.reglas_premios.length > 0 ? (
+            configuracion.reglas_premios.map((regla, index) => (
+              <div key={index} className="flex items-center gap-2 mb-2">
+                <input
+                  type="number"
+                  value={regla.minimo}
+                  onChange={e => handlePremiosChange(index, "minimo", e.target.value)}
+                  placeholder="Monto mínimo ($)"
+                  className="p-2 rounded bg-white/20 text-white w-32"
+                />
+                <input
+                  type="number"
+                  value={regla.boletos}
+                  onChange={e => handlePremiosChange(index, "boletos", e.target.value)}
+                  placeholder="Boletos de regalo"
+                  className="p-2 rounded bg-white/20 text-white w-32"
+                />
+                <button
+                  onClick={() => eliminarRegla(index)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                >
+                  ✖
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-white/60 italic mb-4">No hay reglas configuradas aún.</p>
+          )}
 
           <button
             onClick={agregarRegla}
