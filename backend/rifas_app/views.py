@@ -879,13 +879,10 @@ def crear_codigo_promocional(request):
 
 #Endpoint para consultar la configuracion del programa de referidos
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])  # Solo para usuarios admin autenticados
+@permission_classes([IsAuthenticated])
 def obtener_configuracion_referidos(request):
     try:
-        configuracion = ConfiguracionReferidos.objects.first()
-        if not configuracion:
-            return Response({"error": "No se ha configurado el sistema de referidos aún."}, status=404)
-
+        configuracion, _ = ConfiguracionReferidos.objects.get_or_create(id=1)  # 👈 así
         data = {
             "activo": configuracion.activo,
             "monto_minimo_para_generar": float(configuracion.monto_minimo_para_generar),
@@ -897,6 +894,7 @@ def obtener_configuracion_referidos(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
 
 
 #Endpoint para actualizar la configuracion del programa de referidos
