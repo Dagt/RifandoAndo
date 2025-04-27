@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {Trash2, Pencil} from "lucide-react";
 
 const RifasAdmin = () => {
   const navigate = useNavigate();
@@ -134,14 +135,14 @@ style={{
     onClick={() => navigate(`/admin/rifa/${rifa.id}/editar`)}
     className="border border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 px-3 py-1 rounded text-sm transition"
   >
-    ✏️ Editar
+    <Pencil size={20} />
   </button>
   {rifa.estado === "en_espera" && (
     <button
       onClick={() => handleEliminar(rifa.id)}
       className="border border-red-400 text-red-300 hover:bg-red-400/10 px-3 py-1 rounded text-sm transition"
     >
-      🗑️ Eliminar
+      <Trash2 size={20} />
     </button>
   )}
 </td>
