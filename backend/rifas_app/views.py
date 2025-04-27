@@ -920,3 +920,101 @@ def actualizar_configuracion_referidos(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+
+# ---- Toggle "activo" o "permitir_cadena_referidos" ----
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def toggle_campo_referidos(request, campo):
+    try:
+        config = ConfiguracionReferidos.objects.first()
+        if not config:
+            return Response({"error": "Configuración no encontrada."}, status=404)
+
+        if campo not in ["activo", "permitir_cadena_referidos"]:
+            return Response({"error": "Campo inválido."}, status=400)
+
+        valor_actual = getattr(config, campo)
+        setattr(config, campo, not valor_actual)
+        config.save()
+        return Response({"success": True, "nuevo_valor": getattr(config, campo)})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+# ---- Actualizar montos mínimos referidos----
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def actualizar_minimos_referidos(request):
+    try:
+        config = ConfiguracionReferidos.objects.first()
+        if not config:
+            return Response({"error": "Configuración no encontrada."}, status=404)
+
+        monto_generar = request.data.get("monto_minimo_para_generar")
+        monto_validar = request.data.get("monto_minimo_para_validar")
+
+        if monto_generar is not None:
+            config.monto_minimo_para_generar = monto_generar
+        if monto_validar is not None:
+            config.monto_minimo_para_validar = monto_validar
+
+        config.save()
+        return Response({"success": True})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+# ---- Agregar nueva regla referidos ----
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def agregar_regla_referidos(request):
+    try:
+        config = ConfiguracionReferidos.objects.first()
+        if not config:
+            return Response({"error": "Configuración no encontrada."}, status=404)
+
+        minimo = request.data.get("minimo")
+        boletos = request.data.get("boletos")
+
+        if minimo is None or boletos is None:
+            return Response({"error": "Datos incompletos."}, status=400)
+
+        nuevas_reglas = config.reglas_premios or []
+        nuevas_reglas.append({"minimo": minimo, "boletos": boletos})
+        nuevas_reglas = sorted(nuevas_reglas, key=lambda x: x["minimo"])
+
+        config.reglas_premios = nuevas_reglas
+        config.save()
+
+        return Response({"success": True, "reglas_premios": config.reglas_premios})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+# ---- Eliminar regla existente referidos----
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def eliminar_regla_referidos(request):
+    try:
+        config = ConfiguracionReferidos.objects.first()
+        if not config:
+            return Response({"error": "Configuración no encontrada."}, status=404)
+
+        indice = request.data.get("indice")
+        if indice is None:
+            return Response({"error": "No se especificó índice."}, status=400)
+
+        reglas_actuales = config.reglas_premios or []
+
+        if not (0 <= indice < len(reglas_actuales)):
+            return Response({"error": "Índice fuera de rango."}, status=400)
+
+        reglas_actuales.pop(indice)
+        config.reglas_premios = reglas_actuales
+        config.save()
+
+        return Response({"success": True, "reglas_premios": config.reglas_premios})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

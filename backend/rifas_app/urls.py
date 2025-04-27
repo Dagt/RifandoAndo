@@ -22,7 +22,11 @@ from .views import (
     listar_codigos_promocionales,
     crear_codigo_promocional,
     obtener_configuracion_referidos,
-    actualizar_configuracion_referidos
+    actualizar_configuracion_referidos,
+    toggle_campo_referidos,
+    actualizar_minimos_referidos,
+    agregar_regla_referidos,
+    eliminar_regla_referidos
 )
 
 urlpatterns = [
@@ -49,4 +53,8 @@ urlpatterns = [
     path("codigos-promocionales/crear/", crear_codigo_promocional),
     path("configuracion-referidos/", obtener_configuracion_referidos),
     path("configuracion-referidos/actualizar/", actualizar_configuracion_referidos),
+    path("configuracion-referidos/toggle/<str:campo>/", toggle_campo_referidos),
+    path("configuracion-referidos/actualizar-minimos/", actualizar_minimos_referidos),
+    path("configuracion-referidos/agregar-regla/", agregar_regla_referidos),
+    path("configuracion-referidos/eliminar-regla/", eliminar_regla_referidos),
 ]
