@@ -54,7 +54,9 @@ urlpatterns = [
     path("configuracion-referidos/", obtener_configuracion_referidos),
     path("configuracion-referidos/actualizar/", actualizar_configuracion_referidos),
     path("configuracion-referidos/toggle/<str:campo>/", toggle_campo_referidos),
-    path("configuracion-referidos/actualizar-minimos/", actualizar_minimos_referidos),
+    path("configuracion-referidos/actualizar-montos/", actualizar_minimos_referidos),
     path("configuracion-referidos/agregar-regla/", agregar_regla_referidos),
-    path("configuracion-referidos/eliminar-regla/", eliminar_regla_referidos),
+    path("configuracion-referidos/eliminar-regla/<int:index>/", eliminar_regla_referidos),
+
+
 ]
