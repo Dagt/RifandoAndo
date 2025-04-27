@@ -163,17 +163,18 @@ class LinkReferido(models.Model):
     def __str__(self):
         return f"Referido {self.codigo} para rifa {self.rifa.nombre}"
 
-    class ConfiguracionReferidos(models.Model):
-        activo = models.BooleanField(default=False)
-        monto_minimo_para_generar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-        monto_minimo_para_validar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-        permitir_cadena_referidos = models.BooleanField(default=False)
-        reglas_premios = models.JSONField(
-            default=list)  # Ejemplo: [{"minimo": 200, "boletos": 1}, {"minimo": 400, "boletos": 2}, ...]
 
-        def __str__(self):
-            return "Configuración Global de Referidos"
 
-        class Meta:
-            verbose_name = "Configuración de Referidos"
-            verbose_name_plural = "Configuraciones de Referidos"
+class ConfiguracionReferidos(models.Model):
+    activo = models.BooleanField(default=False)
+    monto_minimo_para_generar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    monto_minimo_para_validar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    permitir_cadena_referidos = models.BooleanField(default=False)
+    reglas_premios = models.JSONField(default=list)  # Ejemplo de reglas
+
+    def __str__(self):
+        return "Configuración Global de Referidos"
+
+    class Meta:
+        verbose_name = "Configuración de Referidos"
+        verbose_name_plural = "Configuraciones de Referidos"
