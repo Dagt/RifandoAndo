@@ -11,7 +11,7 @@ const ConfiguracionReferidosAdmin = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch("/api/crear-rifa/", {
+    fetch("/api/configuracion-referidos/", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
