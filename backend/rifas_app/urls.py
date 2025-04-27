@@ -48,5 +48,5 @@ urlpatterns = [
     path("codigos-promocionales/", listar_codigos_promocionales),
     path("codigos-promocionales/crear/", crear_codigo_promocional),
     path("configuracion-referidos/", obtener_configuracion_referidos),
-    path("api/configuracion-referidos/actualizar/", actualizar_configuracion_referidos),
+    path("configuracion-referidos/actualizar/", actualizar_configuracion_referidos),
 ]

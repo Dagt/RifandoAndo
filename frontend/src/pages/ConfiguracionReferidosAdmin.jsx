@@ -1,74 +1,97 @@
 import React, { useEffect, useState } from "react";
+import { Trash2, PlusCircle, RefreshCcw } from "lucide-react";
 
 const ConfiguracionReferidosAdmin = () => {
   const [configuracion, setConfiguracion] = useState(null);
   const [mensaje, setMensaje] = useState("");
+  const [nuevoMinimoGenerar, setNuevoMinimoGenerar] = useState("");
+  const [nuevoMinimoValidar, setNuevoMinimoValidar] = useState("");
+  const [nuevoMinimoRegla, setNuevoMinimoRegla] = useState("");
+  const [nuevoBoletosRegla, setNuevoBoletosRegla] = useState("");
 
   useEffect(() => {
-  fetch("/api/configuracion-referidos/", { credentials: "include" })
-    .then(res => res.json())
-    .then(data => setConfiguracion({
-      ...data,
-      reglas_premios: data.reglas_premios || []
-    }))
-    .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
+    fetch("/api/configuracion-referidos/", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setConfiguracion({
+        ...data,
+        reglas_premios: data.reglas_premios || []
+      }))
+      .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
   }, []);
 
-
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setConfiguracion(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+  const toggleSwitch = (campo) => {
+    fetch(`/api/configuracion-referidos/toggle/${campo}/`, { method: "POST", credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setConfiguracion(prev => ({ ...prev, [campo]: !prev[campo] }));
+        }
+      });
   };
 
-  const handleSwitchToggle = (campo) => {
-    setConfiguracion(prev => ({
-      ...prev,
-      [campo]: !prev[campo]
-    }));
-  };
+  const actualizarMontosMinimos = () => {
+    const payload = {};
+    if (nuevoMinimoGenerar !== "") payload.monto_minimo_para_generar = parseFloat(nuevoMinimoGenerar);
+    if (nuevoMinimoValidar !== "") payload.monto_minimo_para_validar = parseFloat(nuevoMinimoValidar);
 
-  const handlePremiosChange = (index, field, value) => {
-    const nuevosPremios = [...configuracion.reglas_premios];
-    nuevosPremios[index][field] = parseInt(value, 10);
-    setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
-  };
-
-  const agregarRegla = () => {
-    setConfiguracion(prev => ({
-      ...prev,
-      reglas_premios: [...prev.reglas_premios, { minimo: 0, boletos: 0 }]
-    }));
-  };
-
-  const eliminarRegla = (index) => {
-    const nuevosPremios = [...configuracion.reglas_premios];
-    nuevosPremios.splice(index, 1);
-    setConfiguracion(prev => ({ ...prev, reglas_premios: nuevosPremios }));
-  };
-
-  const guardarConfiguracion = () => {
-    // Ordenar reglas antes de guardar
-    const reglasOrdenadas = [...configuracion.reglas_premios].sort((a, b) => a.minimo - b.minimo);
-    const nuevaConfig = { ...configuracion, reglas_premios: reglasOrdenadas };
-
-    fetch("/api/configuracion-referidos/actualizar/", {
+    fetch("/api/configuracion-referidos/actualizar-montos/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nuevaConfig),
+      body: JSON.stringify(payload),
       credentials: "include"
     })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        setMensaje("✅ Configuración actualizada correctamente.");
+        setMensaje("✅ Montos actualizados.");
+        setConfiguracion(prev => ({ ...prev, ...payload }));
+        setNuevoMinimoGenerar("");
+        setNuevoMinimoValidar("");
       } else {
-        setMensaje("❌ Hubo un problema al actualizar.");
+        setMensaje("❌ Error al actualizar montos.");
       }
     })
-    .catch(() => setMensaje("❌ Error de conexión al guardar."));
+    .catch(() => setMensaje("❌ Error de conexión."));
+  };
+
+  const agregarRegla = () => {
+    if (!nuevoMinimoRegla || !nuevoBoletosRegla) return;
+    const nuevaRegla = { minimo: parseInt(nuevoMinimoRegla, 10), boletos: parseInt(nuevoBoletosRegla, 10) };
+
+    fetch("/api/configuracion-referidos/agregar-regla/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(nuevaRegla),
+      credentials: "include"
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setConfiguracion(prev => ({
+          ...prev,
+          reglas_premios: [...prev.reglas_premios, nuevaRegla].sort((a, b) => a.minimo - b.minimo)
+        }));
+        setNuevoMinimoRegla("");
+        setNuevoBoletosRegla("");
+        setMensaje("✅ Regla agregada.");
+      }
+    });
+  };
+
+  const eliminarRegla = (index) => {
+    fetch(`/api/configuracion-referidos/eliminar-regla/${index}/`, {
+      method: "DELETE",
+      credentials: "include"
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const nuevas = [...configuracion.reglas_premios];
+        nuevas.splice(index, 1);
+        setConfiguracion(prev => ({ ...prev, reglas_premios: nuevas }));
+        setMensaje("✅ Regla eliminada.");
+      }
+    });
   };
 
   if (!configuracion) {
@@ -90,96 +113,80 @@ const ConfiguracionReferidosAdmin = () => {
         <div className="flex items-center justify-between">
           <label className="font-semibold text-lg">Programa Activo:</label>
           <button
-            onClick={() => handleSwitchToggle('activo')}
+            onClick={() => toggleSwitch('activo')}
             className={`w-14 h-8 rounded-full flex items-center px-1 ${configuracion.activo ? 'bg-emerald-400' : 'bg-white/20'}`}
           >
             <div className={`w-6 h-6 bg-white rounded-full transform ${configuracion.activo ? 'translate-x-6' : ''} transition`} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="flex-1">
-            <label className="block mb-1 text-sm text-white/80">Monto mínimo para generar link ($):</label>
-            <input
-              type="number"
-              name="monto_minimo_para_generar"
-              value={configuracion.monto_minimo_para_generar}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-white/20 text-white"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block mb-1 text-sm text-white/80">Monto mínimo para validar compra ($):</label>
-            <input
-              type="number"
-              name="monto_minimo_para_validar"
-              value={configuracion.monto_minimo_para_validar}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-white/20 text-white"
-            />
-          </div>
-        </div>
-
         <div className="flex items-center justify-between">
-          <label className="font-semibold text-lg">Permitir cadenas de referidos:</label>
+          <label className="font-semibold text-lg">Permitir Cadenas de Referidos:</label>
           <button
-            onClick={() => handleSwitchToggle('permitir_cadena_referidos')}
+            onClick={() => toggleSwitch('permitir_cadena_referidos')}
             className={`w-14 h-8 rounded-full flex items-center px-1 ${configuracion.permitir_cadena_referidos ? 'bg-emerald-400' : 'bg-white/20'}`}
           >
             <div className={`w-6 h-6 bg-white rounded-full transform ${configuracion.permitir_cadena_referidos ? 'translate-x-6' : ''} transition`} />
           </button>
         </div>
 
-        <div>
-          <h3 className="text-xl font-bold mb-4">🎯 Reglas de Premios</h3>
-          <p className="text-sm text-white/80 mb-4">
-            Define los montos mínimos que debe gastar quien use tu link de referido para otorgar boletos de regalo.
-          </p>
-
-          {Array.isArray(configuracion.reglas_premios) && configuracion.reglas_premios.length > 0 ? (
-  configuracion.reglas_premios.map((regla, index) => (
-    <div key={index} className="flex items-center gap-2 mb-2">
-      <input
-        type="number"
-        value={regla.minimo}
-        onChange={e => handlePremiosChange(index, "minimo", e.target.value)}
-        placeholder="Monto mínimo ($)"
-        className="p-2 rounded bg-white/20 text-white w-32"
-      />
-      <input
-        type="number"
-        value={regla.boletos}
-        onChange={e => handlePremiosChange(index, "boletos", e.target.value)}
-        placeholder="Boletos de regalo"
-        className="p-2 rounded bg-white/20 text-white w-32"
-      />
-      <button
-        onClick={() => eliminarRegla(index)}
-        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-      >
-        ✖
-      </button>
-    </div>
-  ))
-) : (
-  <p className="text-white/60 italic mb-4">No hay reglas configuradas aún.</p>
-)}
-
-          <button
-            onClick={agregarRegla}
-            className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold"
-          >
-            ➕ Agregar Regla
-          </button>
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold">Montos Mínimos</h3>
+          <div className="flex gap-4">
+            <input
+              type="number"
+              value={nuevoMinimoGenerar}
+              onChange={(e) => setNuevoMinimoGenerar(e.target.value)}
+              placeholder={`Generar Link (actual: $${configuracion.monto_minimo_para_generar})`}
+              className="w-full p-2 rounded bg-white/20 text-white"
+            />
+            <input
+              type="number"
+              value={nuevoMinimoValidar}
+              onChange={(e) => setNuevoMinimoValidar(e.target.value)}
+              placeholder={`Validar Compra (actual: $${configuracion.monto_minimo_para_validar})`}
+              className="w-full p-2 rounded bg-white/20 text-white"
+            />
+            <button onClick={actualizarMontosMinimos} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-2">
+              <RefreshCcw size={20} />
+            </button>
+          </div>
         </div>
 
-        <div className="text-center">
-          <button
-            onClick={guardarConfiguracion}
-            className="mt-6 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold text-lg"
-          >
-            Guardar Cambios
-          </button>
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold">🎯 Reglas Activas</h3>
+          {configuracion.reglas_premios.length > 0 ? (
+            configuracion.reglas_premios.map((regla, index) => (
+              <div key={index} className="flex items-center gap-4 bg-white/5 rounded p-3">
+                <span className="flex-1">Compra mínima: <b>${regla.minimo}</b> ➔ Boletos: <b>{regla.boletos}</b></span>
+                <button onClick={() => eliminarRegla(index)} className="text-red-400 hover:text-red-600">
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-white/60 italic">No hay reglas configuradas.</p>
+          )}
+
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <input
+              type="number"
+              value={nuevoMinimoRegla}
+              onChange={(e) => setNuevoMinimoRegla(e.target.value)}
+              placeholder="Monto mínimo ($)"
+              className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+            />
+            <input
+              type="number"
+              value={nuevoBoletosRegla}
+              onChange={(e) => setNuevoBoletosRegla(e.target.value)}
+              placeholder="Boletos a otorgar"
+              className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+            />
+            <button onClick={agregarRegla} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-2">
+              <PlusCircle size={20} />
+            </button>
+          </div>
         </div>
 
       </div>
