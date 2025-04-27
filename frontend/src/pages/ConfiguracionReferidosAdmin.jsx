@@ -156,14 +156,14 @@ const ConfiguracionReferidosAdmin = () => {
                 value={nuevoMinimoGenerar}
                 onChange={(e) => setNuevoMinimoGenerar(e.target.value)}
                 placeholder={`Generar link (actual: $${configuracion.monto_minimo_para_generar})`}
-                className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+                className="p-2 rounded bg-white/20 text-white placeholder-white/70 w-full md:w-1/2"
               />
               <input
                 type="number"
                 value={nuevoMinimoValidar}
                 onChange={(e) => setNuevoMinimoValidar(e.target.value)}
                 placeholder={`Validar compra (actual: $${configuracion.monto_minimo_para_validar})`}
-                className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+                className="p-2 rounded bg-white/20 text-white placeholder-white/70 w-full md:w-1/2"
               />
               <button onClick={actualizarMontosMinimos} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-2">
                 <RefreshCcw size={20} />
@@ -178,7 +178,9 @@ const ConfiguracionReferidosAdmin = () => {
               configuracion.reglas_premios.map((regla, index) => (
                 <div key={index} className="flex items-center gap-4 bg-white/5 rounded p-3">
                   <span className="flex-1">Compra mínima: <b>${regla.minimo}</b> ➔ Boletos: <b>{regla.boletos}</b></span>
-                  <button onClick={() => eliminarRegla(index)} className="text-red-400 hover:text-red-600">
+                  <button onClick={() => eliminarRegla(index)}
+                          className="bg-red-500/20 hover:bg-red-500/40 rounded-full p-2 text-red-400 hover:text-white transition"
+                  >
                     <Trash2 size={20} />
                   </button>
                 </div>
@@ -194,14 +196,14 @@ const ConfiguracionReferidosAdmin = () => {
                 value={nuevoMinimoRegla}
                 onChange={(e) => setNuevoMinimoRegla(e.target.value)}
                 placeholder="Monto mínimo ($)"
-                className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+                className="p-2 rounded bg-white/20 text-white placeholder-white/70 w-full md:w-1/2"
               />
               <input
                 type="number"
                 value={nuevoBoletosRegla}
                 onChange={(e) => setNuevoBoletosRegla(e.target.value)}
                 placeholder="Boletos a otorgar"
-                className="p-2 rounded bg-white/20 text-white w-full md:w-1/2"
+                className="p-2 rounded bg-white/20 text-white placeholder-white/70 w-full md:w-1/2"
               />
               <button onClick={agregarRegla} className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-2">
                 <PlusCircle size={20} />

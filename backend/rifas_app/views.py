@@ -661,13 +661,32 @@ def completar_transaccion(request, folio):
             codigo = transaccion.codigo_usado.codigo
             codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
             codigo.save()
-
-
         except CodigoPromocional.DoesNotExist:
             print("❌ Código promocional asociado no existe. No se registró uso.")
 
-    return Response({"mensaje": "Transacción completada y boletos actualizados."})
+    # Crear Link de Referido si aplica
+    try:
+        from .models import ConfiguracionReferidos, LinkReferido
+        from django.utils import timezone
+        from datetime import timedelta
 
+        configuracion = ConfiguracionReferidos.objects.first()
+        if configuracion and configuracion.activo:
+            if transaccion.monto >= configuracion.monto_minimo_para_generar:
+                # Verificar que no se haya creado antes para esta transacción
+                if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
+                    primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+                    if primera_rifa:
+                        LinkReferido.objects.create(
+                            transaccion_origen=transaccion,
+                            rifa=primera_rifa,
+                            fecha_creacion=timezone.now(),
+                            fecha_expiracion=timezone.now() + timedelta(days=1),
+                        )
+    except Exception as e:
+        print(f"⚠️ Error al crear link de referido: {e}")
+
+    return Response({"mensaje": "Transacción completada, boletos actualizados y link de referido generado si aplicaba."})
 
 
 #Endpoint para poder cancelar Transacciones
