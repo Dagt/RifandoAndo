@@ -260,7 +260,6 @@ const ConfiguracionReferidosAdmin = () => {
                 )}
             </div>
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-md max-w-6xl mx-auto space-y-6 mt-10">
-                <h3 className="text-2xl font-bold text-yellow-400 text-center mb-4">🎟️ Links de Referidos</h3>
                 <div className="mt-10 space-y-4">
                     <h3 className="text-xl font-bold">🔗 Links de Referidos Generados</h3>
 

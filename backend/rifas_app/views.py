@@ -11,7 +11,7 @@ from django.db.models import Sum, Count, Q, F, Avg
 from django.db.models.functions import NullIf
 from decimal import Decimal
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
@@ -23,6 +23,7 @@ from rest_framework.decorators import (
     permission_classes,
     parser_classes
 )
+
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
