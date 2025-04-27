@@ -24,7 +24,6 @@ from rest_framework.decorators import (
     parser_classes
 )
 
-
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
     serializer_class = RifaSerializer
@@ -1051,25 +1050,26 @@ def listar_links_referidos(request):
 
         data = []
         for link in resultado:
-            transaccion_origen = link.transaccion_origen
-            transaccion_usada = link.transaccion_usada
-            rifa = link.rifa
-
-            data.append({
-                "id": link.id,
-                "folio_transaccion": transaccion_origen.folio if transaccion_origen else "—",
-                "nombre_cliente": transaccion_origen.nombre_completo if transaccion_origen else "—",
-                "nombre_rifa": rifa.nombre if rifa else "—",
-                "codigo": link.codigo,
-                "vence": link.fecha_expiracion,
-                "usado": "Sí" if link.usado else "No",
-                "folio_usado": transaccion_usada.folio if transaccion_usada else "—",
-            })
+            try:
+                data.append({
+                    "id": link.id,
+                    "folio_transaccion": link.transaccion_origen.folio if link.transaccion_origen else "—",
+                    "nombre_cliente": link.transaccion_origen.nombre_completo if link.transaccion_origen else "—",
+                    "nombre_rifa": link.rifa.nombre if link.rifa else "—",
+                    "codigo": link.codigo,
+                    "vence": localtime(link.fecha_expiracion).isoformat() if link.fecha_expiracion else "—",
+                    "usado": link.usado,
+                    "folio_usado": link.transaccion_usada.folio if link.transaccion_usada else "—",
+                })
+            except Exception as e:
+                print(f"❌ Error procesando link ID {link.id}: {str(e)}")  # <- Este log
 
         return paginator.get_paginated_response(data)
 
     except Exception as e:
-        return Response({"error": f"Error en listar_links_referidos: {str(e)}"}, status=500)
+        print(f"❌ Error general en listar_links_referidos: {str(e)}")  # <- Este log
+        return Response({"error": str(e)}, status=500)
+
 
 #Endpoint para invalidar links de referidos manualmente
 @api_view(["POST"])
