@@ -686,14 +686,6 @@ def listar_transacciones(request):
 
 
 #Endpoint para completar transacciones manualmente@api_view(["PUT"])
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import transaction
-from django.utils import timezone
-from datetime import timedelta
-
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def completar_transaccion(request, folio):
@@ -737,11 +729,11 @@ def completar_transaccion(request, folio):
 
                         if boletos_disponibles:
                             boletos_a_regalar = 1
-                            reglas = configuracion.reglas_premio.all().order_by('-monto_minimo') if configuracion else []
+                            reglas = configuracion.reglas_premios if configuracion else []
 
-                            for regla in reglas:
-                                if transaccion.monto >= regla.monto_minimo:
-                                    boletos_a_regalar = regla.boletos_regalo
+                            for regla in sorted(reglas, key=lambda r: r['monto_minimo'], reverse=True):
+                                if transaccion.monto >= regla['monto_minimo']:
+                                    boletos_a_regalar = regla['boletos_regalo']
                                     break
 
                             boletos_a_regalar = min(boletos_a_regalar, len(boletos_disponibles))
@@ -778,9 +770,9 @@ def completar_transaccion(request, folio):
     # Registrar uso de código promocional si aplica
     if transaccion.codigo_usado:
         try:
-            codigo = transaccion.codigo_usado
-            codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
-            codigo.save()
+            codigo_promo = transaccion.codigo_usado.codigo  # OJO: correcto para tu modelo
+            codigo_promo.usos_actuales = (codigo_promo.usos_actuales or 0) + 1
+            codigo_promo.save()
         except CodigoPromocional.DoesNotExist:
             print("❌ Código promocional asociado no existe. No se registró uso.")
 
@@ -828,7 +820,8 @@ def completar_transaccion(request, folio):
     except Exception as e:
         print(f"⚠️ Error al enviar correo de confirmación: {e}")
 
-    return Response({"mensaje": "Transacción completada, boletos actualizados y link de referido generado si aplicaba."})
+    return Response({"mensaje": "Transacción completada, boletos actualizados, link de referido generado (si aplicaba) y correo enviado."})
+
 
 
 
