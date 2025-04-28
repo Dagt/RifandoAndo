@@ -149,7 +149,69 @@ const Estadisticas = () => {
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
-          <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
+      <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 my-10">
+        {/* Total de Links generados */}
+      <Card
+        icon={<PlusCircle />}
+        label="Links Generados"
+        value={data.links_referidos?.total_generados ?? 0}
+        color="text-indigo-300"
+      />
+
+      {/*Total de Links usados */}
+      <Card
+        icon={<Check />}
+        label="Links Usados"
+        value={data.links_referidos?.total_usados ?? 0}
+        color="text-green-300"
+      />
+
+      {/* Total de Links expirados */}
+      <Card
+        icon={<X />}
+        label="Links Expirados"
+        value={data.links_referidos?.total_expirados ?? 0}
+        color="text-red-300"
+      />
+
+      {/* % Conversión de Links */}
+      <Card
+        icon={<PieChart />}
+        label="% Conversión Links"
+        value={`${data.links_referidos?.porcentaje_conversion ?? 0}%`}
+        color="text-yellow-300"
+      />
+    </div>
+
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mb-10">
+    {/* Proporción de ventas */}
+    <ChartCard
+        title="Proporción Ventas (Compras con vs sin Link)"
+        type="donut"
+        series={[
+        data.ventas_por_links?.total_usando_link ?? 0,
+        data.ventas_por_links?.total_generaron_link ?? 0,
+    ]}
+    categories={["Ventas usando Link", "Ventas que generaron Link"]}
+    color={["#10b981", "#3b82f6"]}
+    />
+
+    {/* Top Rifas con más uso de Links */}
+    <ChartCard
+        title="Top Rifas con más Uso de Links"
+        type="bar"
+        series={[
+          {
+            name: "Links Usados",
+            data: Array.isArray(data.uso_links_por_rifa) ? data.uso_links_por_rifa.map(r => r.usos) : [],
+          },
+        ]}
+        categories={Array.isArray(data.uso_links_por_rifa) ? data.uso_links_por_rifa.map(r => r.nombre_rifa) : []}
+        color="#f59e0b"
+    />
+    </div>
+
 
       <div className="mt-10 bg-white/5 p-6 rounded-xl space-y-4">
         <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>

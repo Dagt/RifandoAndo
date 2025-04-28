@@ -482,6 +482,42 @@ def resumen_estadisticas(request):
     ingresos_por_codigo = dict(ingresos_por_codigo)
     usos_por_codigo_por_mes = dict(usos_por_mes)
 
+    total_links_generados = LinkReferido.objects.count()
+    total_links_usados = LinkReferido.objects.filter(usado=True).count()
+    total_links_expirados = LinkReferido.objects.filter(usado=False, fecha_expiracion__lt=now()).count()
+    porcentaje_conversion = (total_links_usados / total_links_generados * 100) if total_links_generados else 0
+
+    # --- Ventas por Links ---
+    ventas_generaron_link = \
+    Transaccion.objects.filter(estado="completado", referidos_generados__isnull=False).aggregate(total=Sum('monto'))[
+        "total"] or 0
+    ventas_usando_link = \
+    Transaccion.objects.filter(estado="completado", referral_usado__isnull=False).aggregate(total=Sum('monto'))[
+        "total"] or 0
+    proporcion_ventas = (ventas_usando_link / ventas_generaron_link * 100) if ventas_generaron_link else 0
+
+    # --- Uso de Links por Rifa ---
+    rifas_links = []
+    for rifa in Rifa.objects.all():
+        links_usados = LinkReferido.objects.filter(rifa=rifa, usado=True).count()
+        ventas_con_link = \
+        Transaccion.objects.filter(estado="completado", referral_usado__rifa=rifa).aggregate(total=Sum('monto'))[
+            "total"] or 0
+        ventas_totales_rifa = \
+        Transaccion.objects.filter(estado="completado", rifa_nombre=rifa.nombre).aggregate(total=Sum('monto'))[
+            "total"] or 0
+        porcentaje_ventas_link = (ventas_con_link / ventas_totales_rifa * 100) if ventas_totales_rifa else 0
+
+        if links_usados > 0:
+            rifas_links.append({
+                "rifa": rifa.nombre,
+                "links_usados": links_usados,
+                "ventas_con_link": round(ventas_con_link, 2),
+                "ventas_totales": round(ventas_totales_rifa, 2),
+                "porcentaje_ventas_con_link": round(porcentaje_ventas_link, 2),
+            })
+
+    rifas_links = sorted(rifas_links, key=lambda x: x["links_usados"], reverse=True)[:10]  # Top 10
     return Response({
         "activas": activas,
         "en_espera": en_espera,
@@ -507,7 +543,19 @@ def resumen_estadisticas(request):
         "transacciones_totales": total_transacciones,
         "distribucion_tipo_codigo": distribucion_tipo_codigo,
         "ingresos_por_codigo": ingresos_por_codigo,
-        "usos_por_codigo_por_mes": usos_por_codigo_por_mes
+        "usos_por_codigo_por_mes": usos_por_codigo_por_mes,
+        "links_referidos": {
+            "total_generados": total_links_generados,
+            "total_usados": total_links_usados,
+            "total_expirados": total_links_expirados,
+            "porcentaje_conversion": round(porcentaje_conversion, 2)
+        },
+        "ventas_por_links": {
+            "total_generaron_link": round(ventas_generaron_link, 2),
+            "total_usando_link": round(ventas_usando_link, 2),
+            "proporcion_ventas": round(proporcion_ventas, 2)
+        },
+        "uso_links_por_rifa": rifas_links,
     })
 
 #Endpoint para listar rifas
