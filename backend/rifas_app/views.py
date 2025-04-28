@@ -1177,10 +1177,33 @@ def usar_link_referido(request, codigo):
                 "mensaje": "Este link de referido ha expirado."
             }, status=400)
 
+        rifa = link.rifa
+
+        # Obtener las URLs absolutas de las imágenes
+        request = request  # Asegurar que tenemos el request
+        imagenes_urls = []
+        if hasattr(rifa, 'imagenes'):
+            imagenes = rifa.imagenes.all()
+            for img in imagenes:
+                if img.imagen:
+                    imagenes_urls.append(request.build_absolute_uri(img.imagen.url))
+
+        # Calcular boletos disponibles
+        boletos_vendidos = rifa.boletoseleccionado_set.count()
+        boletos_disponibles = rifa.total_boletos - boletos_vendidos
+
         return Response({
             "success": True,
             "mensaje": "¡Bienvenido! Has entrado con un link de referido.",
-            "rifa_id": link.rifa.id,
-            "rifa_nombre": link.rifa.nombre,
+            "rifa": {
+                "id": rifa.id,
+                "nombre": rifa.nombre,
+                "descripcion": rifa.descripcion,
+                "precio_boleto": rifa.precio_boleto,
+                "total_boletos": rifa.total_boletos,
+                "boletos_disponibles": boletos_disponibles,
+                "fecha_fin": rifa.fecha_fin,
+                "imagenes": imagenes_urls
+            },
             "codigo_referido": link.codigo
         }, status=200)

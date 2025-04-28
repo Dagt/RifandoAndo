@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import RifaCard from "../components/RifaCard";
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 const UsarLink = () => {
   const { codigo } = useParams();
@@ -19,13 +20,20 @@ const UsarLink = () => {
         const data = await response.json();
 
         if (data.success) {
-            setRifa({
-                id: data.rifa_id,
-                nombre: data.rifa_nombre,
-            });
-            localStorage.setItem('codigo_referido', data.codigo_referido); // Guardarlo aquí
-            setEstado("valido");
-        }else {
+          const rifaData = data.rifa;
+          setRifa({
+            id: rifaData.id,
+            nombre: rifaData.nombre,
+            descripcion: rifaData.descripcion,
+            precio: rifaData.precio_boleto,
+            imagenes: rifaData.imagenes,
+            boletos_disponibles: rifaData.boletos_disponibles,
+            total_boletos: rifaData.total_boletos,
+            fecha_fin: rifaData.fecha_fin,
+          });
+          localStorage.setItem('codigo_referido', data.codigo_referido);
+          setEstado("valido");
+        } else {
           setMensaje(data.mensaje || "El link no es válido.");
           setEstado("invalido");
         }
@@ -39,6 +47,22 @@ const UsarLink = () => {
     validarLink();
   }, [codigo]);
 
+  const renderMensaje = (icono, titulo, descripcion, color, botonTexto, botonAccion) => (
+    <div className={`min-h-screen flex flex-col items-center justify-center p-4 text-white text-center`}>
+      <div className={`flex flex-col items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl max-w-md w-full`}>
+        {icono}
+        <h1 className={`text-2xl font-bold`} style={{ color }}>{titulo}</h1>
+        <p className="text-white/80">{descripcion}</p>
+        <button
+          onClick={botonAccion}
+          className="mt-4 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-xl transition font-semibold"
+        >
+          {botonTexto}
+        </button>
+      </div>
+    </div>
+  );
+
   if (estado === "cargando") {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
@@ -48,37 +72,37 @@ const UsarLink = () => {
   }
 
   if (estado === "invalido") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white p-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Link no válido</h1>
-        <p className="mb-6">{mensaje}</p>
-        <button
-          onClick={() => navigate("/")}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-xl transition"
-        >
-          Ir al Inicio
-        </button>
-      </div>
+    return renderMensaje(
+      <XCircle className="w-16 h-16 text-red-400" />,
+      "Link no válido",
+      mensaje,
+      "#f87171", // rojo claro
+      "Ir al Inicio",
+      () => navigate("/")
     );
   }
 
   if (estado === "valido" && rifa) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          🎉 ¡Has sido invitado! Participa en esta rifa:
-        </h1>
+        <div className="flex flex-col items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl max-w-md w-full mb-8">
+          <CheckCircle className="w-16 h-16 text-green-400" />
+          <h1 className="text-2xl font-bold text-green-300">¡Has sido invitado!</h1>
+          <p className="text-white/80 text-center">
+            Participa en esta rifa exclusiva utilizando tu link de referido.
+          </p>
+        </div>
 
         <div className="max-w-sm w-full">
           <RifaCard
             id={rifa.id}
             nombre={rifa.nombre}
-            descripcion=""
-            precio=""
-            imagenes={[]}
-            boletos_disponibles={0}
-            total_boletos={0}
-            fecha_fin=""
+            descripcion={rifa.descripcion}
+            precio={rifa.precio}
+            imagenes={rifa.imagenes}
+            boletos_disponibles={rifa.boletos_disponibles}
+            total_boletos={rifa.total_boletos}
+            fecha_fin={rifa.fecha_fin}
             mostrarBoton={true}
             mostrarCompartir={false}
           />
