@@ -82,34 +82,47 @@ const UsarLink = () => {
     );
   }
 
-  if (estado === "valido" && rifa) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white">
-        <div className="flex flex-col items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl max-w-md w-full mb-8">
-          <CheckCircle className="w-16 h-16 text-green-400" />
-          <h1 className="text-2xl font-bold text-green-300">¡Has sido invitado!</h1>
-          <p className="text-white/80 text-center">
-            Participa en esta rifa exclusiva utilizando tu link de referido.
-          </p>
+  // UsarLink.jsx (solo la parte de bienvenida cambiada)
+
+if (estado === "valido" && rifa) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white">
+      <div className="flex flex-col items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-2xl w-full max-w-sm mb-6">
+        {/* 🎉 Icono de celebración */}
+        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-yellow-300 shadow-lg">
+          <span className="text-4xl">🎊</span>
         </div>
 
-        <div className="max-w-sm w-full">
-          <RifaCard
-            id={rifa.id}
-            nombre={rifa.nombre}
-            descripcion={rifa.descripcion}
-            precio={rifa.precio}
-            imagenes={rifa.imagenes}
-            boletos_disponibles={rifa.boletos_disponibles}
-            total_boletos={rifa.total_boletos}
-            fecha_fin={rifa.fecha_fin}
-            mostrarBoton={true}
-            mostrarCompartir={false}
-          />
-        </div>
+        {/* Título */}
+        <h1 className="text-xl font-bold text-center text-pink-300 mt-2">
+          ¡Te han invitado a participar!
+        </h1>
+
+        {/* Mensaje corto */}
+        <p className="text-white/80 text-center text-sm">
+          Participa en esta rifa exclusiva utilizando tu link de referido.
+        </p>
       </div>
-    );
-  }
+
+      {/* RifaCard */}
+      <div className="max-w-sm w-full">
+        <RifaCard
+          id={rifa.id}
+          nombre={rifa.nombre}
+          descripcion={rifa.descripcion}
+          precio={rifa.precio}
+          imagenes={rifa.imagenes}
+          boletos_disponibles={rifa.boletos_disponibles}
+          total_boletos={rifa.total_boletos}
+          fecha_fin={rifa.fecha_fin}
+          mostrarBoton={true}
+          mostrarCompartir={false}
+        />
+      </div>
+    </div>
+  );
+}
+
 
   return null;
 };

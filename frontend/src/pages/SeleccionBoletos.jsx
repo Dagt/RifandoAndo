@@ -14,9 +14,15 @@ const SeleccionBoletos = () => {
   const [modalMensaje, setModalMensaje] = useState("");
   const [mostrarModal, setMostrarModal] = useState(false);
   const [codigoValido, setCodigoValido] = useState(false);
+  const [vieneDeReferido, setVieneDeReferido] = useState(false);
+
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const referido = localStorage.getItem('codigo_referido');
+    if (referido) {
+      setVieneDeReferido(true);
+    }
     fetch(`/api/rifas/${id}/`)
       .then((res) => res.json())
       .then((data) => {
@@ -244,11 +250,16 @@ const SeleccionBoletos = () => {
           </div>
 
           {/* Código promocional */}
-          <div className="text-center text-sm font-bold text-white/80 cursor-pointer hover:text-yellow-300 transition" onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}>
-            {mostrarCampoPromo ? "Ocultar código promocional" : "¿Tienes un código promocional?"}
-          </div>
+          {!vieneDeReferido && (
+            <div
+              className="text-center text-sm font-bold text-white/80 cursor-pointer hover:text-yellow-300 transition"
+              onClick={() => setMostrarCampoPromo(!mostrarCampoPromo)}
+            >
+              {mostrarCampoPromo ? "Ocultar código promocional" : "¿Tienes un código promocional?"}
+            </div>
+          )}
 
-          {mostrarCampoPromo && (
+          {!vieneDeReferido && mostrarCampoPromo && (
             <input
               type="text"
               value={codigoPromo}

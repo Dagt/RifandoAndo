@@ -7,6 +7,7 @@ const ConfirmarCompra = () => {
   const navigate = useNavigate();
   const [boletosExtra, setBoletosExtra] = useState([]);
   const [infoCodigo, setInfoCodigo] = useState(null);
+  const codigoReferidoGuardado = localStorage.getItem('codigo_referido');
 
   const [formulario, setFormulario] = useState({
     nombre: "",
@@ -147,7 +148,8 @@ if (codigoGuardado) {
       rifa_id: id,
       boletos: boletos,
       monto: montoFinal,
-      codigo_promocional: codigoFinal
+      codigo_promocional: codigoFinal,
+      codigo_referido: codigoReferidoGuardado ? codigoReferidoGuardado : null,
     };
 
     try {
@@ -165,6 +167,7 @@ if (codigoGuardado) {
         localStorage.removeItem("codigo_promocional");
         localStorage.removeItem("precio_boleto");
         localStorage.removeItem("boletos_disponibles");
+        localStorage.removeItem("codigo_referido");
         if (formulario.metodo === "OXXO" && instrucciones?.referencia) {
           navigate("/instrucciones-pago", {
           state: {
