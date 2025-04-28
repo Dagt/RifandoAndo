@@ -701,88 +701,78 @@ def completar_transaccion(request, folio):
     transaccion.estado = "completado"
     transaccion.save()
 
-    # Marcar boletos como pagados y dejar de estar apartados
+    # Marcar boletos como pagados y no apartados
     BoletoSeleccionado.objects.filter(transaccion=transaccion).update(pagado=True, apartado=False)
 
-    # Procesar referidos si la transacción tiene un codigo_referido
+    # Procesar referidos si existe un código de referido
     if transaccion.codigo_referido:
         try:
             with transaction.atomic():
-                link = LinkReferido.objects.select_for_update().select_related('transaccion_origen').get(
-                    codigo=transaccion.codigo_referido)
+                link = LinkReferido.objects.select_for_update().select_related('transaccion_origen').get(codigo=transaccion.codigo_referido)
+                configuracion = ConfiguracionReferidos.objects.first()
 
                 if not link.usado:
-                    # Verificar si la compra cumple el monto mínimo para premiar
-                    configuracion = ConfiguracionReferidos.objects.first()
                     if configuracion and transaccion.monto >= configuracion.monto_minimo_para_validar:
-                        # Sí cumple: marcar link como usado
+                        transaccion_origen = link.transaccion_origen
+
                         link.usado = True
                         link.transaccion_usada = transaccion
                         link.save()
 
-                        # (Aquí crear la transacción de premio como ya lo tienes)
-                    else:
-                        print(f"⚠️ El comprador no cumplió el monto mínimo para premio. El link sigue disponible.")
+                        # Buscar boletos disponibles
+                        boletos_disponibles = list(BoletoSeleccionado.objects.filter(
+                            rifa=link.rifa,
+                            apartado=False,
+                            pagado=False,
+                            transaccion__isnull=True
+                        ).values_list('numero', flat=True))
 
-                    # Crear transacción de regalo para el que refirió
-                    transaccion_origen = link.transaccion_origen
+                        if boletos_disponibles:
+                            # Determinar boletos a regalar basado en reglas
+                            boletos_a_regalar = 1
+                            reglas = configuracion.reglas_premio.all().order_by('-monto_minimo') if configuracion else []
 
-                    # Buscar boletos disponibles para asignar
-                    boletos_disponibles = list(BoletoSeleccionado.objects.filter(
-                        rifa=link.rifa,
-                        apartado=False,
-                        pagado=False,
-                        transaccion__isnull=True
-                    ).values_list('numero', flat=True))
-
-                    if boletos_disponibles:
-                        # Buscar configuración de referidos
-                        configuracion = ConfiguracionReferidos.objects.first()
-                        boletos_a_regalar = 1  # Valor por defecto en caso de no encontrar reglas
-
-                        if configuracion:
-                            reglas = configuracion.reglas_premio.all().order_by('-monto_minimo')
                             for regla in reglas:
                                 if transaccion.monto >= regla.monto_minimo:
                                     boletos_a_regalar = regla.boletos_regalo
                                     break
 
-                        boletos_a_regalar = min(boletos_a_regalar,
-                                                len(boletos_disponibles))  # No regalar más de los disponibles
+                            boletos_a_regalar = min(boletos_a_regalar, len(boletos_disponibles))
 
-                        nueva_transaccion = Transaccion.objects.create(
-                            nombre_completo=transaccion_origen.nombre_completo,
-                            correo=transaccion_origen.correo,
-                            telefono=transaccion_origen.telefono,
-                            fecha_nacimiento=transaccion_origen.fecha_nacimiento,
-                            monto=0,
-                            metodo_pago='premio',
-                            estado='completado',
-                            rifa_nombre=link.rifa.nombre
-                        )
-
-                        for _ in range(boletos_a_regalar):
-                            numero = boletos_disponibles.pop(0)
-                            BoletoSeleccionado.objects.create(
-                                rifa=link.rifa,
-                                transaccion=nueva_transaccion,
-                                numero=numero,
-                                pagado=True,
-                                apartado=False
+                            nueva_transaccion = Transaccion.objects.create(
+                                nombre_completo=transaccion_origen.nombre_completo,
+                                correo=transaccion_origen.correo,
+                                telefono=transaccion_origen.telefono,
+                                fecha_nacimiento=transaccion_origen.fecha_nacimiento,
+                                monto=0,
+                                metodo_pago='premio',
+                                estado='completado',
+                                rifa_nombre=link.rifa.nombre
                             )
 
-                        print(
-                            f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
+                            for _ in range(boletos_a_regalar):
+                                numero = boletos_disponibles.pop(0)
+                                BoletoSeleccionado.objects.create(
+                                    rifa=link.rifa,
+                                    transaccion=nueva_transaccion,
+                                    numero=numero,
+                                    pagado=True,
+                                    apartado=False
+                                )
+
+                            print(f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
+                    else:
+                        print(f"⚠️ El comprador no cumplió el monto mínimo para premio. Link sigue disponible.")
 
         except LinkReferido.DoesNotExist:
             print(f"⚠️ No se encontró LinkReferido con código {transaccion.codigo_referido}")
         except Exception as e:
             print(f"❌ Error procesando premios de referido: {str(e)}")
 
-    # Verificar si tiene código promocional
+    # Registrar uso de código promocional si aplica
     if transaccion.codigo_usado:
         try:
-            codigo = transaccion.codigo_usado.codigo
+            codigo = transaccion.codigo_usado
             codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
             codigo.save()
         except CodigoPromocional.DoesNotExist:
@@ -794,16 +784,22 @@ def completar_transaccion(request, folio):
         configuracion = ConfiguracionReferidos.objects.first()
         if configuracion and configuracion.activo:
             if transaccion.monto >= configuracion.monto_minimo_para_generar:
-                if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
-                    primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
-                    if primera_rifa:
-                        link_obj = LinkReferido.objects.create(
-                            transaccion_origen=transaccion,
-                            rifa=primera_rifa,
-                            fecha_creacion=timezone.now(),
-                            fecha_expiracion=timezone.now() + timedelta(days=1),
-                        )
-                        link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
+                permitir_cadena = configuracion.permitir_cadenas
+                puede_generar_link = not transaccion.codigo_referido or permitir_cadena
+
+                if puede_generar_link:
+                    if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
+                        primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+                        if primera_rifa:
+                            link_obj = LinkReferido.objects.create(
+                                transaccion_origen=transaccion,
+                                rifa=primera_rifa,
+                                fecha_creacion=timezone.now(),
+                                fecha_expiracion=timezone.now() + timedelta(days=1),
+                            )
+                            link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
+                else:
+                    print(f"🔒 No se generó link para {transaccion.nombre_completo} porque no se permite cadena de referidos.")
     except Exception as e:
         print(f"⚠️ Error al crear link de referido: {e}")
 
@@ -813,8 +809,6 @@ def completar_transaccion(request, folio):
             BoletoSeleccionado.objects.filter(transaccion=transaccion, pagado=True)
             .values_list('numero', flat=True)
         )
-        configuracion = ConfiguracionReferidos.objects.first()
-        monto_minimo_validar = configuracion.monto_minimo_para_validar if configuracion else None
         enviar_correo_confirmacion_compra(transaccion, boletos_pagados, link_url)
     except Exception as e:
         print(f"⚠️ Error al enviar correo de confirmación: {e}")
