@@ -184,7 +184,7 @@ const PanelTransacciones = () => {
       onClick={() => marcarComoPagada(t.folio)}
       className="flex items-center gap-1 border border-green-400 text-green-300 hover:bg-green-400/10 px-3 py-1 rounded text-sm transition"
     >
-      <span className="font-bold">✓</span> Confirmar
+      <span className="font-bold">✓</span>
     </button>
   )}
   {["pendiente", "completado"].includes(t.estado?.toLowerCase()) && (
@@ -192,7 +192,7 @@ const PanelTransacciones = () => {
       onClick={() => cancelarTransaccion(t.folio)}
       className="flex items-center gap-1 border border-red-400 text-red-300 hover:bg-red-400/10 px-3 py-1 rounded text-sm transition"
     >
-      <span className="font-bold">✗</span> Cancelar
+      <span className="font-bold">✗</span>
     </button>
   )}
 </td>
