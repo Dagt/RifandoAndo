@@ -2,7 +2,7 @@
 import TablaCodigosPromocionales from "@/components/TablaCodigosPromocionales";
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset, PlusCircle } from "lucide-react";
+import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset, PlusCircle, Check, X} from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
