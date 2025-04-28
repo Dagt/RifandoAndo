@@ -35,7 +35,7 @@ const TablaCodigosPromocionales = ({ codigos }) => {
             <th className="p-2">Usos</th>
             <th className="p-2">Monto generado</th>
             <th className="p-2">Ticket promedio</th>
-            <th className="p-2">% de su(s) rifa(s)</th>
+            <th className="p-2">% de ingreso en su(s) rifa(s)</th>
           </tr>
         </thead>
         <tbody>
