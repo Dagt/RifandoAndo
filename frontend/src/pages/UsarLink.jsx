@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import RifaCard from "../components/RifaCard";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { XCircle } from "lucide-react";
 
 const UsarLink = () => {
   const { codigo } = useParams();
@@ -49,10 +49,10 @@ const UsarLink = () => {
   }, [codigo]);
 
   const renderMensaje = (icono, titulo, descripcion, color, botonTexto, botonAccion) => (
-    <div className={`min-h-screen flex flex-col items-center justify-center p-4 text-white text-center`}>
-      <div className={`flex flex-col items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl max-w-md w-full`}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white text-center">
+      <div className="flex flex-col items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl max-w-md w-full">
         {icono}
-        <h1 className={`text-2xl font-bold`} style={{ color }}>{titulo}</h1>
+        <h1 className="text-2xl font-bold" style={{ color }}>{titulo}</h1>
         <p className="text-white/80">{descripcion}</p>
         <button
           onClick={botonAccion}
@@ -83,42 +83,38 @@ const UsarLink = () => {
     );
   }
 
-  // UsarLink.jsx (solo la parte de bienvenida cambiada)
-
-if (estado === "valido" && rifa) {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white">
-      <div className="flex flex-col items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-2xl w-full max-w-sm mb-6">
-        {/* 🎉 Icono de celebración */}
-        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-yellow-300 shadow-lg">
-          <span className="text-4xl">🎊</span>
+  if (estado === "valido" && rifa) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-white">
+        <div className="max-w-sm w-full">
+          <RifaCard
+            id={rifa.id}
+            nombre={rifa.nombre}
+            descripcion={rifa.descripcion}
+            precio={rifa.precio}
+            imagenes={rifa.imagenes}
+            boletos_disponibles={rifa.boletos_disponibles}
+            total_boletos={rifa.total_boletos}
+            fecha_fin={rifa.fecha_fin}
+            mostrarBoton={true}
+            mostrarCompartir={false}
+            mensajeExtra={
+              <div className="flex flex-col items-center justify-center mb-4">
+                {/* Circulito bonito */}
+                <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-yellow-300 shadow-lg mb-2">
+                  <span className="text-4xl">🎊</span>
+                </div>
+                {/* Texto abajo */}
+                <p className="text-sm font-semibold text-green-300">
+                  ¡Te han invitado a participar en esta rifa!
+                </p>
+              </div>
+            }
+          />
         </div>
-
-        {/* Título */}
-        <h1 className="text-xl font-bold text-center text-pink-300 mt-2">
-          ¡Te han invitado a participar!
-        </h1>
       </div>
-
-      {/* RifaCard */}
-      <div className="max-w-sm w-full">
-        <RifaCard
-          id={rifa.id}
-          nombre={rifa.nombre}
-          descripcion={rifa.descripcion}
-          precio={rifa.precio}
-          imagenes={rifa.imagenes}
-          boletos_disponibles={rifa.boletos_disponibles}
-          total_boletos={rifa.total_boletos}
-          fecha_fin={rifa.fecha_fin}
-          mostrarBoton={true}
-          mostrarCompartir={false}
-        />
-      </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   return null;
 };

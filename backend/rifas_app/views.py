@@ -109,7 +109,8 @@ def confirmar_compra(request):
         metodo_pago=data["metodo_pago"],
         fecha_expiracion=tiempo_expiracion,
         rifa_nombre=rifa.nombre,
-        codigo_usado = codigo_usado
+        codigo_usado = codigo_usado,
+        codigo_referido=data.get("codigo_referido")
     )
 
     metodo = data["metodo_pago"].lower()

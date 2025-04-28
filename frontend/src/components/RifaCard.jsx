@@ -15,6 +15,7 @@ const RifaCard = ({
   fecha_fin,
   mostrarBoton = true,
   mostrarCompartir = true,
+  mensajeExtra = null,
 }) => {
   const [tiempoRestante, setTiempoRestante] = useState("");
   const agotada = boletos_disponibles === 0;
@@ -104,6 +105,11 @@ const RifaCard = ({
       </Carousel>
 
       <div className="p-5">
+        {mensajeExtra && (
+          <div className="mb-2 text-center text-green-300 text-sm font-semibold">
+            {mensajeExtra}
+          </div>
+        )}
         <h2 className="text-xl font-extrabold text-center flex justify-center items-center gap-2 mb-1 text-orange-300">
           <Gift className="w-6 h-6 text-purple-300" />
           {nombre}
