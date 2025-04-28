@@ -128,9 +128,7 @@ const Estadisticas = () => {
         <Card icon={<PieChart />} label="Rifas finalizadas" value={data.finalizadas} color="text-purple-300" />
         <Card icon={<TicketCheck />} label="Boletos vendidos" value={data.boletos_vendidos} color="text-green-300" />
         <Card icon={<Banknote />} label="Monto recaudado" value={`$${data.ingresos_totales.toLocaleString()}`} color="text-emerald-300" />
-        <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
-        <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
-        <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
+
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -147,8 +145,12 @@ const Estadisticas = () => {
         <ChartCard title="Usos de Códigos por Mes" type="area" series={[{ name: "Usos", data: Object.values(data.usos_por_codigo_por_mes) }]} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
-
-      <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
+        <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
+        <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
+        <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
+      </div>
+        <TablaCodigosPromocionales codigos={data.codigos_mas_usados}/>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 my-10">
         {/* Total de Links generados */}
       <Card
