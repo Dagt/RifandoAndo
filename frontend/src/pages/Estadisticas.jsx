@@ -2,7 +2,7 @@
 import TablaCodigosPromocionales from "@/components/TablaCodigosPromocionales";
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset } from "lucide-react";
+import { TicketCheck, Gift, PieChart, Banknote, Star, TrendingUp, TimerReset, PlusCircle } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
@@ -102,7 +102,6 @@ const Estadisticas = () => {
       </div>
     </div>
   );
-    console.log("DATA ESTADISTICAS:", data);
 
   return (
     <div className="min-h-screen p-6 text-white">
