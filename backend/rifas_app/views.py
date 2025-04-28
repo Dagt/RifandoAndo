@@ -655,37 +655,6 @@ def editar_rifa(request, rifa_id):
     return Response({"success": True, "mensaje": "Rifa actualizada correctamente"})
 
 #Endpoint para listar las transacciones
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def listar_transacciones(request):
-    transacciones = Transaccion.objects.all().order_by("-fecha_creacion")
-
-    estado = request.GET.get("estado", "").lower().strip()
-    metodo = request.GET.get("metodo", "").lower().strip()
-    buscar = request.GET.get("buscar", "").strip()
-
-    if estado:
-        transacciones = transacciones.filter(estado__iexact=estado)
-
-    if metodo:
-        transacciones = transacciones.filter(metodo_pago__iexact=metodo)
-
-    if buscar:
-        transacciones = transacciones.filter(
-            Q(folio__icontains=buscar) |
-            Q(nombre_completo__icontains=buscar) |
-            Q(rifa_nombre__icontains=buscar)
-        )
-
-    paginador = PageNumberPagination()
-    paginador.page_size = int(request.GET.get("page_size", 10))
-    resultado_paginado = paginador.paginate_queryset(transacciones, request)
-    serializer = TransaccionSerializer(resultado_paginado, many=True)
-
-    return paginador.get_paginated_response(serializer.data)
-
-
-#Endpoint para completar transacciones manualmente@api_view(["PUT"])
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def completar_transaccion(request, folio):
@@ -696,6 +665,8 @@ def completar_transaccion(request, folio):
 
     if transaccion.estado == "completado":
         return Response({"mensaje": "La transacción ya está marcada como completada."})
+
+    configuracion = ConfiguracionReferidos.objects.first()
 
     # Marcar transacción como completada
     transaccion.estado = "completado"
@@ -709,7 +680,6 @@ def completar_transaccion(request, folio):
         try:
             with transaction.atomic():
                 link = LinkReferido.objects.select_for_update().select_related('transaccion_origen').get(codigo=transaccion.codigo_referido)
-                configuracion = ConfiguracionReferidos.objects.first()
 
                 if not link.usado:
                     if configuracion and transaccion.monto >= configuracion.monto_minimo_para_validar:
@@ -719,7 +689,6 @@ def completar_transaccion(request, folio):
                         link.transaccion_usada = transaccion
                         link.save()
 
-                        # Buscar boletos disponibles
                         boletos_disponibles = list(BoletoSeleccionado.objects.filter(
                             rifa=link.rifa,
                             apartado=False,
@@ -728,7 +697,6 @@ def completar_transaccion(request, folio):
                         ).values_list('numero', flat=True))
 
                         if boletos_disponibles:
-                            # Determinar boletos a regalar basado en reglas
                             boletos_a_regalar = 1
                             reglas = configuracion.reglas_premio.all().order_by('-monto_minimo') if configuracion else []
 
@@ -763,7 +731,6 @@ def completar_transaccion(request, folio):
                             print(f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
                     else:
                         print(f"⚠️ El comprador no cumplió el monto mínimo para premio. Link sigue disponible.")
-
         except LinkReferido.DoesNotExist:
             print(f"⚠️ No se encontró LinkReferido con código {transaccion.codigo_referido}")
         except Exception as e:
@@ -781,17 +748,13 @@ def completar_transaccion(request, folio):
     # Crear Link de Referido si aplica
     link_url = None
     try:
-        configuracion = ConfiguracionReferidos.objects.first()
-
         if configuracion and configuracion.activo:
             cumple_monto = transaccion.monto >= configuracion.monto_minimo_para_generar
             permitir_cadena = configuracion.permitir_cadenas if configuracion.permitir_cadenas is not None else False
-            usó_referido = bool(transaccion.codigo_referido)
 
-            # Definir reglas para permitir o no crear el link
             puede_generar_link = False
             if cumple_monto:
-                if not usó_referido:
+                if not transaccion.codigo_referido:
                     puede_generar_link = True
                 elif permitir_cadena:
                     puede_generar_link = True
@@ -810,10 +773,9 @@ def completar_transaccion(request, folio):
                         print(f"✅ Link generado: {link_url}")
             else:
                 if not cumple_monto:
-                    print(
-                        f"⛔ No se generó link: No cumplió el monto mínimo (${configuracion.monto_minimo_para_generar})")
-                elif usó_referido and not permitir_cadena:
-                    print(f"🔒 No se generó link: Usó un referido y no se permiten cadenas")
+                    print(f"⛔️ No se generó link: No cumplió monto mínimo (${configuracion.monto_minimo_para_generar})")
+                elif transaccion.codigo_referido and not permitir_cadena:
+                    print(f"🔒 No se generó link: Usó referido y no se permiten cadenas")
     except Exception as e:
         print(f"⚠️ Error al crear link de referido: {e}")
 
@@ -828,6 +790,7 @@ def completar_transaccion(request, folio):
         print(f"⚠️ Error al enviar correo de confirmación: {e}")
 
     return Response({"mensaje": "Transacción completada, boletos actualizados y link de referido generado si aplicaba."})
+
 
 
 
