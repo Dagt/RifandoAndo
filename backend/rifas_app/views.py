@@ -782,24 +782,38 @@ def completar_transaccion(request, folio):
     link_url = None
     try:
         configuracion = ConfiguracionReferidos.objects.first()
-        if configuracion and configuracion.activo:
-            if transaccion.monto >= configuracion.monto_minimo_para_generar:
-                permitir_cadena = configuracion.permitir_cadenas
-                puede_generar_link = not transaccion.codigo_referido or permitir_cadena
 
-                if puede_generar_link:
-                    if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
-                        primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
-                        if primera_rifa:
-                            link_obj = LinkReferido.objects.create(
-                                transaccion_origen=transaccion,
-                                rifa=primera_rifa,
-                                fecha_creacion=timezone.now(),
-                                fecha_expiracion=timezone.now() + timedelta(days=1),
-                            )
-                            link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
-                else:
-                    print(f"🔒 No se generó link para {transaccion.nombre_completo} porque no se permite cadena de referidos.")
+        if configuracion and configuracion.activo:
+            cumple_monto = transaccion.monto >= configuracion.monto_minimo_para_generar
+            permitir_cadena = configuracion.permitir_cadenas if configuracion.permitir_cadenas is not None else False
+            usó_referido = bool(transaccion.codigo_referido)
+
+            # Definir reglas para permitir o no crear el link
+            puede_generar_link = False
+            if cumple_monto:
+                if not usó_referido:
+                    puede_generar_link = True
+                elif permitir_cadena:
+                    puede_generar_link = True
+
+            if puede_generar_link:
+                if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
+                    primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+                    if primera_rifa:
+                        link_obj = LinkReferido.objects.create(
+                            transaccion_origen=transaccion,
+                            rifa=primera_rifa,
+                            fecha_creacion=timezone.now(),
+                            fecha_expiracion=timezone.now() + timedelta(days=1),
+                        )
+                        link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
+                        print(f"✅ Link generado: {link_url}")
+            else:
+                if not cumple_monto:
+                    print(
+                        f"⛔ No se generó link: No cumplió el monto mínimo (${configuracion.monto_minimo_para_generar})")
+                elif usó_referido and not permitir_cadena:
+                    print(f"🔒 No se generó link: Usó un referido y no se permiten cadenas")
     except Exception as e:
         print(f"⚠️ Error al crear link de referido: {e}")
 
