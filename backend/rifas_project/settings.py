@@ -158,8 +158,6 @@ CLOUDINARY_STORAGE = {
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # === LOGGING ===
-import sys
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -192,3 +190,7 @@ LOGGING = {
         },
     },
 }
+
+#=====SMTP Config=====
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@rifandoando.club")

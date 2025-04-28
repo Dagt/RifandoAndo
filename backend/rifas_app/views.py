@@ -3,6 +3,7 @@ from collections import defaultdict
 import traceback
 import logging
 from rest_framework.response import Response
+from rifas_app.emails import enviar_correo_confirmacion_compra
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now, timedelta, localtime, datetime,  get_current_timezone
@@ -712,28 +713,38 @@ def completar_transaccion(request, folio):
             print("❌ Código promocional asociado no existe. No se registró uso.")
 
     # Crear Link de Referido si aplica
+    link_url = None
     try:
-        from .models import ConfiguracionReferidos, LinkReferido
-        from django.utils import timezone
-        from datetime import timedelta
-
         configuracion = ConfiguracionReferidos.objects.first()
         if configuracion and configuracion.activo:
             if transaccion.monto >= configuracion.monto_minimo_para_generar:
-                # Verificar que no se haya creado antes para esta transacción
                 if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
                     primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
                     if primera_rifa:
-                        LinkReferido.objects.create(
+                        link_obj = LinkReferido.objects.create(
                             transaccion_origen=transaccion,
                             rifa=primera_rifa,
                             fecha_creacion=timezone.now(),
                             fecha_expiracion=timezone.now() + timedelta(days=1),
                         )
+                        link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
     except Exception as e:
         print(f"⚠️ Error al crear link de referido: {e}")
 
+    # Enviar correo de confirmación
+    try:
+        boletos_pagados = list(
+            BoletoSeleccionado.objects.filter(transaccion=transaccion, pagado=True)
+            .values_list('numero', flat=True)
+        )
+        configuracion = ConfiguracionReferidos.objects.first()
+        monto_minimo_validar = configuracion.monto_minimo_para_validar if configuracion else None
+        enviar_correo_confirmacion_compra(transaccion, boletos_pagados, link_url)
+    except Exception as e:
+        print(f"⚠️ Error al enviar correo de confirmación: {e}")
+
     return Response({"mensaje": "Transacción completada, boletos actualizados y link de referido generado si aplicaba."})
+
 
 
 #Endpoint para poder cancelar Transacciones
