@@ -712,10 +712,17 @@ def completar_transaccion(request, folio):
                     codigo=transaccion.codigo_referido)
 
                 if not link.usado:
-                    # Marcar el link como usado
-                    link.usado = True
-                    link.transaccion_usada = transaccion
-                    link.save()
+                    # Verificar si la compra cumple el monto mínimo para premiar
+                    configuracion = ConfiguracionReferidos.objects.first()
+                    if configuracion and transaccion.monto >= configuracion.monto_minimo_para_validar:
+                        # Sí cumple: marcar link como usado
+                        link.usado = True
+                        link.transaccion_usada = transaccion
+                        link.save()
+
+                        # (Aquí crear la transacción de premio como ya lo tienes)
+                    else:
+                        print(f"⚠️ El comprador no cumplió el monto mínimo para premio. El link sigue disponible.")
 
                     # Crear transacción de regalo para el que refirió
                     transaccion_origen = link.transaccion_origen
