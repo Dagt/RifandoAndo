@@ -39,6 +39,7 @@ class Transaccion(models.Model):
         ('OXXO', 'OXXO'),
         ('SPEI', 'Transferencia SPEI'),
         ('tarjeta', 'Tarjeta'),
+        ('premio', 'Premio'),
     ]
 
     ESTADO_CHOICES = [
