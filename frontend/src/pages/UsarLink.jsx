@@ -32,6 +32,7 @@ const UsarLink = () => {
             fecha_fin: rifaData.fecha_fin,
           });
           localStorage.setItem('codigo_referido', data.codigo_referido);
+          localStorage.setItem('rifa_referida', data.rifa.id);
           setEstado("valido");
         } else {
           setMensaje(data.mensaje || "El link no es válido.");
@@ -97,11 +98,6 @@ if (estado === "valido" && rifa) {
         <h1 className="text-xl font-bold text-center text-pink-300 mt-2">
           ¡Te han invitado a participar!
         </h1>
-
-        {/* Mensaje corto */}
-        <p className="text-white/80 text-center text-sm">
-          Participa en esta rifa exclusiva utilizando tu link de referido.
-        </p>
       </div>
 
       {/* RifaCard */}

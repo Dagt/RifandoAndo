@@ -21,8 +21,15 @@ const SeleccionBoletos = () => {
     window.scrollTo(0, 0);
     const referido = localStorage.getItem('codigo_referido');
     if (referido) {
-      setVieneDeReferido(true);
-    }
+      const rifaReferida = localStorage.getItem('rifa_referida');
+      if (rifaReferida && parseInt(rifaReferida) !== parseInt(id)) {
+        localStorage.removeItem('codigo_referido');
+        localStorage.removeItem('rifa_referida');
+        setVieneDeReferido(false);
+      } else {
+        setVieneDeReferido(true);
+      }
+  }
     fetch(`/api/rifas/${id}/`)
       .then((res) => res.json())
       .then((data) => {
