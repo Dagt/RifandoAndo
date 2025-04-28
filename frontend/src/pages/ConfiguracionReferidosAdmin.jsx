@@ -122,7 +122,7 @@ const ConfiguracionReferidosAdmin = () => {
                     setMensaje("✅ Link invalidado correctamente.");
                     fetchLinksReferidos(1);
                 } else {
-                    setMensaje("❌ Error al invalidar link.");
+                    setMensaje("❌ Error. El link ya no era valido.");
                 }
             })
             .catch(() => setMensaje("❌ Error de conexión al invalidar link."));

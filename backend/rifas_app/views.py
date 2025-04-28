@@ -1142,7 +1142,7 @@ def invalidar_link_referido(request, link_id):
             return Response({"error": "El link ya estaba marcado como usado."}, status=400)
 
         link.usado = True
-        link.fecha_expiracion = timezone.now()  # Opcional: marcar expirado ahora
+        link.fecha_expiracion = timezone.now()
         link.save()
 
         return Response({"success": True, "mensaje": "Link invalidado correctamente."})
@@ -1156,7 +1156,7 @@ def invalidar_link_referido(request, link_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def usar_link_referido(request, codigo):
-    with transaction.atomic():  # Bloqueamos todo este bloque como atómico
+    with transaction.atomic():
         try:
             link = LinkReferido.objects.select_for_update().select_related('rifa').get(codigo=codigo)
         except LinkReferido.DoesNotExist:
@@ -1165,13 +1165,13 @@ def usar_link_referido(request, codigo):
                 "mensaje": "El link de referido es inválido o no existe."
             }, status=404)
 
-        if link.estado != 'disponible':
+        if link.usado:
             return Response({
                 "success": False,
-                "mensaje": "Este link de referido ya fue usado o no está disponible."
+                "mensaje": "Este link de referido ya fue usado."
             }, status=400)
 
-        if link.fecha_expiracion and timezone.now() > link.fecha_expiracion:
+        if timezone.now() > link.fecha_expiracion:
             return Response({
                 "success": False,
                 "mensaje": "Este link de referido ha expirado."
