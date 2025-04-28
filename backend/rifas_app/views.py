@@ -8,6 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now, timedelta, localtime, datetime,  get_current_timezone
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Sum, Count, Q, F, Avg
 from django.db.models.functions import NullIf
 from decimal import Decimal
@@ -1149,3 +1150,37 @@ def invalidar_link_referido(request, link_id):
         return Response({"error": "Link no encontrado."}, status=404)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+
+#Endpoint para validar links de referidos
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def usar_link_referido(request, codigo):
+    with transaction.atomic():  # Bloqueamos todo este bloque como atómico
+        try:
+            link = LinkReferido.objects.select_for_update().select_related('rifa').get(codigo=codigo)
+        except LinkReferido.DoesNotExist:
+            return Response({
+                "success": False,
+                "mensaje": "El link de referido es inválido o no existe."
+            }, status=404)
+
+        if link.estado != 'disponible':
+            return Response({
+                "success": False,
+                "mensaje": "Este link de referido ya fue usado o no está disponible."
+            }, status=400)
+
+        if link.fecha_expiracion and timezone.now() > link.fecha_expiracion:
+            return Response({
+                "success": False,
+                "mensaje": "Este link de referido ha expirado."
+            }, status=400)
+
+        return Response({
+            "success": True,
+            "mensaje": "¡Bienvenido! Has entrado con un link de referido.",
+            "rifa_id": link.rifa.id,
+            "rifa_nombre": link.rifa.nombre,
+            "codigo_referido": link.codigo
+        }, status=200)

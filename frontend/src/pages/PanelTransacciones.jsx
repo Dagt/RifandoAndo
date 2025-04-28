@@ -178,25 +178,24 @@ const PanelTransacciones = () => {
                     <td className="px-4 py-3">${t.monto}</td>
                     <td className="px-4 py-3">{t.metodo_pago}</td>
                     <td className="px-4 py-3">{iconoEstado(t.estado?.toLowerCase())}</td>
-                    <td className="px-4 py-3 text-center space-x-2">
-  {t.estado?.toLowerCase() === "pendiente" && (
-    <button
-      onClick={() => marcarComoPagada(t.folio)}
-      className="flex items-center gap-1 border border-green-400 text-green-300 hover:bg-green-400/10 px-3 py-1 rounded text-sm transition"
-    >
-      <span className="font-bold">✓</span>
-    </button>
-  )}
-  {["pendiente", "completado"].includes(t.estado?.toLowerCase()) && (
-    <button
-      onClick={() => cancelarTransaccion(t.folio)}
-      className="flex items-center gap-1 border border-red-400 text-red-300 hover:bg-red-400/10 px-3 py-1 rounded text-sm transition"
-    >
-      <span className="font-bold">✗</span>
-    </button>
-  )}
-</td>
-
+                    <td className="flex justify-center items-center px-4 py-3 space-x-2">
+                      {t.estado?.toLowerCase() === "pendiente" && (
+                        <button
+                          onClick={() => marcarComoPagada(t.folio)}
+                          className="flex items-center gap-1 border border-green-400 text-green-300 hover:bg-green-400/10 px-3 py-1 rounded text-sm transition"
+                        >
+                          <span className="font-bold">✓</span>
+                        </button>
+                      )}
+                      {["pendiente", "completado"].includes(t.estado?.toLowerCase()) && (
+                        <button
+                          onClick={() => cancelarTransaccion(t.folio)}
+                          className="flex items-center gap-1 border border-red-400 text-red-300 hover:bg-red-400/10 px-3 py-1 rounded text-sm transition"
+                        >
+                          <span className="font-bold">✗</span>
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

@@ -9,6 +9,7 @@ import ConfirmacionFinal from "./pages/ConfirmacionFinal";
 import Verificador from "./pages/Verificador";
 import Ganadores from "./pages/Ganadores";
 import Proximas from "./pages/Proximas";
+import UsarLink from "./pages/UsarLink";
 import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import RutaProtegida from "./utils/RutaProtegida";
@@ -48,6 +49,7 @@ function App() {
           <Route path="/terminos" element={<PoliticasCondiciones />} />
           <Route path="/como-funciona" element={<ComoFunciona />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/usar-link/:codigo" element={<UsarLink />} />
           <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
           <Route path="/panel/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
