@@ -729,9 +729,9 @@ def completar_transaccion(request, folio):
 
                         if boletos_disponibles:
                             boletos_a_regalar = 1
-                            reglas = configuracion.reglas_premios if configuracion else []
+                            reglas = sorted(configuracion.reglas_premios, key=lambda x: x['monto_minimo'], reverse=True) if configuracion and configuracion.reglas_premios else []
 
-                            for regla in sorted(reglas, key=lambda r: r['monto_minimo'], reverse=True):
+                            for regla in reglas:
                                 if transaccion.monto >= regla['monto_minimo']:
                                     boletos_a_regalar = regla['boletos_regalo']
                                     break
@@ -760,6 +760,8 @@ def completar_transaccion(request, folio):
                                 )
 
                             print(f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
+                        else:
+                            print(f"❌ No se encontraron boletos disponibles para asignar premio.")
                     else:
                         print(f"⚠️ El comprador no cumplió el monto mínimo para premio. Link sigue disponible.")
         except LinkReferido.DoesNotExist:
@@ -770,9 +772,9 @@ def completar_transaccion(request, folio):
     # Registrar uso de código promocional si aplica
     if transaccion.codigo_usado:
         try:
-            codigo_promo = transaccion.codigo_usado.codigo  # OJO: correcto para tu modelo
-            codigo_promo.usos_actuales = (codigo_promo.usos_actuales or 0) + 1
-            codigo_promo.save()
+            codigo = transaccion.codigo_usado.codigo
+            codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
+            codigo.save()
         except CodigoPromocional.DoesNotExist:
             print("❌ Código promocional asociado no existe. No se registró uso.")
 
@@ -820,10 +822,7 @@ def completar_transaccion(request, folio):
     except Exception as e:
         print(f"⚠️ Error al enviar correo de confirmación: {e}")
 
-    return Response({"mensaje": "Transacción completada, boletos actualizados, link de referido generado (si aplicaba) y correo enviado."})
-
-
-
+    return Response({"mensaje": "Transacción completada, boletos actualizados y link de referido generado si aplicaba."})
 
 
 #Endpoint para poder cancelar Transacciones
