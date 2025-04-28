@@ -789,7 +789,7 @@ def completar_transaccion(request, folio):
     try:
         if configuracion and configuracion.activo:
             cumple_monto = transaccion.monto >= configuracion.monto_minimo_para_generar
-            permitir_cadena = configuracion.permitir_cadenas if configuracion.permitir_cadenas is not None else False
+            permitir_cadena = configuracion.permitir_cadena_referidos if configuracion.permitir_cadena_referidos is not None else False
 
             puede_generar_link = False
             if cumple_monto:
