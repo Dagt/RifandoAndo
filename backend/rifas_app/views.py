@@ -655,6 +655,45 @@ def editar_rifa(request, rifa_id):
     return Response({"success": True, "mensaje": "Rifa actualizada correctamente"})
 
 #Endpoint para listar las transacciones
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def listar_transacciones(request):
+    transacciones = Transaccion.objects.all().order_by("-fecha_creacion")
+
+    estado = request.GET.get("estado", "").lower().strip()
+    metodo = request.GET.get("metodo", "").lower().strip()
+    buscar = request.GET.get("buscar", "").strip()
+
+    if estado:
+        transacciones = transacciones.filter(estado__iexact=estado)
+
+    if metodo:
+        transacciones = transacciones.filter(metodo_pago__iexact=metodo)
+
+    if buscar:
+        transacciones = transacciones.filter(
+            Q(folio__icontains=buscar) |
+            Q(nombre_completo__icontains=buscar) |
+            Q(rifa_nombre__icontains=buscar)
+        )
+
+    paginador = PageNumberPagination()
+    paginador.page_size = int(request.GET.get("page_size", 10))
+    resultado_paginado = paginador.paginate_queryset(transacciones, request)
+    serializer = TransaccionSerializer(resultado_paginado, many=True)
+
+    return paginador.get_paginated_response(serializer.data)
+
+
+#Endpoint para completar transacciones manualmente@api_view(["PUT"])
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+from django.utils import timezone
+from datetime import timedelta
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def completar_transaccion(request, folio):
