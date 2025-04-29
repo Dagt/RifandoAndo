@@ -3,7 +3,7 @@ from collections import defaultdict
 import traceback
 import logging
 from rest_framework.response import Response
-from rifas_app.emails import enviar_correo_confirmacion_compra
+from rifas_app.emails import enviar_correo_confirmacion_compra, enviar_correo_boletos_regalo
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now, timedelta, localtime, datetime,  get_current_timezone
@@ -240,7 +240,7 @@ def verificar_folio(request, folio):
         "monto": transaccion.monto,
         "metodo_pago": transaccion.metodo_pago,
         "fecha": transaccion.fecha_creacion,
-        "expira_pago": int(transaccion.fecha_expiracion.timestamp()),
+        "expira_pago": int(transaccion.fecha_expiracion.timestamp()) if transaccion.fecha_expiracion else None,
         "boletos": list(boletos),
         "rifa": transaccion.rifa_nombre,
         "total_boletos": transaccion.boletos.first().rifa.total_boletos if transaccion.boletos.exists() else None,
@@ -857,6 +857,7 @@ def cancelar_transaccion(request, folio):
     try:
         link = LinkReferido.objects.get(transaccion_origen=transaccion)
         link.expirado = True
+        link.usado = True
         link.save()
     except LinkReferido.DoesNotExist:
         pass  # No hay problema si no existe
