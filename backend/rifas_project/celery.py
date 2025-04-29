@@ -39,7 +39,7 @@ app.conf.beat_schedule = {
     },
     'marcar-links-referidos-expirados': {
         'task': 'rifas_app.tasks.marcar_links_referidos_expirados',
-        'schedule': crontab(minute=0, hour='*'),  # Cada hora en punto
+        'schedule': crontab(minute='*/5'),  # Cada 5 minutos
     },
 }
 

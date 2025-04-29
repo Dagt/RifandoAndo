@@ -301,7 +301,7 @@ const ConfiguracionReferidosAdmin = () => {
                                     <th className="p-2">Nombre Rifa</th>
                                     <th className="p-2">Código Link</th>
                                     <th className="p-2">Vence en</th>
-                                    <th className="p-2 text-center">Usado</th>
+                                    <th className="p-2 text-center">Estado</th>
                                     <th className="p-2 text-center">Acciones</th>
                                 </tr>
                                 </thead>
