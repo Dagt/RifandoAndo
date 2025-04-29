@@ -72,7 +72,7 @@ const ConfiguracionReferidosAdmin = () => {
 
     const agregarRegla = () => {
         if (!nuevoMinimoRegla || !nuevoBoletosRegla) return;
-        const nuevaRegla = {minimo: parseInt(nuevoMinimoRegla, 10), boletos: parseInt(nuevoBoletosRegla, 10)};
+        const nuevaRegla = {monto_minimo: parseInt(nuevoMinimoRegla, 10), boletos_regalo: parseInt(nuevoBoletosRegla, 10)};
 
         fetch("/api/configuracion-referidos/agregar-regla/", {
             method: "POST",
