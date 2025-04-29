@@ -861,13 +861,20 @@ def cancelar_transaccion(request, folio):
     except LinkReferido.DoesNotExist:
         pass  # No hay problema si no existe
 
-    # Revertir uso de código promocional (si existía)
+    # Revertir uso de código promocional
     if transaccion.codigo_usado:
         try:
-            codigo = transaccion.codigo_usado
-            if codigo.usos_actuales and codigo.usos_actuales > 0:
-                codigo.usos_actuales -= 1
-                codigo.save()
+            codigo_usado = transaccion.codigo_usado
+            codigo_promocional = codigo_usado.codigo
+
+            if codigo_promocional:
+                # Disminuir usos_actuales
+                codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
+                codigo_promocional.save()
+
+            # Borrar el registro de uso
+            codigo_usado.delete()
+
         except Exception as e:
             print(f"Error al revertir uso de código promocional: {str(e)}")
 
