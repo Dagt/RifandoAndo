@@ -312,33 +312,35 @@ def subir_imagen_rifa(request, rifa_id):
     return Response({"success": True})
 
 #Endpoint para regresar estadisticas personalizadas
+# rifas_app/views.py
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def resumen_estadisticas(request):
     from collections import defaultdict
     from django.utils.timezone import now
     from django.db.models import Sum, Count, Q, F, Avg
-    from .models import Rifa, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado
+    from .models import Rifa, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado, LinkReferido
 
     fecha_inicio = request.GET.get("fecha_inicio")
     fecha_fin = request.GET.get("fecha_fin")
     rifa_id = request.GET.get("rifa_id")
 
     rifas = Rifa.objects.all()
-    transacciones = Transaccion.objects.filter(estado="completado")
+    qs_transacciones = Transaccion.objects.filter(estado="completado", es_premio=False)
     boletos = BoletoSeleccionado.objects.filter(pagado=True)
 
     if rifa_id:
         rifas = rifas.filter(id=rifa_id)
-        transacciones = transacciones.filter(rifa_nombre__in=rifas.values_list("nombre", flat=True))
+        qs_transacciones = qs_transacciones.filter(rifa_nombre__in=rifas.values_list("nombre", flat=True))
         boletos = boletos.filter(rifa__id=rifa_id)
 
     if fecha_inicio:
-        transacciones = transacciones.filter(fecha_creacion__gte=fecha_inicio)
+        qs_transacciones = qs_transacciones.filter(fecha_creacion__gte=fecha_inicio)
         boletos = boletos.filter(transaccion__fecha_creacion__gte=fecha_inicio)
 
     if fecha_fin:
-        transacciones = transacciones.filter(fecha_creacion__lte=fecha_fin)
+        qs_transacciones = qs_transacciones.filter(fecha_creacion__lte=fecha_fin)
         boletos = boletos.filter(transaccion__fecha_creacion__lte=fecha_fin)
 
     activas = rifas.filter(estado='activa').count()
@@ -346,9 +348,9 @@ def resumen_estadisticas(request):
     finalizadas = rifas.filter(estado='finalizada').count()
 
     boletos_vendidos = boletos.count()
-    transacciones_canceladas = Transaccion.objects.filter(estado="cancelado").count()
-    total_transacciones = Transaccion.objects.all().count()
-    ingresos_totales = transacciones.aggregate(total=Sum("monto"))['total'] or 0
+    boletos_regalados = BoletoSeleccionado.objects.filter(transaccion__es_premio=True, pagado=True).count()
+
+    ingresos_totales = qs_transacciones.aggregate(total=Sum("monto"))['total'] or 0
 
     boletos_por_rifa = list(
         rifas.annotate(vendidos=Count("boletoseleccionado", filter=Q(boletoseleccionado__pagado=True)))
@@ -358,10 +360,11 @@ def resumen_estadisticas(request):
 
     rifas_por_mes = defaultdict(int)
     for r in rifas:
-        mes = r.fecha_inicio.strftime("%B")
-        rifas_por_mes[mes] += 1
+        if r.fecha_inicio:
+            mes = r.fecha_inicio.strftime("%B")
+            rifas_por_mes[mes] += 1
 
-    pagos = transacciones.values("metodo_pago").annotate(total=Count("id"))
+    pagos = qs_transacciones.values("metodo_pago").annotate(total=Count("id"))
     metodos_pago = {p["metodo_pago"].upper(): p["total"] for p in pagos}
 
     porcentaje_por_tamano = defaultdict(lambda: {"vendidos": 0, "total": 0})
@@ -387,7 +390,7 @@ def resumen_estadisticas(request):
     }
 
     ticket_promedio_raw = (
-        transacciones
+        qs_transacciones
         .values("rifa_nombre")
         .annotate(
             total=Sum("monto"),
@@ -399,20 +402,13 @@ def resumen_estadisticas(request):
         for t in ticket_promedio_raw if t["total"] and t["cantidad"]
     ]
 
-    total_transacciones_realizadas = transacciones.count()
-    boletos_por_transaccion = round(boletos.count() / total_transacciones_realizadas, 2) if total_transacciones_realizadas else 0
-
     promedio_por_metodo = {}
     for metodo in ["SPEI", "OXXO", "tarjeta"]:
-        promedio = transacciones.filter(metodo_pago=metodo).aggregate(avg=Avg("monto"))["avg"]
+        promedio = qs_transacciones.filter(metodo_pago=metodo).aggregate(avg=Avg("monto"))["avg"]
         promedio_por_metodo[metodo.upper()] = round(promedio or 0, 2)
 
-    ingresos_por_rifa = (
-        transacciones
-        .values("rifa_nombre")
-        .annotate(total=Sum("monto"))
-        .order_by("-total")[:10]
-    )
+    transacciones_canceladas = Transaccion.objects.filter(estado="cancelado").count()
+    transacciones_totales = Transaccion.objects.all().count()
 
     ahora = now()
     activos = CodigoPromocional.objects.filter(
@@ -425,140 +421,83 @@ def resumen_estadisticas(request):
     ingresos_por_codigo = defaultdict(float)
     usos_por_mes = defaultdict(int)
 
-    codigos_agrupados = defaultdict(lambda: {
-        "tipo": "",
-        "usos": 0,
-        "monto_generado": 0,
-        "rifas_ids": set(),
-    })
+    codigos_agrupados = defaultdict(lambda: {"tipo": "", "usos": 0, "monto_generado": 0})
 
     for cu in CodigoUsado.objects.select_related("codigo"):
         transaccion = Transaccion.objects.filter(codigo_usado=cu, estado="completado").first()
         if not transaccion:
             continue
-
         codigo_txt = cu.codigo.codigo
         codigos_agrupados[codigo_txt]["tipo"] = cu.codigo.tipo
         codigos_agrupados[codigo_txt]["usos"] += 1
         codigos_agrupados[codigo_txt]["monto_generado"] += float(transaccion.monto or 0)
-        rifas_ids = cu.codigo.rifas.values_list('id', flat=True)
-        codigos_agrupados[codigo_txt]["rifas_ids"].update(rifas_ids)
-
         tipo_distribucion[cu.codigo.tipo] += 1
         ingresos_por_codigo[codigo_txt] += float(transaccion.monto or 0)
         mes = cu.fecha_uso.strftime("%Y-%m")
         usos_por_mes[mes] += 1
 
-    ventas_por_rifa = (
-        Transaccion.objects
-        .filter(estado="completado")
-        .values("rifa_nombre")
-        .annotate(total=Sum("monto"))
-    )
-    ventas_por_rifa_dict = {v["rifa_nombre"]: float(v["total"] or 0) for v in ventas_por_rifa}
-
-    codigos_resumen = []
-    for codigo, datos in codigos_agrupados.items():
-        rifas_asociadas = datos["rifas_ids"]
-        monto_total_rifas = 0
-
-        for rifa_id in rifas_asociadas:
-            rifa = Rifa.objects.filter(id=rifa_id).first()
-            if rifa:
-                monto_total_rifas += ventas_por_rifa_dict.get(rifa.nombre, 0)
-
-        porcentaje_rifa = round((float(datos["monto_generado"]) / float(monto_total_rifas)) * 100, 2) if monto_total_rifas else 0
-
-        codigos_resumen.append({
+    codigos_resumen = [
+        {
             "codigo": codigo,
             "tipo": datos["tipo"],
             "usos": datos["usos"],
             "monto_generado": datos["monto_generado"],
             "ticket_promedio": round(datos["monto_generado"] / datos["usos"], 2) if datos["usos"] else 0,
-            "porcentaje_del_total": porcentaje_rifa
-        })
+            "porcentaje_del_total": 0  # Simplificado por ahora
+        }
+        for codigo, datos in codigos_agrupados.items()
+    ]
 
-    # Conversión defaultdict -> dict
-    rifas_por_mes = dict(rifas_por_mes)
-    distribucion_tipo_codigo = dict(tipo_distribucion)
-    ingresos_por_codigo = dict(ingresos_por_codigo)
-    usos_por_codigo_por_mes = dict(usos_por_mes)
-
+    # Links de referidos
     total_links_generados = LinkReferido.objects.count()
     total_links_usados = LinkReferido.objects.filter(usado=True).count()
-    total_links_expirados = LinkReferido.objects.filter(usado=False, fecha_expiracion__lt=now()).count()
+    total_links_expirados = LinkReferido.objects.filter(usado=False, fecha_expiracion__lt=ahora).count()
     porcentaje_conversion = (total_links_usados / total_links_generados * 100) if total_links_generados else 0
 
-    # --- Ventas por Links ---
-    ventas_generaron_link = \
-    Transaccion.objects.filter(estado="completado", referidos_generados__isnull=False).aggregate(total=Sum('monto'))[
-        "total"] or 0
-    ventas_usando_link = \
-    Transaccion.objects.filter(estado="completado", referral_usado__isnull=False).aggregate(total=Sum('monto'))[
-        "total"] or 0
-    proporcion_ventas = (ventas_usando_link / ventas_generaron_link * 100) if ventas_generaron_link else 0
-
-    # --- Uso de Links por Rifa ---
     rifas_links = []
     for rifa in Rifa.objects.all():
         links_usados = LinkReferido.objects.filter(rifa=rifa, usado=True).count()
-        ventas_con_link = \
-        Transaccion.objects.filter(estado="completado", referral_usado__rifa=rifa).aggregate(total=Sum('monto'))[
-            "total"] or 0
-        ventas_totales_rifa = \
-        Transaccion.objects.filter(estado="completado", rifa_nombre=rifa.nombre).aggregate(total=Sum('monto'))[
-            "total"] or 0
-        porcentaje_ventas_link = (ventas_con_link / ventas_totales_rifa * 100) if ventas_totales_rifa else 0
-
         if links_usados > 0:
             rifas_links.append({
-                "rifa": rifa.nombre,
-                "links_usados": links_usados,
-                "ventas_con_link": round(ventas_con_link, 2),
-                "ventas_totales": round(ventas_totales_rifa, 2),
-                "porcentaje_ventas_con_link": round(porcentaje_ventas_link, 2),
+                "nombre_rifa": rifa.nombre,
+                "usos": links_usados
             })
 
-    rifas_links = sorted(rifas_links, key=lambda x: x["links_usados"], reverse=True)[:10]  # Top 10
+    rifas_links = sorted(rifas_links, key=lambda x: x["usos"], reverse=True)[:10]
+
     return Response({
         "activas": activas,
         "en_espera": en_espera,
         "finalizadas": finalizadas,
         "boletos_vendidos": boletos_vendidos,
+        "boletos_regalados": boletos_regalados,
         "ingresos_totales": ingresos_totales,
         "codigos_activos": activos,
         "codigos_expirados": expirados,
         "total_generado_por_codigos": sum(c["monto_generado"] for c in codigos_resumen),
         "boletos_por_rifa": boletos_por_rifa,
-        "rifas_por_mes": rifas_por_mes,
+        "rifas_por_mes": dict(rifas_por_mes),
         "metodos_pago": metodos_pago,
         "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
         "porcentaje_por_precio": porcentaje_por_precio,
         "ticket_promedio_por_metodo": promedio_por_metodo,
-        "boletos_promedio_por_transaccion": boletos_por_transaccion,
         "ticket_promedio_por_rifa": ticket_promedio_por_rifa,
-        "top_rifas_mas_vendidas": boletos_por_rifa[:10],
-        "top_rifas_mas_ingresos": ingresos_por_rifa,
-        "codigos_mas_usados": codigos_resumen,
-        "transacciones_completadas": transacciones.count(),
+        "transacciones_completadas": qs_transacciones.count(),
         "transacciones_canceladas": transacciones_canceladas,
-        "transacciones_totales": total_transacciones,
-        "distribucion_tipo_codigo": distribucion_tipo_codigo,
-        "ingresos_por_codigo": ingresos_por_codigo,
-        "usos_por_codigo_por_mes": usos_por_codigo_por_mes,
+        "transacciones_totales": transacciones_totales,
+        "distribucion_tipo_codigo": dict(tipo_distribucion),
+        "ingresos_por_codigo": dict(ingresos_por_codigo),
+        "usos_por_codigo_por_mes": dict(usos_por_mes),
+        "codigos_mas_usados": codigos_resumen,
         "links_referidos": {
             "total_generados": total_links_generados,
             "total_usados": total_links_usados,
             "total_expirados": total_links_expirados,
             "porcentaje_conversion": round(porcentaje_conversion, 2)
         },
-        "ventas_por_links": {
-            "total_generaron_link": round(ventas_generaron_link, 2),
-            "total_usando_link": round(ventas_usando_link, 2),
-            "proporcion_ventas": round(proporcion_ventas, 2)
-        },
         "uso_links_por_rifa": rifas_links,
     })
+
 
 #Endpoint para listar rifas
 @api_view(["GET"])
