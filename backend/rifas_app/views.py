@@ -1131,15 +1131,15 @@ def agregar_regla_referidos(request):
         if not config:
             return Response({"error": "Configuración no encontrada."}, status=404)
 
-        minimo = request.data.get("minimo")
-        boletos = request.data.get("boletos")
+        monto_minimo = request.data.get("monto_minimo")
+        boletos_regalo = request.data.get("boletos_regalo")
 
-        if minimo is None or boletos is None:
+        if monto_minimo is None or boletos_regalo is None:
             return Response({"error": "Datos incompletos."}, status=400)
 
         nuevas_reglas = config.reglas_premios or []
-        nuevas_reglas.append({"minimo": minimo, "boletos": boletos})
-        nuevas_reglas = sorted(nuevas_reglas, key=lambda x: x["minimo"])
+        nuevas_reglas.append({"monto_minimo": monto_minimo, "boletos_regalo": boletos_regalo})
+        nuevas_reglas = sorted(nuevas_reglas, key=lambda x: x["monto_minimo"])
 
         config.reglas_premios = nuevas_reglas
         config.save()
