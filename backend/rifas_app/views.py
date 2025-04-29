@@ -720,14 +720,16 @@ def completar_transaccion(request, folio):
                         link.transaccion_usada = transaccion
                         link.save()
 
-                        boletos_disponibles = list(BoletoSeleccionado.objects.filter(
-                            rifa=link.rifa,
-                            apartado=False,
-                            pagado=False,
-                            transaccion__isnull=True
-                        ).values_list('numero', flat=True))
+                        # Buscar correctamente los boletos disponibles como en RifaCard
+                        boletos_ocupados = BoletoSeleccionado.objects.filter(
+                            rifa=link.rifa
+                        ).values_list('numero', flat=True)
 
-                        if boletos_disponibles:
+                        todos_los_numeros = set(range(1, link.rifa.total_boletos + 1))
+                        numeros_disponibles = list(todos_los_numeros - set(boletos_ocupados))
+                        numeros_disponibles.sort()
+
+                        if numeros_disponibles:
                             boletos_a_regalar = 1
                             reglas = sorted(configuracion.reglas_premios, key=lambda x: x['monto_minimo'], reverse=True) if configuracion and configuracion.reglas_premios else []
 
@@ -736,7 +738,7 @@ def completar_transaccion(request, folio):
                                     boletos_a_regalar = regla['boletos_regalo']
                                     break
 
-                            boletos_a_regalar = min(boletos_a_regalar, len(boletos_disponibles))
+                            boletos_a_regalar = min(boletos_a_regalar, len(numeros_disponibles))
 
                             nueva_transaccion = Transaccion.objects.create(
                                 nombre_completo=transaccion_origen.nombre_completo,
@@ -750,7 +752,7 @@ def completar_transaccion(request, folio):
                             )
 
                             for _ in range(boletos_a_regalar):
-                                numero = boletos_disponibles.pop(0)
+                                numero = numeros_disponibles.pop(0)
                                 BoletoSeleccionado.objects.create(
                                     rifa=link.rifa,
                                     transaccion=nueva_transaccion,
