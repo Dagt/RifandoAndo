@@ -860,13 +860,17 @@ def cancelar_transaccion(request, folio):
         link.usado = True
         link.save()
 
-        # Si el link ya había sido usado, borrar boletos del premiado
+        # Cancelar la transacción de boletos de premio, si existiera
         if link.transaccion_usada:
-            BoletoSeleccionado.objects.filter(transaccion=link.transaccion_usada).delete()
-            link.transaccion_usada.estado = "cancelado"
-            link.transaccion_usada.save()
+            transaccion_premio = link.transaccion_usada
+            transaccion_premio.estado = "cancelado"
+            transaccion_premio.save()
+
+            # Borrar boletos de la transacción de premios
+            BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
+
     except LinkReferido.DoesNotExist:
-        pass  # No pasa nada si no hay link
+        pass  # No hay problema si no existe
 
     # Revertir uso de código promocional (si aplicaba)
     if transaccion.codigo_usado:
