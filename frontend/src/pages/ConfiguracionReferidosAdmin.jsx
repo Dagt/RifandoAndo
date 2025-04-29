@@ -130,10 +130,14 @@ const ConfiguracionReferidosAdmin = () => {
 
 
     const eliminarRegla = (index) => {
-        fetch(`/api/configuracion-referidos/eliminar-regla/${index}/`, {
-            method: "DELETE",
-            headers: {Authorization: `Bearer ${token}`},
-        })
+        fetch(`/api/configuracion-referidos/eliminar-regla/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ indice: index }),
+    })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -221,8 +225,9 @@ const ConfiguracionReferidosAdmin = () => {
                             {configuracion.reglas_premios.length > 0 ? (
                                 configuracion.reglas_premios.map((regla, index) => (
                                     <div key={index} className="flex items-center gap-4 bg-white/5 rounded p-3">
-                                        <span
-                                            className="flex-1">Compra mínima: <b>${regla.minimo}</b> ➔ Boletos: <b>{regla.boletos}</b></span>
+                                        <span className="flex-1">
+  Compra mínima: <b>${regla.monto_minimo}</b> ➔ Boletos: <b>{regla.boletos_regalo}</b>
+</span>
                                         <button onClick={() => eliminarRegla(index)}
                                                 className="bg-red-500/20 hover:bg-red-500/40 rounded-full p-2 text-red-400 hover:text-white transition"
                                         >
