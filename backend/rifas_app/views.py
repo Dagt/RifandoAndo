@@ -340,7 +340,7 @@ def resumen_estadisticas(request):
         boletos = boletos.filter(transaccion__fecha_creacion__lte=fecha_fin)
 
     # Filtrar solo transacciones normales (no premio)
-    transacciones_sin_premio = transacciones.filter(premio=False)
+    transacciones_sin_premio = transacciones.filter(es_premio=False)
 
     # -------------------------
     # Métricas de Rifas
@@ -350,7 +350,7 @@ def resumen_estadisticas(request):
     finalizadas = rifas.filter(estado='finalizada').count()
 
     boletos_vendidos = boletos.count()
-    boletos_regalados = BoletoSeleccionado.objects.filter(transaccion__premio=True, pagado=True).count()
+    boletos_regalados = BoletoSeleccionado.objects.filter(transaccion__es_premio=True, pagado=True).count()
 
     # -------------------------
     # Ventas, Ingresos, Métodos
@@ -426,7 +426,7 @@ def resumen_estadisticas(request):
     usos_por_codigo_por_mes = defaultdict(int)
 
     for cu in CodigoUsado.objects.select_related("codigo"):
-        trans = Transaccion.objects.filter(codigo_usado=cu, estado="completado", premio=False).first()
+        trans = Transaccion.objects.filter(codigo_usado=cu, estado="completado", es_premio=False).first()
         if not trans:
             continue
         codigo_txt = cu.codigo.codigo
@@ -473,11 +473,11 @@ def resumen_estadisticas(request):
     # Ventas por Links
     # -------------------------
     ventas_generaron_link = (
-        Transaccion.objects.filter(estado="completado", referidos_generados__isnull=False, premio=False)
+        Transaccion.objects.filter(estado="completado", referidos_generados__isnull=False, es_premio=False)
         .aggregate(total=Sum('monto'))["total"] or 0
     )
     ventas_usando_link = (
-        Transaccion.objects.filter(estado="completado", referral_usado__isnull=False, premio=False)
+        Transaccion.objects.filter(estado="completado", referral_usado__isnull=False, es_premio=False)
         .aggregate(total=Sum('monto'))["total"] or 0
     )
     proporcion_ventas = (ventas_usando_link / ventas_generaron_link * 100) if ventas_generaron_link else 0
@@ -489,11 +489,11 @@ def resumen_estadisticas(request):
     for rifa in Rifa.objects.all():
         links_usados = LinkReferido.objects.filter(rifa=rifa, usado=True).count()
         ventas_con_link = (
-            Transaccion.objects.filter(referral_usado__rifa=rifa, estado="completado", premio=False)
+            Transaccion.objects.filter(referral_usado__rifa=rifa, estado="completado", es_premio=False)
             .aggregate(total=Sum('monto'))["total"] or 0
         )
         ventas_totales_rifa = (
-            Transaccion.objects.filter(rifa_nombre=rifa.nombre, estado="completado", premio=False)
+            Transaccion.objects.filter(rifa_nombre=rifa.nombre, estado="completado", es_premio=False)
             .aggregate(total=Sum('monto'))["total"] or 0
         )
         if ventas_totales_rifa > 0:
