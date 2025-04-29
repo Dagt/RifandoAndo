@@ -325,19 +325,20 @@ const ConfiguracionReferidosAdmin = () => {
                                             <td className="p-2 font-mono text-yellow-300">{link.codigo}</td>
                                             <td className="p-2">{new Date(link.vence).toLocaleString()}</td>
                                             <td className="px-4 py-2 text-center">
-                                              {link.expirado ? (
-                                                <span className="text-yellow-400 flex items-center justify-center gap-1">
-                                                  <X size={18}/> Expirado
-                                                </span>
-                                              ) : link.usado ? (
+                                              {link.usado ? (
                                                 <span className="text-red-400 flex items-center justify-center gap-1">
-                                                  <X size={18}/> Usado
+                                                    <X size={18}/> Usado
+                                                </span>
+                                              ) : link.expirado ? (
+                                                <span className="text-yellow-400 flex items-center justify-center gap-1">
+                                                    <X size={18}/> Expirado
                                                 </span>
                                               ) : (
                                                 <span className="text-green-400 flex items-center justify-center gap-1">
-                                                  <Check size={18}/> Disponible
+                                                    <Check size={18}/> Disponible
                                                 </span>
                                               )}
+
                                             </td>
                                             <td className="px-4 py-2 text-center">
                                                 {!link.usado && !link.expirado && (

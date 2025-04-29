@@ -51,7 +51,7 @@ def actualizar_estado_rifas():
 def marcar_links_referidos_expirados():
     from rifas_app.models import LinkReferido  # Import aquí adentro para evitar problemas circulares
     ahora = now()
-    links = LinkReferido.objects.filter(expirado=False, fecha_expiracion__lt=ahora)
+    links = LinkReferido.objects.filter(expirado=False, usado=False, fecha_expiracion__lt=ahora)
 
     cantidad = links.update(expirado=True)
 
