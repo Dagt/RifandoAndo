@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>¡Te regalamos boletos!</title>
+</head>
+<body style="font-family: Arial, sans-serif; background: #f9fafb; padding: 20px;">
+  <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px;">
+    <h1 style="color: #22c55e;">🎉 ¡Felicidades {{ nombre }}!</h1>
+    <p>Gracias a tu referido, has recibido boletos de regalo en la rifa:</p>
+    <p><b>{{ rifa_nombre }}</b></p>
+    <div style="background: #fef9c3; padding: 12px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <h2>🎟️ Boletos Regalados:</h2>
+      <p style="font-size: 18px;">{{ boletos_regalados|join:", " }}</p>
+    </div>
+    <p>¡Mucha suerte y gracias por participar en Rifando Ando!</p>
+  </div>
+</body>
+</html>

@@ -33,3 +33,26 @@ def enviar_correo_confirmacion_compra(transaccion, boletos, link_referido=None, 
         html_message=mensaje_html,
         fail_silently=False,
     )
+
+
+
+def enviar_correo_boletos_regalo(transaccion_origen, boletos_regalados):
+    subject = "🎉 ¡Te hemos regalado boletos! - Rifando Ando"
+    destinatario = transaccion_origen.correo
+
+    context = {
+        "nombre": transaccion_origen.nombre_completo,
+        "rifa_nombre": transaccion_origen.rifa_nombre,
+        "boletos_regalados": boletos_regalados,
+    }
+
+    mensaje_html = render_to_string("emails/boletos_regalo.html", context)
+
+    send_mail(
+        subject,
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [destinatario],
+        html_message=mensaje_html,
+        fail_silently=False,
+    )

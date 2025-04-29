@@ -760,8 +760,15 @@ def completar_transaccion(request, folio):
                                     pagado=True,
                                     apartado=False
                                 )
-
                             print(f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
+                            try:
+                                boletos_asignados = list(
+                                    BoletoSeleccionado.objects.filter(transaccion=nueva_transaccion)
+                                    .values_list('numero', flat=True)
+                                )
+                                enviar_correo_boletos_regalo(transaccion_origen, link.rifa.nombre, boletos_asignados)
+                            except Exception as e:
+                                print(f"⚠️ Error al enviar correo de boletos de regalo: {e}")
                         else:
                             print(f"❌ No se encontraron boletos disponibles para asignar premio.")
                     else:
