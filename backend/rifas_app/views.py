@@ -846,11 +846,11 @@ def cancelar_transaccion(request, folio):
     if transaccion.estado == "cancelado":
         return Response({"error": "La transacción ya fue cancelada."}, status=400)
 
-    # Cambiar estado
+    # Cambiar estado de la transacción
     transaccion.estado = "cancelado"
     transaccion.save()
 
-    # Eliminar todos los boletos asociados (pagados o no)
+    # Eliminar todos los boletos asociados a la transacción
     BoletoSeleccionado.objects.filter(transaccion=transaccion).delete()
 
     # Invalidar link de referido generado (si existe)
@@ -859,10 +859,16 @@ def cancelar_transaccion(request, folio):
         link.expirado = True
         link.usado = True
         link.save()
-    except LinkReferido.DoesNotExist:
-        pass  # No hay problema si no existe
 
-    # Revertir uso de código promocional
+        # Si el link ya había sido usado, borrar boletos del premiado
+        if link.transaccion_usada:
+            BoletoSeleccionado.objects.filter(transaccion=link.transaccion_usada).delete()
+            link.transaccion_usada.estado = "cancelado"
+            link.transaccion_usada.save()
+    except LinkReferido.DoesNotExist:
+        pass  # No pasa nada si no hay link
+
+    # Revertir uso de código promocional (si aplicaba)
     if transaccion.codigo_usado:
         try:
             codigo_usado = transaccion.codigo_usado
@@ -873,15 +879,15 @@ def cancelar_transaccion(request, folio):
                 codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
                 codigo_promocional.save()
 
-            # Borrar el registro de uso
+            # Eliminar registro de uso
             codigo_usado.delete()
 
         except Exception as e:
             print(f"Error al revertir uso de código promocional: {str(e)}")
 
-    # (Opcional avanzado) Cancelar premios si existían...
-
-    return Response({"mensaje": "Transacción cancelada, boletos liberados, link invalidado y código promocional revertido si aplicaba."})
+    return Response({
+        "mensaje": "Transacción cancelada, boletos liberados, link invalidado, boletos de premio borrados y código promocional revertido si aplicaba."
+    })
 
 
 #Endpoint para la busqueda de boletos
