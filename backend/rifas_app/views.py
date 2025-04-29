@@ -853,7 +853,28 @@ def cancelar_transaccion(request, folio):
     # Eliminar todos los boletos asociados (pagados o no)
     BoletoSeleccionado.objects.filter(transaccion=transaccion).delete()
 
-    return Response({"mensaje": "Transacción cancelada y boletos liberados correctamente."})
+    # Invalidar link de referido generado (si existe)
+    try:
+        link = LinkReferido.objects.get(transaccion_origen=transaccion)
+        link.expirado = True
+        link.save()
+    except LinkReferido.DoesNotExist:
+        pass  # No hay problema si no existe
+
+    # Revertir uso de código promocional (si existía)
+    if transaccion.codigo_usado:
+        try:
+            codigo = transaccion.codigo_usado
+            if codigo.usos_actuales and codigo.usos_actuales > 0:
+                codigo.usos_actuales -= 1
+                codigo.save()
+        except Exception as e:
+            print(f"Error al revertir uso de código promocional: {str(e)}")
+
+    # (Opcional avanzado) Cancelar premios si existían...
+
+    return Response({"mensaje": "Transacción cancelada, boletos liberados, link invalidado y código promocional revertido si aplicaba."})
+
 
 #Endpoint para la busqueda de boletos
 @api_view(["GET"])

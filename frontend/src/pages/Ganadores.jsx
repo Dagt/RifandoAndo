@@ -109,7 +109,7 @@ const Ganadores = () => {
                         <img
                           src={img}
                           alt={`Premio ${idx + 1}`}
-                          className="h-44 w-full object-cover rounded"
+                          className="h-44 w-full object-contain rounded"
                         />
                       </div>
                     ))}
