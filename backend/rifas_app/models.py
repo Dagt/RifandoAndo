@@ -153,6 +153,7 @@ class LinkReferido(models.Model):
     fecha_expiracion = models.DateTimeField()
     usado = models.BooleanField(default=False)
     transaccion_usada = models.ForeignKey('Transaccion', null=True, blank=True, related_name='referral_usado', on_delete=models.SET_NULL)
+    expirado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.codigo:

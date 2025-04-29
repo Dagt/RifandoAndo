@@ -31,11 +31,15 @@ app.conf.result_backend = REDIS_URL
 app.conf.beat_schedule = {
     'liberar-boletos-cada-minuto': {
         'task': 'rifas_app.tasks.liberar_boletos_expirados',
-        'schedule': crontab(),
+        'schedule': crontab(), # Cada minuto
     },
     'actualizar-estado-rifas': {
         'task': 'rifas_app.tasks.actualizar_estado_rifas',
-        'schedule': crontab(minute=1, hour=0),
+        'schedule': crontab(minute=1, hour=0), #A la media noche
+    },
+    'marcar-links-referidos-expirados': {
+        'task': 'rifas_app.tasks.marcar_links_referidos_expirados',
+        'schedule': crontab(minute=0, hour='*'),  # Cada hora en punto
     },
 }
 

@@ -45,3 +45,17 @@ def actualizar_estado_rifas():
         "activadas": rifas_a_activar.count(),
         "finalizadas": rifas_a_finalizar.count()
     }
+
+
+@shared_task
+def marcar_links_referidos_expirados():
+    from rifas_app.models import LinkReferido  # Import aquí adentro para evitar problemas circulares
+    ahora = now()
+    links = LinkReferido.objects.filter(expirado=False, fecha_expiracion__lt=ahora)
+
+    cantidad = links.update(expirado=True)
+
+    if cantidad > 0:
+        print(f"⏳ {cantidad} links de referidos marcados como expirados automáticamente.")
+    else:
+        print("🔎 No había links de referidos para expirar.")
