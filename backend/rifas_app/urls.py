@@ -59,7 +59,7 @@ urlpatterns = [
     path("configuracion-referidos/toggle/<str:campo>/", toggle_campo_referidos),
     path("configuracion-referidos/actualizar-montos/", actualizar_minimos_referidos),
     path("configuracion-referidos/agregar-regla/", agregar_regla_referidos),
-    path("configuracion-referidos/eliminar-regla/<int:index>/", eliminar_regla_referidos),
+    path("configuracion-referidos/eliminar-regla/", eliminar_regla_referidos),
     path("links-referidos/", listar_links_referidos),
     path("links-referidos/invalidar/<int:link_id>/", invalidar_link_referido),
     path("usar-link/<str:codigo>/", usar_link_referido),
