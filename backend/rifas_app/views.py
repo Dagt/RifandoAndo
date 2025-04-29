@@ -748,8 +748,12 @@ def completar_transaccion(request, folio):
                                 monto=0,
                                 metodo_pago='premio',
                                 estado='completado',
-                                rifa_nombre=link.rifa.nombre
+                                rifa_nombre=link.rifa.nombre,
+                                es_premio=True
                             )
+
+                            link.transaccion_premio = nueva_transaccion
+                            link.save()
 
                             for _ in range(boletos_a_regalar):
                                 numero = numeros_disponibles.pop(0)
@@ -861,12 +865,12 @@ def cancelar_transaccion(request, folio):
         link.save()
 
         # Cancelar la transacción de boletos de premio, si existiera
-        if link.transaccion_usada:
-            transaccion_premio = link.transaccion_usada
+        if link.transaccion_premio:
+            transaccion_premio = link.transaccion_premio
             transaccion_premio.estado = "cancelado"
             transaccion_premio.save()
 
-            # Borrar boletos de la transacción de premios
+            # Borrar boletos de la transacción de premio
             BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
 
     except LinkReferido.DoesNotExist:
@@ -892,6 +896,7 @@ def cancelar_transaccion(request, folio):
     return Response({
         "mensaje": "Transacción cancelada, boletos liberados, link invalidado, boletos de premio borrados y código promocional revertido si aplicaba."
     })
+
 
 
 #Endpoint para la busqueda de boletos

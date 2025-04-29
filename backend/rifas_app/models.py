@@ -67,6 +67,7 @@ class Transaccion(models.Model):
         related_name="transacciones"
     )
     codigo_referido = models.CharField(max_length=100, null=True, blank=True)
+    es_premio = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.folio:
@@ -154,6 +155,13 @@ class LinkReferido(models.Model):
     usado = models.BooleanField(default=False)
     transaccion_usada = models.ForeignKey('Transaccion', null=True, blank=True, related_name='referral_usado', on_delete=models.SET_NULL)
     expirado = models.BooleanField(default=False)
+    transaccion_premio = models.ForeignKey(
+        'Transaccion',
+        null=True,
+        blank=True,
+        related_name='premio_referido',
+        on_delete=models.SET_NULL
+    )
 
     def save(self, *args, **kwargs):
         if not self.codigo:
