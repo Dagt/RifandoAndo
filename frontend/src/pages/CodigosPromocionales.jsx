@@ -5,6 +5,7 @@ const CodigosPromocionalesAdmin = () => {
   const [codigos, setCodigos] = useState([]);
   const [rifas, setRifas] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const token = localStorage.getItem("token");
 
   const [nuevoCodigo, setNuevoCodigo] = useState({
     codigo: "",
@@ -71,10 +72,13 @@ const CodigosPromocionalesAdmin = () => {
   }
 
   fetch("/api/codigos-promocionales/crear/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  })
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify(payload),
+})
     .then((res) => res.json())
     .then((data) => {
       if (data.id) {

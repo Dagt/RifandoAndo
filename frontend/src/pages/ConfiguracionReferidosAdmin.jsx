@@ -226,8 +226,8 @@ const ConfiguracionReferidosAdmin = () => {
                                 configuracion.reglas_premios.map((regla, index) => (
                                     <div key={index} className="flex items-center gap-4 bg-white/5 rounded p-3">
                                         <span className="flex-1">
-  Compra mínima: <b>${regla.monto_minimo}</b> ➔ Boletos: <b>{regla.boletos_regalo}</b>
-</span>
+                                          Compra mínima: <b>${regla.monto_minimo}</b> ➔ Boletos: <b>{regla.boletos_regalo}</b>
+                                        </span>
                                         <button onClick={() => eliminarRegla(index)}
                                                 className="bg-red-500/20 hover:bg-red-500/40 rounded-full p-2 text-red-400 hover:text-white transition"
                                         >
@@ -340,12 +340,14 @@ const ConfiguracionReferidosAdmin = () => {
                                               )}
                                             </td>
                                             <td className="px-4 py-2 text-center">
+                                                {!link.usado && !link.expirado && (
                                                 <button onClick={() => invalidarLink(link.id)}
-                                                        className="text-red-400 hover:text-red-600"
-                                                        title="Invalidar Link"
+                                                  className="text-red-400 hover:text-red-600"
+                                                  title="Invalidar Link"
                                                 >
                                                     <Trash2 size={18}/>
                                                 </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

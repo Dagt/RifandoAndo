@@ -11,6 +11,7 @@ const RifasAdmin = () => {
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState("");
+  const token = localStorage.getItem("token");
 
   const fetchRifas = async () => {
     setLoading(true);
@@ -39,8 +40,11 @@ const RifasAdmin = () => {
   const handleEliminar = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta rifa?")) return;
     const res = await fetch(`/api/rifas/${id}/eliminar/`, {
-      method: "DELETE",
-    });
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
     if (res.ok) {
       setMensaje("Rifa eliminada");
       fetchRifas();

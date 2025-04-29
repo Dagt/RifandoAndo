@@ -110,10 +110,12 @@ const Header = () => {
       </nav>
 
       {/* Logo y texto "Menú" solo en móviles */}
-<div className="flex items-center gap-2 lg:hidden text-white font-bold">
-  <img src="/static/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-  <span className="text-[16px]">Menú</span>
-</div>
+      <div className="flex items-center gap-2 lg:hidden text-white font-bold">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/static/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+        </Link>
+        <span className="text-[16px]">Menú</span>
+      </div>
 
       {/* Botón hamburguesa móvil */}
       <button onClick={() => setMenuAbierto(!menuAbierto)} className="lg:hidden z-[101] text-yellow-300 ml-auto">

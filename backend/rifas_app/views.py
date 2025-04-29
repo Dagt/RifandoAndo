@@ -589,6 +589,7 @@ def listar_rifas(request):
 
 #Endpoint para eliminar rifas
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def eliminar_rifa(request, rifa_id):
     try:
         rifa = Rifa.objects.get(id=rifa_id)
@@ -1057,6 +1058,7 @@ def listar_codigos_promocionales(request):
 
 #Endpoint que se encarga de crear un nuevo codigo de promocion
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def crear_codigo_promocional(request):
     serializer = CodigoPromocionalSerializer(data=request.data)
     if serializer.is_valid():
@@ -1250,6 +1252,7 @@ def listar_links_referidos(request):
                     "codigo": link.codigo,
                     "vence": localtime(link.fecha_expiracion).isoformat() if link.fecha_expiracion else "—",
                     "usado": link.usado,
+                    "expirado": link.expirado,
                     "folio_usado": link.transaccion_usada.folio if link.transaccion_usada else "—",
                 })
             except Exception as e:
