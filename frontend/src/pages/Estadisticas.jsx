@@ -133,7 +133,7 @@ const Estadisticas = () => {
         <Card icon={<Banknote />} label="Monto recaudado" value={`$${data.ingresos_totales.toLocaleString()}`} color="text-emerald-300" />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <ChartCard title="Rifas por Estado" type="pie" series={[data.activas, data.en_espera, data.finalizadas]} categories={["Activas", "En espera", "Finalizadas"]} color={["#f97316", "#facc15", "#a78bfa"]} />
         <ChartCard title="Boletos por Rifa" type="bar" series={data.boletos_por_rifa.map(r => r.vendidos)} categories={data.boletos_por_rifa.map(r => r.nombre)} color="#facc15" />
         <ChartCard title="Métodos de Pago" type="donut" series={["SPEI", "OXXO", "TARJETA"].map(m => data.metodos_pago[m] || 0)} categories={["SPEI", "OXXO", "TARJETA"]} color={["#22c55e", "#f97316", "#ef4444"]} />
@@ -153,13 +153,13 @@ const Estadisticas = () => {
 
       <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <ChartCard title="Top Códigos por Ingresos" type="bar" series={Object.values(data.ingresos_por_codigo)} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
         <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />
         <ChartCard title="Usos de Códigos por Mes" type="area" series={Object.values(data.usos_por_codigo_por_mes)} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-10">
         <Card icon={<PlusCircle />} label="Links Generados" value={data.links_referidos?.total_generados ?? 0} color="text-indigo-300" />
         <Card icon={<Check />} label="Links Usados" value={data.links_referidos?.total_usados ?? 0} color="text-green-300" />
         <Card icon={<X />} label="Links Expirados" value={data.links_referidos?.total_expirados ?? 0} color="text-red-300" />
@@ -167,7 +167,7 @@ const Estadisticas = () => {
         <Card icon={<PlusCircle />} label="Boletos de regalo" value={data.boletos_regalados || 0} color="text-indigo-300" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mb-10">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mb-8">
         <ChartCard title="Proporción Ventas (Compras con vs sin Link)" type="donut" series={[data.ventas_por_links.total_usando_link, data.ventas_por_links.total_generaron_link]} categories={["Ventas usando Link", "Ventas que generaron Link"]} color={["#10b981", "#3b82f6"]} />
         <ChartCard title="Top Rifas con más Uso de Links" type="bar" series={data.uso_links_por_rifa.map(r => r.usos)} categories={data.uso_links_por_rifa.map(r => r.nombre_rifa)} color="#f59e0b" />
       </div>
