@@ -117,6 +117,8 @@ class CodigoPromocional(models.Model):
     pausado = models.BooleanField(default=False)
 
     def esta_activo(self):
+        if self.pausado:
+            return False
         if self.fecha_expiracion and timezone.now() > self.fecha_expiracion:
             return False
         if self.usos_maximos is not None and self.usos_actuales >= self.usos_maximos:
