@@ -3,110 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <title>Confirmación de tu Compra - Rifando Ando</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f3f4f6;
-      margin: 0;
-      padding: 20px;
-      color: #111827;
-    }
-    .container {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 32px 24px;
-      max-width: 640px;
-      margin: auto;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-    }
-    h1 {
-      text-align: center;
-      color: #facc15;
-      margin-bottom: 20px;
-      font-size: 26px;
-    }
-    .section {
-      margin-top: 24px;
-    }
-    .highlight {
-      background-color: #fef08a;
-      padding: 14px;
-      border-radius: 8px;
-      margin-top: 12px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .link-block {
-      background-color: #e0f2fe;
-      padding: 24px;
-      margin-top: 32px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    a {
-      color: #0ea5e9;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      margin-top: 36px;
-      color: #64748b;
-    }
-  </style>
 </head>
-<body>
+<body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; color: #111827;">
 
-<div class="container">
-  <h1>🎉 ¡Gracias por tu compra, {{ nombre }}!</h1>
+  <div style="background: #ffffff; border-radius: 12px; padding: 32px 24px; max-width: 640px; margin: auto; box-shadow: 0 4px 16px rgba(0,0,0,0.07);">
 
-  <p>Hemos registrado correctamente tu participación en la rifa: <strong>{{ nombre_rifa }}</strong>.</p>
+    <h1 style="text-align: center; color: #facc15; margin-bottom: 20px; font-size: 26px;">
+      🎉 ¡Gracias por tu compra, {{ nombre }}!
+    </h1>
 
-  <div class="section">
-    <p><strong>Folio de compra:</strong> {{ folio }}</p>
-    <p><strong>Fecha:</strong> {{ fecha }}</p>
-    <p><strong>Monto pagado:</strong> ${{ monto }}</p>
-  </div>
+    <p>Hemos registrado correctamente tu participación en la rifa: <strong>{{ nombre_rifa }}</strong>.</p>
 
-  <div class="section">
-    <h3>🎟️ Boletos adquiridos:</h3>
-    <div class="highlight">
-      {{ boletos|join:", " }}
-    </div>
-  </div>
-
-  {% if link_referido %}
-  <div class="section link-block">
-    <h3>📣 ¡Multiplica tus oportunidades de ganar!</h3>
-    <p>Comparte tu link especial con tus amigos y familia:</p>
-
-    <div class="highlight" style="word-break: break-word; background: #bae6fd; margin-bottom: 14px;">
-      <a href="{{ link_referido }}">{{ link_referido }}</a>
+    <div style="margin-top: 24px;">
+      <p><strong>Folio de compra:</strong> {{ folio }}</p>
+      <p><strong>Fecha:</strong> {{ fecha }}</p>
+      <p><strong>Monto pagado:</strong> ${{ monto }}</p>
     </div>
 
-    <div style="margin-top: 12px;">
-      <a href="https://wa.me/?text=¡Mira esta rifa increíble! Participa usando mi link: {{ link_referido }}"
-         style="background-color: #22c55e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-        Compartir por WhatsApp
-      </a>
+    <div style="margin-top: 24px;">
+      <h3>🎟️ Boletos adquiridos:</h3>
+      <div style="background-color: #fef08a; padding: 14px; border-radius: 8px; margin-top: 12px; font-weight: bold; text-align: center;">
+        {{ boletos|join:", " }}
+      </div>
     </div>
 
-    <p style="font-size: 14px; color: #1e293b; margin-top: 16px;">
-      • La persona que use tu link debe realizar una compra mínima de <strong>${{ monto_minimo_para_validar }}</strong> para que recibas boletos de regalo!<br><br>
-      • <strong>Entre más boletos compre quien use tu link, más boletos te regalaremos a ti.</strong><br><br>
-      • Recuerda: <strong>tu link solo puede usarse una vez</strong> y estará disponible durante 24 horas.
-    </p>
+    {% if link_referido %}
+    <div style="background-color: #e0f2fe; padding: 24px; margin-top: 32px; border-radius: 8px; text-align: center;">
+      <h3>📣 ¡Multiplica tus oportunidades de ganar!</h3>
+      <p>Comparte tu link especial con tus amigos y familia:</p>
 
-    <p class="footer">(¡Comparte rápido y no dejes pasar esta oportunidad!)</p>
+      <div style="word-break: break-word; background: #bae6fd; margin-bottom: 14px; padding: 10px; border-radius: 6px;">
+        <a href="{{ link_referido }}" style="color: #0ea5e9; font-weight: bold; text-decoration: none;">{{ link_referido }}</a>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <a href="https://wa.me/?text=¡Mira esta rifa increíble! Participa usando mi link: {{ link_referido }}"
+           style="background-color: #22c55e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+          Compartir por WhatsApp
+        </a>
+      </div>
+
+      <p style="font-size: 14px; color: #1e293b; margin-top: 16px; text-align: left;">
+        • La persona que use tu link debe realizar una compra mínima de <strong>${{ monto_minimo_para_validar }}</strong> para que recibas boletos de regalo.<br><br>
+        • <strong>Entre más boletos compre quien use tu link, más boletos te regalaremos a ti.</strong><br><br>
+        • Recuerda: <strong>tu link solo puede usarse una vez</strong> y estará disponible durante 24 horas.
+      </p>
+
+      <p style="text-align: center; font-size: 12px; color: #64748b; margin-top: 20px;">
+        (¡Comparte rápido y no dejes pasar esta oportunidad!)
+      </p>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center; font-size: 12px; margin-top: 36px; color: #64748b;">
+      © Rifando Ando {{ fecha|slice:":4" }} - Todos los derechos reservados.
+    </div>
+
   </div>
-  {% endif %}
-
-  <div class="footer">
-    © Rifando Ando {{ fecha|slice:":4" }} - Todos los derechos reservados.
-  </div>
-</div>
-
 </body>
 </html>
