@@ -97,8 +97,10 @@ const Verificador = () => {
               >
                 {resultado.es_premio ? (
                 <>
-                <Gift className="w-6 h-6 mr-2 text-transparent bg-gradient-to-r from-pink-400 via-yellow-400 to-orange-400 bg-clip-text" />
-                <span className="uppercase text-xl font-extrabold text-transparent bg-gradient-to-r from-pink-400 via-yellow-300 to-orange-400 bg-clip-text animate-pulse">
+                <span className="inline-flex items-center justify-center bg-gradient-to-r from-pink-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                  <Gift className="w-6 h-6 mr-2" />
+                </span>
+                <span className="uppercase text-xl font-extrabold text-transparent bg-gradient-to-r from-pink-600 via-yellow-300 to-orange-400 bg-clip-text animate-pulse">
                   Regalo por Referidos
                 </span>
                 </>

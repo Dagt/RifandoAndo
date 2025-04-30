@@ -29,7 +29,8 @@ from .views import (
     eliminar_regla_referidos,
     listar_links_referidos,
     invalidar_link_referido,
-    usar_link_referido
+    usar_link_referido,
+    toggle_codigo_pausado,
 )
 
 urlpatterns = [
@@ -63,5 +64,6 @@ urlpatterns = [
     path("links-referidos/", listar_links_referidos),
     path("links-referidos/invalidar/<int:link_id>/", invalidar_link_referido),
     path("usar-link/<str:codigo>/", usar_link_referido),
+    path("codigos-promocionales/<int:codigo_id>/toggle-pausa/", toggle_codigo_pausado),
 
 ]

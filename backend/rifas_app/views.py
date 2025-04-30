@@ -1113,6 +1113,17 @@ def crear_codigo_promocional(request):
 
     return Response(serializer.errors, status=400)
 
+#Endpoint para pausar un codigo promocional
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def toggle_codigo_pausado(request, codigo_id):
+    try:
+        codigo = CodigoPromocional.objects.get(id=codigo_id)
+        codigo.pausado = not codigo.pausado
+        codigo.save()
+        return Response({"id": codigo.id, "pausado": codigo.pausado})
+    except CodigoPromocional.DoesNotExist:
+        return Response({"error": "Código no encontrado."}, status=404)
 
 #Endpoint para consultar la configuracion del programa de referidos
 @api_view(["GET"])
