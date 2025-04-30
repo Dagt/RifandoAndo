@@ -155,7 +155,6 @@ const Estadisticas = () => {
         <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
       </div>
 
-
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <ChartCard title="Top Códigos por Ingresos" type="bar" series={Object.values(data.ingresos_por_codigo)} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
         <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />

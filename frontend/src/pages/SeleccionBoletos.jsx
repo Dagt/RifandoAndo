@@ -187,7 +187,7 @@ const SeleccionBoletos = () => {
         Selecciona tus boletos entre los números disponibles
       </h1>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-stretch">
         {/* Ventana de boletos */}
         <div className="w-full lg:flex-[3] h-[70vh] lg:h-[80vh] overflow-y-auto bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md">
           <div className="grid grid-cols-[repeat(auto-fill,_minmax(36px,_1fr))] gap-[9px] justify-center items-center">
@@ -209,11 +209,11 @@ const SeleccionBoletos = () => {
         </div>
 
         {/* Ventana de selección + botones */}
-        <div className="w-full flex flex-col gap-4 lg:h-[80vh] lg:flex-1 overflow-hidden min-h-0">
+        <div className="w-full flex flex-col gap-4 lg:h-[80vh] lg:flex-1 min-h-full">
           <h2 className="text-lg font-extrabold text-center text-white-400">
             Tus boletos seleccionados:
           </h2>
-          <div className="flex flex-col gap-4 overflow-y-auto flex-grow pr-1">
+          <div className="flex flex-col gap-4 overflow-y-auto flex-grow h-full pr-1">
           <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md min-h-[200px] max-h-[400px] overflow-y-auto">
 
             <div className="flex flex-wrap gap-[4px] justify-center">

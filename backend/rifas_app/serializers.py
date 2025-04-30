@@ -98,6 +98,8 @@ class ProximasRifasSerializer(serializers.ModelSerializer):
         return obj.boletoseleccionado_set.count()
 
 class TransaccionSerializer(serializers.ModelSerializer):
+    es_referido = serializers.SerializerMethodField()
+    uso_codigo = serializers.SerializerMethodField()
     class Meta:
         model = Transaccion
         fields = [

@@ -11,7 +11,7 @@ const TablaCodigosPromocionales = ({ codigos }) => {
   const codigosPaginados = codigosFiltrados.slice(pagina * codigosPorPagina, (pagina + 1) * codigosPorPagina);
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md col-span-full mt-20 overflow-x-auto">
+    <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md col-span-full overflow-x-auto">
       <h3 className="text-center font-semibold mb-4 text-white text-xl">🔥 Códigos Promocionales</h3>
 
       <div className="flex justify-center mb-4">
