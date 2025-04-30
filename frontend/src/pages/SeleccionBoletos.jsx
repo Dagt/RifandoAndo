@@ -214,7 +214,7 @@ const SeleccionBoletos = () => {
             Tus boletos seleccionados:
           </h2>
           <div className="flex flex-col gap-4 overflow-y-auto flex-grow h-full pr-1">
-          <div className="flex-grow bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md overflow-y-auto">
+          <div className="flex-grow bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md overflow-y-auto min-h-[250px] max-h-[400px] lg:min-h-[300px] lg:max-h-full">
             <div className="flex flex-wrap gap-[4px] justify-center">
               {seleccionados.map((n) => (
                 <div

@@ -107,7 +107,7 @@ class TransaccionSerializer(serializers.ModelSerializer):
         fields = [
             "id", "folio", "nombre_completo", "correo", "telefono",
             "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre",
-            "es_referido", "uso_codigo", "codigo"
+            "es_referido", "uso_codigo", "codigo"  # <- asegurarse de incluirlo
         ]
 
     def get_es_referido(self, obj):
