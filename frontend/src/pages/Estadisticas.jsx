@@ -125,16 +125,12 @@ const Estadisticas = () => {
         <button onClick={exportToCSV} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm font-bold">Exportar CSV</button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-8">
         <Card icon={<Gift />} label="Rifas activas" value={data.activas} color="text-orange-300" />
         <Card icon={<TimerReset />} label="Rifas en espera" value={data.en_espera} color="text-yellow-300" />
         <Card icon={<PieChart />} label="Rifas finalizadas" value={data.finalizadas} color="text-purple-300" />
         <Card icon={<TicketCheck />} label="Boletos vendidos" value={data.boletos_vendidos} color="text-green-300" />
         <Card icon={<Banknote />} label="Monto recaudado" value={`$${data.ingresos_totales.toLocaleString()}`} color="text-emerald-300" />
-        <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
-        <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
-        <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
-        <Card icon={<PlusCircle />} label="Boletos de regalo" value={data.boletos_regalados || 0} color="text-indigo-300" />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -152,6 +148,12 @@ const Estadisticas = () => {
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
+        <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
+        <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
+      </div>
+
       <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 my-10">
@@ -159,6 +161,7 @@ const Estadisticas = () => {
         <Card icon={<Check />} label="Links Usados" value={data.links_referidos?.total_usados ?? 0} color="text-green-300" />
         <Card icon={<X />} label="Links Expirados" value={data.links_referidos?.total_expirados ?? 0} color="text-red-300" />
         <Card icon={<PieChart />} label="% Conversión Links" value={`${data.links_referidos?.porcentaje_conversion ?? 0}%`} color="text-yellow-300" />
+        <Card icon={<PlusCircle />} label="Boletos de regalo" value={data.boletos_regalados || 0} color="text-indigo-300" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mb-10">
