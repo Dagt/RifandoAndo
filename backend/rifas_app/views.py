@@ -25,7 +25,8 @@ from rest_framework.decorators import (
     permission_classes,
     parser_classes
 )
-
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
@@ -402,8 +403,10 @@ def resumen_estadisticas(request):
     ticket_promedio_por_metodo = {}
     for metodo in ["SPEI", "OXXO", "TARJETA"]:
         promedio = transacciones_sin_premio.filter(metodo_pago=metodo).aggregate(avg=Avg("monto"))["avg"]
+        logger.debug(f"✅ Método: {metodo} - Promedio calculado: {promedio}")
         ticket_promedio_por_metodo[metodo.upper()] = round(promedio or 0, 2)
-
+    metodos_detectados = list(transacciones_sin_premio.values_list("metodo_pago", flat=True).distinct())
+    logger.debug(f"📊 Métodos de pago encontrados en la BD: {metodos_detectados}")
     # -------------------------
     # Códigos Promocionales
     # -------------------------
