@@ -25,8 +25,6 @@ from rest_framework.decorators import (
     permission_classes,
     parser_classes
 )
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
@@ -400,13 +398,24 @@ def resumen_estadisticas(request):
         for b in boletos_por_precio
     }
 
+    ticket_promedio_raw = (
+        transacciones_sin_premio
+        .values("rifa_nombre")
+        .annotate(
+            total=Sum("monto"),
+            cantidad=Count("id")
+        )
+    )
+
+    ticket_promedio_por_rifa = [
+        {"nombre": t["rifa_nombre"], "ticket_promedio": round(t["total"] / t["cantidad"], 2)}
+        for t in ticket_promedio_raw if t["total"] and t["cantidad"]
+    ]
+
     ticket_promedio_por_metodo = {}
-    for metodo in ["SPEI", "OXXO", "TARJETA"]:
+    for metodo in ["SPEI", "OXXO", "tarjeta"]:
         promedio = transacciones_sin_premio.filter(metodo_pago=metodo).aggregate(avg=Avg("monto"))["avg"]
-        logger.debug(f"✅ Método: {metodo} - Promedio calculado: {promedio}")
         ticket_promedio_por_metodo[metodo.upper()] = round(promedio or 0, 2)
-    metodos_detectados = list(transacciones_sin_premio.values_list("metodo_pago", flat=True).distinct())
-    logger.debug(f"📊 Métodos de pago encontrados en la BD: {metodos_detectados}")
     # -------------------------
     # Códigos Promocionales
     # -------------------------
@@ -529,7 +538,7 @@ def resumen_estadisticas(request):
         "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
         "porcentaje_por_precio": porcentaje_por_precio,
         "ticket_promedio_por_metodo": ticket_promedio_por_metodo,
-        "ticket_promedio_por_rifa": codigos_resumen,
+        "ticket_promedio_por_rifa": ticket_promedio_por_rifa,
         "top_rifas_mas_vendidas": list(boletos_por_rifa)[:10],
         "codigos_mas_usados": codigos_resumen,
         "distribucion_tipo_codigo": dict(tipo_distribucion),
