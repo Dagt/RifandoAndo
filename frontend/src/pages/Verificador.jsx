@@ -89,12 +89,13 @@ const Verificador = () => {
         {resultado && (
           <div className="space-y-4 text-sm bg-white/5 p-6 rounded-xl shadow-inner">
             <div className="text-center mb-4">
-              <div className={`inline-flex items-center justify-center px-4 py-2 rounded-full font-bold text-lg shadow-md backdrop-blur-md
+              <div className={`inline-flex items-center justify-center px-4 py-2 rounded-full font-bold text-lg shadow-md 
                 ${resultado.es_premio
-                ? "border border-yellow-400 bg-yellow-400/10"
-                : "border border-white/20 bg-white/10"
+                ? "border border-yellow-400 bg-[#facc1544] backdrop-blur-sm"
+                : "border border-white/20 bg-[#ffffff22] backdrop-blur-sm"
                 }`}
               >
+
                 {resultado.es_premio ? (
                 <>
                 <span className="inline-flex items-center justify-center animate-pulse">

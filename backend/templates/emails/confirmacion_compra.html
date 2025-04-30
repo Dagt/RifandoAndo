@@ -1,64 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Confirmación de tu Compra - Rifando Ando</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎟️ Confirmación de tu Compra - Rifando Ando</title>
 </head>
-<body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; color: #111827;">
+<body style="background: #0f172a; padding: 24px; font-family: Arial, sans-serif; color: #f8fafc;">
 
-  <div style="background: #ffffff; border-radius: 12px; padding: 32px 24px; max-width: 640px; margin: auto; box-shadow: 0 4px 16px rgba(0,0,0,0.07);">
-
-    <h1 style="text-align: center; color: #facc15; margin-bottom: 20px; font-size: 26px;">
+  <div style="max-width: 600px; margin: auto; background: #1e293b; border-radius: 16px; padding: 32px;">
+    <h1 style="color: #facc15; font-size: 24px; text-align: center; margin-bottom: 24px;">
       🎉 ¡Gracias por tu compra, {{ nombre }}!
     </h1>
 
-    <p>Hemos registrado correctamente tu participación en la rifa: <strong>{{ nombre_rifa }}</strong>.</p>
+    <p>Hemos registrado correctamente tu participación en la rifa: <strong style="color: #38bdf8;">{{ nombre_rifa }}</strong>.</p>
 
     <div style="margin-top: 24px;">
-      <p><strong>Folio de compra:</strong> {{ folio }}</p>
-      <p><strong>Fecha:</strong> {{ fecha }}</p>
-      <p><strong>Monto pagado:</strong> ${{ monto }}</p>
+      <p><strong style="color: #fbbf24;">Folio de compra:</strong> {{ folio }}</p>
+      <p><strong style="color: #fbbf24;">Fecha:</strong> {{ fecha }}</p>
+      <p><strong style="color: #fbbf24;">Monto pagado:</strong> ${{ monto }}</p>
     </div>
 
     <div style="margin-top: 24px;">
-      <h3>🎟️ Boletos adquiridos:</h3>
-      <div style="background-color: #fef08a; padding: 14px; border-radius: 8px; margin-top: 12px; font-weight: bold; text-align: center;">
+      <h3 style="color: #ec4899;">🎟️ Boletos adquiridos:</h3>
+      <div style="background: #fde047; padding: 16px; border-radius: 8px; color: #1e293b; font-weight: bold; text-align: center; font-size: 18px;">
         {{ boletos|join:", " }}
       </div>
     </div>
 
     {% if link_referido %}
-    <div style="background-color: #e0f2fe; padding: 24px; margin-top: 32px; border-radius: 8px; text-align: center;">
-      <h3>📣 ¡Multiplica tus oportunidades de ganar!</h3>
+    <div style="background: #2563eb22; padding: 24px; margin-top: 32px; border-radius: 12px;">
+      <h3 style="color: #38bdf8;">📣 ¡Multiplica tus oportunidades de ganar!</h3>
       <p>Comparte tu link especial con tus amigos y familia:</p>
+      <p style="word-break: break-all; margin: 10px 0;">
+        <a href="{{ link_referido }}" style="color: #60a5fa; font-weight: bold;">{{ link_referido }}</a>
+      </p>
 
-      <div style="word-break: break-word; background: #bae6fd; margin-bottom: 14px; padding: 10px; border-radius: 6px;">
-        <a href="{{ link_referido }}" style="color: #0ea5e9; font-weight: bold; text-decoration: none;">{{ link_referido }}</a>
-      </div>
-
-      <div style="margin-top: 12px;">
+      <div style="margin: 12px 0;">
         <a href="https://wa.me/?text=¡Mira esta rifa increíble! Participa usando mi link: {{ link_referido }}"
-           style="background-color: #22c55e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+           style="background-color: #22c55e; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
           Compartir por WhatsApp
         </a>
       </div>
 
-      <p style="font-size: 14px; color: #1e293b; margin-top: 16px; text-align: left;">
-        • La persona que use tu link debe realizar una compra mínima de <strong>${{ monto_minimo_para_validar }}</strong> para que recibas boletos de regalo.<br><br>
-        • <strong>Entre más boletos compre quien use tu link, más boletos te regalaremos a ti.</strong><br><br>
-        • Recuerda: <strong>tu link solo puede usarse una vez</strong> y estará disponible durante 24 horas.
-      </p>
-
-      <p style="text-align: center; font-size: 12px; color: #64748b; margin-top: 20px;">
-        (¡Comparte rápido y no dejes pasar esta oportunidad!)
-      </p>
+      <ul style="font-size: 14px; color: #e2e8f0; margin-top: 16px; padding-left: 18px;">
+        <li>La persona que use tu link debe hacer una compra mínima de <strong>${{ monto_minimo_para_validar }}</strong> para que recibas boletos de regalo.</li>
+        <li><strong>Entre más boletos compre quien use tu link, ¡¡más boletos te regalaremos a ti!!</strong></li>
+        <li>Tu link solo puede usarse <strong>una vez</strong> y estará disponible por 24 horas.</li>
+      </ul>
     </div>
     {% endif %}
 
-    <div style="text-align: center; font-size: 12px; margin-top: 36px; color: #64748b;">
-      © Rifando Ando {{ fecha|slice:":4" }} - Todos los derechos reservados.
-    </div>
-
+    <p style="text-align: center; font-size: 12px; margin-top: 40px; color: #94a3b8;">
+      © Rifando Ando {{ fecha|slice:"-5:" }} - Todos los derechos reservados.
+    </p>
   </div>
+
 </body>
 </html>
