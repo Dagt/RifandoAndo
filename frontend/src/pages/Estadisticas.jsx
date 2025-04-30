@@ -151,7 +151,10 @@ const Estadisticas = () => {
         <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
       </div>
 
-      <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
+      <div className="mb-8">
+        <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
+      </div>
+
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <ChartCard title="Top Códigos por Ingresos" type="bar" series={Object.values(data.ingresos_por_codigo)} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
