@@ -100,13 +100,20 @@ class ProximasRifasSerializer(serializers.ModelSerializer):
 class TransaccionSerializer(serializers.ModelSerializer):
     es_referido = serializers.SerializerMethodField()
     uso_codigo = serializers.SerializerMethodField()
+
     class Meta:
         model = Transaccion
         fields = [
             "id", "folio", "nombre_completo", "correo", "telefono",
             "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre",
-            "rifa_nombre", "es_referido", "uso_codigo"
+            "es_referido", "uso_codigo"
         ]
+
+    def get_es_referido(self, obj):
+        return bool(obj.codigo_referido)
+
+    def get_uso_codigo(self, obj):
+        return bool(obj.codigo_usado)
 
 class CodigoPromocionalSerializer(serializers.ModelSerializer):
     descuento = serializers.SerializerMethodField()

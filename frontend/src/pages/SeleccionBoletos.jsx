@@ -213,7 +213,7 @@ const SeleccionBoletos = () => {
           <h2 className="text-lg font-extrabold text-center text-white-400">
             Tus boletos seleccionados:
           </h2>
-          <div className="flex flex-col gap-4 overflow-y-auto flex-grow h-full pr-1">
+          <div className="flex flex-col justify-between flex-grow h-full pr-1">
           <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md min-h-[200px] max-h-[400px] overflow-y-auto">
 
             <div className="flex flex-wrap gap-[4px] justify-center">
