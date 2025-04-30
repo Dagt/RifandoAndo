@@ -51,13 +51,13 @@ const Estadisticas = () => {
   const exportToCSV = () => {
     const csvData = Array.isArray(data?.codigos_mas_usados)
       ? data.codigos_mas_usados.map(c => ({
-        codigo: c.codigo,
-        tipo: c.tipo,
-        usos: c.usos,
-        monto_generado: c.monto_generado,
-        ticket_promedio: c.ticket_promedio,
-        porcentaje_total: c.porcentaje_del_total
-      }))
+          codigo: c.codigo,
+          tipo: c.tipo,
+          usos: c.usos,
+          monto_generado: c.monto_generado,
+          ticket_promedio: c.ticket_promedio,
+          porcentaje_total: c.porcentaje_del_total
+        }))
       : [];
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -85,7 +85,7 @@ const Estadisticas = () => {
   const ChartCard = ({ title, type, series, categories, color }) => (
     <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md overflow-x-auto">
       <h3 className="text-center font-semibold mb-2 text-white">{title}</h3>
-      <div style={{ minWidth: Math.max(categories?.length * 80, 300) }}>
+      <div style={{ minWidth: Math.max((categories?.length || 1) * 80, 300) }}>
         <Chart
           type={type}
           series={type === "pie" || type === "donut" ? series : [{ name: title, data: series }]}
@@ -103,7 +103,7 @@ const Estadisticas = () => {
   );
 
   const ticketPromedioVisible = Array.isArray(data.ticket_promedio_por_rifa)
-    ? data.ticket_promedio_por_rifa.filter(r => r.ticket_promedio < 10000 && r.ticket_promedio > 0).slice(0, 10)
+    ? data.ticket_promedio_por_rifa.filter(r => typeof r.ticket_promedio === 'number' && r.ticket_promedio > 0 && r.ticket_promedio < 10000).slice(0, 10)
     : [];
 
   return (
@@ -164,6 +164,23 @@ const Estadisticas = () => {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mb-10">
         <ChartCard title="Proporción Ventas (Compras con vs sin Link)" type="donut" series={[data.ventas_por_links.total_usando_link, data.ventas_por_links.total_generaron_link]} categories={["Ventas usando Link", "Ventas que generaron Link"]} color={["#10b981", "#3b82f6"]} />
         <ChartCard title="Top Rifas con más Uso de Links" type="bar" series={data.uso_links_por_rifa.map(r => r.usos)} categories={data.uso_links_por_rifa.map(r => r.nombre_rifa)} color="#f59e0b" />
+      </div>
+      <div className="mt-10 bg-white/5 p-6 rounded-xl space-y-4">
+        <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>
+        <ul className="list-disc pl-6 space-y-2">
+          <li><b>Rifas por Estado:</b> cantidad actual de rifas activas, en espera y finalizadas.</li>
+          <li><b>Boletos por Rifa:</b> muestra cuáles rifas han vendido más boletos.</li>
+          <li><b>Métodos de Pago:</b> compara la popularidad de SPEI, OXXO y tarjeta.</li>
+          <li><b>% Boletos por Tamaño:</b> qué tanto se están vendiendo proporcionalmente las rifas según su tamaño total de boletos (no suma 100%).</li>
+          <li><b>% Ventas por Precio:</b> qué precios de boleto generan más ventas.</li>
+          <li><b>Ticket Promedio por Método:</b> cuánto gasta en promedio un usuario por tipo de pago.</li>
+          <li><b>Ticket Promedio por Rifa:</b> gasto promedio por comprador en cada rifa.</li>
+          <li><b>Top Códigos por Ingresos:</b> qué códigos han generado más dinero.</li>
+          <li><b>Distribución por Tipo de Código:</b> tipos de códigos usados (porcentaje o boletos gratis).</li>
+          <li><b>Usos de Códigos por Mes:</b> evolución mensual del uso de códigos.</li>
+          <li><b>Estado de Transacciones:</b> transacciones completadas vs canceladas.</li>
+          <li><b>Proporcion Ventas (Compras con vs sin Link):</b> aumento/disminucion de gasto con link de referidos.</li>
+        </ul>
       </div>
     </div>
   );
