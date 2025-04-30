@@ -31,23 +31,25 @@ const Verificador = () => {
     if (folioInicial) buscarTransaccion();
   }, [folioInicial]);
 
-  const getEstadoColor = (estado) => {
-    switch (estado) {
-      case "completado": return "text-green-400";
-      case "pendiente": return "text-yellow-400";
-      case "cancelado": return "text-red-400";
-      default: return "text-white";
-    }
-  };
+  const getEstadoColor = (estado, esPremio) => {
+  if (esPremio) return "text-pink-400";
+  switch (estado) {
+    case "completado": return "text-green-400";
+    case "pendiente": return "text-yellow-400";
+    case "cancelado": return "text-red-400";
+    default: return "text-white";
+  }
+};
 
-  const getEstadoIcono = (estado) => {
-    switch (estado) {
-      case "completado": return <CheckCircle className="w-6 h-6 mr-2 text-green-400" />;
-      case "pendiente": return <Hourglass className="w-6 h-6 mr-2 text-yellow-400" />;
-      case "cancelado": return <XCircle className="w-6 h-6 mr-2 text-red-400" />;
-      default: return null;
-    }
-  };
+  const getEstadoIcono = (estado, esPremio) => {
+  if (esPremio) return <Gift className="w-6 h-6 mr-2 text-pink-400" />;
+  switch (estado) {
+    case "completado": return <CheckCircle className="w-6 h-6 mr-2 text-green-400" />;
+    case "pendiente": return <Hourglass className="w-6 h-6 mr-2 text-yellow-400" />;
+    case "cancelado": return <XCircle className="w-6 h-6 mr-2 text-red-400" />;
+    default: return null;
+  }
+};
 
   const formatearNumero = (n) => {
     if (!resultado || !resultado.total_boletos) return String(n);
@@ -87,13 +89,30 @@ const Verificador = () => {
         {resultado && (
           <div className="space-y-4 text-sm bg-white/5 p-6 rounded-xl shadow-inner">
             <div className="text-center mb-4">
-              <div className="inline-flex items-center justify-center px-4 py-2 rounded-full font-bold text-lg border border-white/20 shadow-md bg-white/10">
-                {getEstadoIcono(resultado.estado)}
-                <span className={`uppercase ${getEstadoColor(resultado.estado)} text-xl`}>
-                  {resultado.es_premio ? "Regalo por Referidos" : resultado.estado}
+              <div className={`inline-flex items-center justify-center px-4 py-2 rounded-full font-bold text-lg shadow-md backdrop-blur-md
+                ${resultado.es_premio
+                ? "border border-yellow-400 bg-yellow-400/10"
+                : "border border-white/20 bg-white/10"
+                }`}
+              >
+                {resultado.es_premio ? (
+                <>
+                <Gift className="w-6 h-6 mr-2 text-transparent bg-gradient-to-r from-pink-400 via-yellow-400 to-orange-400 bg-clip-text" />
+                <span className="uppercase text-xl font-extrabold text-transparent bg-gradient-to-r from-pink-400 via-yellow-300 to-orange-400 bg-clip-text animate-pulse">
+                  Regalo por Referidos
                 </span>
+                </>
+                ) : (
+              <>
+                {getEstadoIcono(resultado.estado)}
+                  <span className={`uppercase ${getEstadoColor(resultado.estado)} text-xl`}>
+                    {resultado.estado}
+                  </span>
+              </>
+                )}
               </div>
             </div>
+
 
             <div className="grid sm:grid-cols-2 gap-3">
               <p className="flex items-center gap-2"><User className="w-4 h-4 text-orange-300" /><span className="font-bold">Nombre:</span> {resultado.nombre}</p>

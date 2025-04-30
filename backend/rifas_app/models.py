@@ -114,6 +114,8 @@ class CodigoPromocional(models.Model):
     boletos_regalo = models.PositiveIntegerField(
         null=True, blank=True, help_text="Cuántos boletos regalar (normalmente 1)"
     )
+    pausado = models.BooleanField(default=False)
+
     def esta_activo(self):
         if self.fecha_expiracion and timezone.now() > self.fecha_expiracion:
             return False

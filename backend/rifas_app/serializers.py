@@ -125,6 +125,7 @@ class CodigoPromocionalSerializer(serializers.ModelSerializer):
     descuento = serializers.SerializerMethodField()
     x = serializers.SerializerMethodField()
     y = serializers.SerializerMethodField()
+    rifas_nombres = serializers.SerializerMethodField()
 
     class Meta:
         model = CodigoPromocional
@@ -138,3 +139,6 @@ class CodigoPromocionalSerializer(serializers.ModelSerializer):
 
     def get_y(self, obj):
         return obj.boletos_regalo if obj.tipo == "boletos_extra" else None
+
+    def get_rifas_nombres(self, obj):
+        return [r.nombre for r in obj.rifas.all()]
