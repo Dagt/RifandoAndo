@@ -145,7 +145,7 @@ const Estadisticas = () => {
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <Card icon={<Star />} label="Códigos activos" value={data.codigos_activos} color="text-blue-300" />
         <Card icon={<Star />} label="Códigos expirados" value={data.codigos_expirados} color="text-red-300" />
         <Card icon={<TrendingUp />} label="Ingresos por códigos" value={`$${data.total_generado_por_codigos.toLocaleString()}`} color="text-yellow-200" />
@@ -159,7 +159,7 @@ const Estadisticas = () => {
         <ChartCard title="Usos de Códigos por Mes" type="area" series={Object.values(data.usos_por_codigo_por_mes)} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 my-10">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-8">
         <Card icon={<PlusCircle />} label="Links Generados" value={data.links_referidos?.total_generados ?? 0} color="text-indigo-300" />
         <Card icon={<Check />} label="Links Usados" value={data.links_referidos?.total_usados ?? 0} color="text-green-300" />
         <Card icon={<X />} label="Links Expirados" value={data.links_referidos?.total_expirados ?? 0} color="text-red-300" />
@@ -171,6 +171,7 @@ const Estadisticas = () => {
         <ChartCard title="Proporción Ventas (Compras con vs sin Link)" type="donut" series={[data.ventas_por_links.total_usando_link, data.ventas_por_links.total_generaron_link]} categories={["Ventas usando Link", "Ventas que generaron Link"]} color={["#10b981", "#3b82f6"]} />
         <ChartCard title="Top Rifas con más Uso de Links" type="bar" series={data.uso_links_por_rifa.map(r => r.usos)} categories={data.uso_links_por_rifa.map(r => r.nombre_rifa)} color="#f59e0b" />
       </div>
+
       <div className="mt-10 bg-white/5 p-6 rounded-xl space-y-4">
         <h4 className="text-lg font-semibold text-white">📘 Cómo interpretar las gráficas:</h4>
         <ul className="list-disc pl-6 space-y-2">
