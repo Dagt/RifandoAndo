@@ -117,7 +117,9 @@ class TransaccionSerializer(serializers.ModelSerializer):
         return bool(obj.codigo_usado)
 
     def get_codigo(self, obj):
-        return obj.codigo_usado.codigo if obj.codigo_usado else None
+        if obj.codigo_usado and obj.codigo_usado.codigo:
+            return obj.codigo_usado.codigo.codigo  # <- accede al string del código promocional
+        return None
 
 class CodigoPromocionalSerializer(serializers.ModelSerializer):
     descuento = serializers.SerializerMethodField()
