@@ -4,27 +4,27 @@
   <meta charset="UTF-8">
   <title>🎁 Boletos de regalo - Rifando Ando</title>
 </head>
-<body style="font-family: Arial, sans-serif; background: #f9fafb; padding: 20px;">
-  <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px;">
+<body style="font-family: Arial, sans-serif; background: #f3f4f6; padding: 20px;">
+  <div style="max-width: 600px; margin: auto; background: #1e293b; padding: 30px; border-radius: 12px; color: #f8fafc;">
 
-    <h1 style="color: #22c55e;">🎉 ¡Felicidades {{ nombre }}!</h1>
+    <h1 style="color: #4ade80; font-size: 24px;">🎉 ¡Felicidades {{ nombre }}!</h1>
 
-    <p>
+    <p style="line-height: 1.6;">
       Has recibido boletos de regalo en la rifa <strong>{{ rifa_nombre }}</strong> gracias a que
       <strong>{{ nombre_comprador }}</strong> usó tu link de referido.
     </p>
 
-    <div style="background: #fef9c3; padding: 12px; border-radius: 8px; margin: 20px 0; text-align: center;">
-      <h2>🎟️ Boletos Regalados:</h2>
-      <p style="font-size: 18px;">{{ boletos_regalados|join:", " }}</p>
+    <div style="background: #facc15; color: #1e293b; padding: 16px; border-radius: 8px; margin: 24px 0; text-align: center;">
+      <h2 style="margin: 0 0 10px;">🎟️ Boletos Regalados:</h2>
+      <p style="font-size: 20px; font-weight: bold;">{{ boletos_regalados|join:", " }}</p>
     </div>
 
-    <p style="font-size: 14px; color: #4b5563;">
-      Folio de la transacción de regalo: <b>{{ folio }}</b><br>
+    <p style="font-size: 14px; color: #cbd5e1;">
+      Folio de la transacción de regalo: <strong style="color: #fbbf24;">{{ folio }}</strong><br>
       Puedes verificar estos boletos en nuestro verificador usando este folio.
     </p>
 
-    <p style="margin-top: 20px;">¡Gracias por participar en <strong>Rifando Ando</strong> y mucha suerte! 🍀</p>
+    <p style="margin-top: 24px;">¡Gracias por participar en <strong style="color: #fbbf24;">Rifando Ando</strong> y mucha suerte! 🍀</p>
   </div>
 </body>
 </html>
