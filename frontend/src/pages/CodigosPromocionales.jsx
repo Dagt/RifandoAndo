@@ -223,10 +223,21 @@ const CodigosPromocionalesAdmin = () => {
                 </td>
                 <td className="p-2">{c.compra_minima ? `$${c.compra_minima}` : "—"}</td>
                 <td className="p-2 flex items-center gap-2 justify-center">
-                  <button onClick={() => setCodigoDetalle(c)} className="text-yellow-400 hover:text-yellow-300" title="Ver rifas asignadas">
+                  {/* Botón de detalles */}
+                  <button onClick={() => setCodigoDetalle(c)}
+                  className="text-cyan-400 hover:text-cyan-300 transition"
+                  title="Ver rifas asignadas"
+                  >
                     <ClipboardList size={16} />
                   </button>
-                  <button onClick={() => togglePausa(c.id)} className="text-white hover:text-yellow-400" title={c.pausado ? "Reanudar código" : "Pausar código"}>
+
+                  {/* Botón de pausa/reanudar */}
+                  <button onClick={() => togglePausa(c.id)}
+                  className={`transition ${c.pausado
+                  ? "text-green-400 hover:text-green-300"
+                  : "text-red-400 hover:text-red-300"}`}
+                  title={c.pausado ? "Reanudar código" : "Pausar código"}
+                  >
                     {c.pausado ? <Play size={16} /> : <Pause size={16} />}
                   </button>
                 </td>
