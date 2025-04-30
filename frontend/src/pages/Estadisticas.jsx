@@ -142,9 +142,6 @@ const Estadisticas = () => {
         <ChartCard title="% Ventas por Precio" type="bar" series={Object.values(data.porcentaje_por_precio)} categories={Object.keys(data.porcentaje_por_precio)} color="#f87171" />
         <ChartCard title="Ticket Promedio por Método" type="bar" series={Object.values(data.ticket_promedio_por_metodo)} categories={Object.keys(data.ticket_promedio_por_metodo)} color="#7c3aed" />
         <ChartCard title="Ticket Promedio por Rifa" type="bar" series={ticketPromedioVisible.map(r => r.ticket_promedio)} categories={ticketPromedioVisible.map(r => r.nombre)} color="#4ade80" />
-        <ChartCard title="Top Códigos por Ingresos" type="bar" series={Object.values(data.ingresos_por_codigo)} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
-        <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />
-        <ChartCard title="Usos de Códigos por Mes" type="area" series={Object.values(data.usos_por_codigo_por_mes)} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
 
@@ -155,6 +152,12 @@ const Estadisticas = () => {
       </div>
 
       <TablaCodigosPromocionales codigos={data.codigos_mas_usados} />
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <ChartCard title="Top Códigos por Ingresos" type="bar" series={Object.values(data.ingresos_por_codigo)} categories={Object.keys(data.ingresos_por_codigo)} color="#fcd34d" />
+        <ChartCard title="Distribución por Tipo de Código" type="pie" series={Object.values(data.distribucion_tipo_codigo)} categories={Object.keys(data.distribucion_tipo_codigo)} color={["#60a5fa", "#ec4899"]} />
+        <ChartCard title="Usos de Códigos por Mes" type="area" series={Object.values(data.usos_por_codigo_por_mes)} categories={Object.keys(data.usos_por_codigo_por_mes)} color="#22d3ee" />
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 my-10">
         <Card icon={<PlusCircle />} label="Links Generados" value={data.links_referidos?.total_generados ?? 0} color="text-indigo-300" />
