@@ -47,7 +47,7 @@ const CrearRifa = () => {
       const token = localStorage.getItem("token");
 
       // Crear rifa
-      const response = await fetch("/api/configuracion-referidos/", {
+      const response = await fetch("/api/crear-rifa/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
