@@ -1,6 +1,16 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../utils/useAuth";
+import {
+  PlusCircle,
+  BarChart,
+  ClipboardList,
+  CreditCard,
+  Search,
+  Tag,
+  Link,
+  Settings,
+} from "lucide-react";
 
 const AdminPanel = () => {
   const { user, loading } = useAuth();
@@ -15,8 +25,8 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h1 className="text-3xl font-bold text-center text-orange-400 mb-8">
-        Panel de Administración 🛠️
+      <h1 className="text-3xl font-bold text-center text-orange-400 mb-8 flex items-center justify-center gap-2">
+        <Settings className="w-7 h-7 text-orange-400" /> Panel de Administración
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -26,7 +36,10 @@ const AdminPanel = () => {
           onClick={() => navigate("/panel/crear-rifa")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2">➕ Crear nueva rifa</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <PlusCircle className="w-6 h-6 text-yellow-300" />
+            Crear nueva rifa
+          </h2>
           <p className="text-sm text-white/80">Agrega una nueva rifa con sus imágenes, fechas, etc.</p>
         </div>
 
@@ -35,7 +48,10 @@ const AdminPanel = () => {
           onClick={() => navigate("/panel/estadisticas")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2">📊 Estadísticas</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <BarChart className="w-6 h-6 text-green-300" />
+            Estadísticas
+          </h2>
           <p className="text-sm text-white/80">Revisa boletos vendidos, transacciones y más.</p>
         </div>
 
@@ -44,7 +60,10 @@ const AdminPanel = () => {
           onClick={() => navigate("/panel/rifas")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2">📋 Editar rifas</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <ClipboardList className="w-6 h-6 text-blue-300" />
+            Editar rifas
+          </h2>
           <p className="text-sm text-white/80">Modifica rifas según su estado o agrega más imágenes.</p>
         </div>
 
@@ -53,7 +72,10 @@ const AdminPanel = () => {
           onClick={() => navigate("/panel/transacciones")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2">💳 Ver transacciones</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <CreditCard className="w-6 h-6 text-pink-300" />
+            Ver transacciones
+          </h2>
           <p className="text-sm text-white/80">Consulta las compras realizadas y valida pagos.</p>
         </div>
 
@@ -62,24 +84,37 @@ const AdminPanel = () => {
           onClick={() => navigate("/panel/buscador-boletos")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🎟 Buscar boleto por No.</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <Search className="w-6 h-6 text-purple-300" />
+            Buscar boleto por No.
+          </h2>
           <p className="text-sm text-white/80">Encuentra detalles sobre un boleto.</p>
         </div>
+
         {/* Codigos Promocionales */}
         <div
           onClick={() => navigate("/panel/codigos-promocion")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🏷️ Codigos de promoción.</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <Tag className="w-6 h-6 text-red-300" />
+            Códigos de promoción
+          </h2>
           <p className="text-sm text-white/80">Crea y gestiona códigos de promoción.</p>
         </div>
+
+        {/* Links de referidos */}
         <div
           onClick={() => navigate("/panel/links-referidos")}
           className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-yellow-300 mb-2"> 🔗 Links de Referidos.</h2>
+          <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+            <Link className="w-6 h-6 text-cyan-300" />
+            Links de Referidos
+          </h2>
           <p className="text-sm text-white/80">Crea y gestiona links de referidos.</p>
         </div>
+
       </div>
     </div>
   );

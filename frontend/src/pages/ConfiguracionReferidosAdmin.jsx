@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Trash2, PlusCircle, RefreshCcw, Check, X} from "lucide-react";
+import {Trash2, PlusCircle, RefreshCcw, Check, X, Link2} from "lucide-react";
 
 const ConfiguracionReferidosAdmin = () => {
     const [configuracion, setConfiguracion] = useState(null);
@@ -155,7 +155,10 @@ const ConfiguracionReferidosAdmin = () => {
 
     return (
         <div className="min-h-screen p-6 text-white">
-            <h2 className="text-3xl font-bold text-center mb-8 text-yellow-400">🔗 Links de Referidos</h2>
+            <h2 className="text-3xl font-bold text-center mb-8 text-yellow-400 flex items-center justify-center gap-2">
+                <Link2 className="w-7 h-7 text-yellow-400" />
+                    Links de Referidos
+            </h2>
 
             {mensaje && (
                 <div className="mb-6 text-center p-3 rounded-lg bg-white/10 text-sm font-semibold max-w-2xl mx-auto">

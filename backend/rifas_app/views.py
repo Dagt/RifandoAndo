@@ -244,6 +244,7 @@ def verificar_folio(request, folio):
         "boletos": list(boletos),
         "rifa": transaccion.rifa_nombre,
         "total_boletos": transaccion.boletos.first().rifa.total_boletos if transaccion.boletos.exists() else None,
+        "es_premio": transaccion.es_premio,
     })
 
 #Endpoint que regresa las rifas que ya finalizaron
@@ -776,7 +777,16 @@ def completar_transaccion(request, folio):
                                     BoletoSeleccionado.objects.filter(transaccion=nueva_transaccion)
                                     .values_list('numero', flat=True)
                                 )
-                                enviar_correo_boletos_regalo(transaccion_origen, link.rifa.nombre, boletos_asignados)
+                                digitos = len(str(link.rifa.total_boletos - 1))
+                                boletos_formateados = [str(n).zfill(digitos) for n in boletos_asignados]
+
+                                enviar_correo_boletos_regalo(
+                                    transaccion_origen,
+                                    link.rifa.nombre,
+                                    boletos_formateados,
+                                    nueva_transaccion.folio,
+                                    transaccion.nombre_completo
+                                )
                             except Exception as e:
                                 print(f"⚠️ Error al enviar correo de boletos de regalo: {e}")
                         else:
@@ -837,7 +847,19 @@ def completar_transaccion(request, folio):
             BoletoSeleccionado.objects.filter(transaccion=transaccion, pagado=True)
             .values_list('numero', flat=True)
         )
-        enviar_correo_confirmacion_compra(transaccion, boletos_pagados, link_url)
+        rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+        if rifa:
+            digitos = len(str(rifa.total_boletos - 1))
+            boletos_formateados = [str(n).zfill(digitos) for n in boletos_pagados]
+        else:
+            boletos_formateados = [str(n) for n in boletos_pagados]
+        enviar_correo_confirmacion_compra(
+            transaccion,
+            boletos_formateados,
+            link_url,
+            configuracion.monto_minimo_para_validar if configuracion else None
+        )
+
     except Exception as e:
         print(f"⚠️ Error al enviar correo de confirmación: {e}")
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {Trash2, Pencil} from "lucide-react";
+import {Trash2, Pencil,ListTodo,} from "lucide-react";
 
 const RifasAdmin = () => {
   const navigate = useNavigate();
@@ -62,7 +62,10 @@ const RifasAdmin = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h2 className="text-3xl font-bold text-orange-400 text-center mb-6">📋 Rifas Registradas</h2>
+      <h2 className="text-3xl font-bold text-orange-400 text-center mb-6 flex items-center justify-center gap-2">
+        <ListTodo className="w-7 h-7 text-orange-400" />
+          Rifas Registradas
+      </h2>
 
       {mensaje && <p className="text-center text-green-400 mb-4">{mensaje}</p>}
 

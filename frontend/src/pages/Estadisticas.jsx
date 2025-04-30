@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 import Papa from "papaparse";
 import {
   Gift, TicketCheck, PieChart, Banknote, Star,
-  TrendingUp, TimerReset, PlusCircle, Check, X
+  TrendingUp, TimerReset, PlusCircle, Check, X, BarChart3,
 } from "lucide-react";
 import TablaCodigosPromocionales from "@/components/TablaCodigosPromocionales";
 
@@ -108,7 +108,10 @@ const Estadisticas = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Estadísticas Generales</h2>
+      <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400 flex items-center justify-center gap-2">
+         <BarChart3 className="w-7 h-7 text-yellow-400" />
+            Estadísticas Generales
+      </h2>
 
       <div className="flex flex-wrap justify-center gap-4 mb-6">
         <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="bg-white/10 px-2 py-1 rounded" />

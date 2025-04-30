@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../utils/useAuth";
+import { CreditCard } from "lucide-react";
 
 const PanelTransacciones = () => {
   const navigate = useNavigate();
@@ -101,7 +102,10 @@ const PanelTransacciones = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h2 className="text-3xl font-bold text-orange-400 text-center mb-6">💳 Transacciones</h2>
+      <h2 className="text-3xl font-bold text-orange-400 text-center mb-6 flex items-center justify-center gap-2">
+        <CreditCard className="w-7 h-7 text-orange-400" />
+          Transacciones
+      </h2>
 
       {mensaje && <p className="text-center text-green-400 mb-4">{mensaje}</p>}
 

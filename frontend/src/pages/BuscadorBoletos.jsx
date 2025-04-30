@@ -80,8 +80,9 @@ const BuscadorBoletos = () => {
 
   return (
     <div className="min-h-screen p-6 text-white">
-      <h2 className="text-3xl font-bold text-yellow-400 text-center mb-6">
-        🔎 Buscar Boleto
+      <h2 className="text-3xl font-bold text-yellow-400 text-center mb-6 flex items-center justify-center gap-2">
+        <Search className="w-7 h-7 text-yellow-400" />
+          Buscar Boleto
       </h2>
 
       <div className="max-w-xl mx-auto space-y-4">

@@ -90,7 +90,7 @@ const Verificador = () => {
               <div className="inline-flex items-center justify-center px-4 py-2 rounded-full font-bold text-lg border border-white/20 shadow-md bg-white/10">
                 {getEstadoIcono(resultado.estado)}
                 <span className={`uppercase ${getEstadoColor(resultado.estado)} text-xl`}>
-                  {resultado.estado}
+                  {resultado.es_premio ? "Regalo por Referidos" : resultado.estado}
                 </span>
               </div>
             </div>
@@ -110,9 +110,13 @@ const Verificador = () => {
                 <Ticket className="text-yellow-300 w-4 h-4" />
                 <span className="font-bold">Boletos:</span>
               </div>
-              <p className="text-sm text-white/90 border border-white/10 rounded p-3 bg-white/5">
-                {resultado.boletos.map((n) => formatearNumero(n)).join(", ")}
-              </p>
+             <p className="text-sm text-white/90 border border-white/10 rounded p-3 bg-white/5">
+              {resultado.boletos.length > 0
+              ? resultado.boletos.map((n) => formatearNumero(n)).join(", ")
+              : resultado.estado === "cancelado"
+              ? "Los boletos fueron liberados y puestos como disponibles nuevamente en la rifa."
+              : "No se asignaron boletos en esta transacción."}
+             </p>
             </div>
           </div>
         )}

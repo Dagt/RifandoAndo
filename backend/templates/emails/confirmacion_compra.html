@@ -83,29 +83,28 @@
 
   {% if link_referido %}
   <div class="section link-block">
-  <h3>📣 ¡Multiplica tus oportunidades de ganar!</h3>
-  <p>Comparte tu link especial con tus amigos y familia:</p>
+    <h3>📣 ¡Multiplica tus oportunidades de ganar!</h3>
+    <p>Comparte tu link especial con tus amigos y familia:</p>
 
-  <div class="highlight" style="word-break: break-all; margin-bottom: 10px;">
-    <a href="{{ link_referido }}">{{ link_referido }}</a>
+    <div class="highlight" style="word-break: break-all; margin-bottom: 10px;">
+      <a href="{{ link_referido }}">{{ link_referido }}</a>
+    </div>
+
+    <div style="margin-top: 10px;">
+      <a href="https://wa.me/?text=¡Mira esta rifa increíble! Participa usando mi link: {{ link_referido }}"
+         style="background-color: #25d366; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 10px;">
+        Compartir por WhatsApp
+      </a>
+    </div>
+
+    <p style="font-size: 14px; color: #555;">
+      • La persona que use tu link debe realizar una compra mínima de <b>${{ monto_minimo_para_validar }}</b> para que recibas boletos de regalo.<br><br>
+      • <b>Entre más boletos compre quien use tu link, más boletos te regalaremos a ti.</b><br><br>
+      • Recuerda: <b>tu link solo puede usarse una vez</b> y estará disponible durante 24 horas.
+    </p>
+
+    <p class="footer">(Comparte rápido y no dejes pasar esta oportunidad)</p>
   </div>
-
-  <div style="margin-top: 10px;">
-    <a href="https://wa.me/?text=¡Mira esta rifa increíble! Participa usando mi link: {{ link_referido }}"
-       style="background-color: #25d366; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 10px;">
-      Compartir por WhatsApp
-    </a>
-  </div>
-
-  <p style="font-size: 14px; color: #555;">
-    • La persona que use tu link debe realizar una compra mínima de <b>${{ monto_minimo_para_validar }}</b> para que recibas boletos de regalo.<br><br>
-    • <b>Entre más boletos compre quien use tu link, más boletos te regalaremos a ti.</b><br><br>
-    • Recuerda: <b>tu link solo puede usarse una vez</b> y estará disponible durante 24 horas.
-  </p>
-
-  <p style="font-size: 12px; color: #999;">(Comparte rápido y no dejes pasar esta oportunidad)</p>
-</div>
-
   {% endif %}
 
   <div class="footer">
