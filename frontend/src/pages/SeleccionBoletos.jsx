@@ -209,11 +209,11 @@ const SeleccionBoletos = () => {
         </div>
 
         {/* Ventana de selección + botones */}
-        <div className="w-full flex flex-col gap-4 lg:h-[80vh] lg:flex-1">
+        <div className="w-full flex flex-col gap-4 lg:h-[80vh] lg:flex-1 overflow-hidden min-h-0">
           <h2 className="text-lg font-extrabold text-center text-white-400">
             Tus boletos seleccionados:
           </h2>
-
+          <div className="flex flex-col gap-4 overflow-y-auto flex-grow pr-1">
           <div className="bg-white bg-opacity-10 backdrop-blur-md p-4 rounded-xl shadow-md min-h-[200px] max-h-[400px] overflow-y-auto">
 
             <div className="flex flex-wrap gap-[4px] justify-center">
@@ -301,6 +301,7 @@ const SeleccionBoletos = () => {
           >
             💰 Comprar
           </button>
+        </div>
         </div>
       </div>
     </div>

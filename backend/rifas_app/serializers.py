@@ -102,7 +102,8 @@ class TransaccionSerializer(serializers.ModelSerializer):
         model = Transaccion
         fields = [
             "id", "folio", "nombre_completo", "correo", "telefono",
-            "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre"
+            "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre",
+            "rifa_nombre", "es_referido", "uso_codigo"
         ]
 
 class CodigoPromocionalSerializer(serializers.ModelSerializer):

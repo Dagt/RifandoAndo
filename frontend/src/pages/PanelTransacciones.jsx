@@ -144,6 +144,8 @@ const PanelTransacciones = () => {
   <option value="SPEI" className="text-black">🏦 Transferencia</option>
   <option value="OXXO" className="text-black">🧾 OXXO</option>
   <option value="tarjeta" className="text-black">💳 Tarjeta</option>
+  <option value="premio" className="text-black">🎁 Premio</option>
+
 </select>
       </div>
 
@@ -157,8 +159,11 @@ const PanelTransacciones = () => {
               <tr>
                 <th className="px-4 py-3">Folio</th>
                 <th className="px-4 py-3">Nombre</th>
+                <th className="px-4 py-3">Rifa</th>
                 <th className="px-4 py-3">Monto</th>
                 <th className="px-4 py-3">Método</th>
+                <th className="px-4 py-3">Código</th>
+                <th className="px-4 py-3">Referido</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3 text-center">Acciones</th>
               </tr>
@@ -175,8 +180,17 @@ const PanelTransacciones = () => {
                   <tr key={t.folio} className="border-t border-white/10">
                     <td className="px-4 py-3 font-mono">{t.folio}</td>
                     <td className="px-4 py-3">{t.nombre_completo}</td>
+                    <td className="px-4 py-3">{t.rifa_nombre}</td>
                     <td className="px-4 py-3">${t.monto}</td>
                     <td className="px-4 py-3">{t.metodo_pago}</td>
+                    <td className="px-4 py-3 font-mono text-center">{t.codigo || <span className="text-white/40">—</span>}</td>
+                    <td className="px-4 py-3 text-center">
+                      {t.es_referido ? (
+                      <span className="text-green-400 font-bold">✓</span>
+                      ) : (
+                      <span className="text-white/40">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">{iconoEstado(t.estado?.toLowerCase())}</td>
                     <td className="flex justify-center items-center px-4 py-3 space-x-2">
                       {t.estado?.toLowerCase() === "pendiente" && (

@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from collections import defaultdict
 import traceback
+import random
 import logging
 from rest_framework.response import Response
 from rifas_app.emails import enviar_correo_confirmacion_compra, enviar_correo_boletos_regalo
@@ -743,6 +744,7 @@ def completar_transaccion(request, folio):
                                     break
 
                             boletos_a_regalar = min(boletos_a_regalar, len(numeros_disponibles))
+                            random.shuffle(numeros_disponibles)
 
                             nueva_transaccion = Transaccion.objects.create(
                                 nombre_completo=transaccion_origen.nombre_completo,
