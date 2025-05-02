@@ -31,12 +31,22 @@ from .views import (
     invalidar_link_referido,
     usar_link_referido,
     toggle_codigo_pausado,
+    simular_caja_sorpresa,
+    subir_imagen_rifa_exclusiva,
+    crear_rifa_exclusiva,
+    listar_rifas_exclusivas,
+    editar_rifa_exclusiva,
+    obtener_rifa_exclusiva
 )
 
 urlpatterns = [
     path('rifas/', listar_rifas, name="listar_rifas"),
+    path('exclusiva/listar-rifas/', listar_rifas_exclusivas, name="listar_rifas_exclusivas"),
     path('rifas/<int:rifa_id>/', obtener_rifa, name="obtener_rifa"),
+    path('exclusiva/rifa/<int:rifa_id>/', obtener_rifa_exclusiva, name='obtener_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/editar/', editar_rifa, name="editar_rifa"),
+# urls.py
+    path('exclusiva/rifa/<int:rifa_id>/editar/', editar_rifa_exclusiva, name='editar_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/eliminar/', eliminar_rifa, name="eliminar_rifa"),
     path('rifas/<int:rifa_id>/boletos-disponibles/', boletos_disponibles),
     path('confirmar-compra/', confirmar_compra, name='confirmar_compra'),
@@ -44,7 +54,9 @@ urlpatterns = [
     path('rifas-finalizadas/', rifas_finalizadas),
     path('proximas-rifas/', proximas_rifas),
     path('crear-rifa/', crear_rifa),
+    path('exclusiva/crear-rifa/', crear_rifa_exclusiva),
     path('subir-imagen/<int:rifa_id>/', subir_imagen_rifa),
+    path('subir-imagen-exclusiva/<int:rifa_id>/', subir_imagen_rifa_exclusiva),
     path('estadisticas/', resumen_estadisticas),
     path("rifas-activas/", rifas_activas, name="rifas_activas"),
     path("transacciones/", listar_transacciones, name="listar_transacciones"),
@@ -65,5 +77,6 @@ urlpatterns = [
     path("links-referidos/invalidar/<int:link_id>/", invalidar_link_referido),
     path("usar-link/<str:codigo>/", usar_link_referido),
     path("codigos-promocionales/<int:codigo_id>/toggle-pausa/", toggle_codigo_pausado),
+    path("simular-caja/", simular_caja_sorpresa),
 
 ]

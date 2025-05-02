@@ -1,5 +1,10 @@
 from django.contrib import admin
 from .models import Rifa, Galeria, Transaccion, BoletoSeleccionado, CodigoPromocional, CodigoUsado, LinkReferido, ConfiguracionReferidos
+from .models import (
+    RifaExclusiva, Jackpot, CajaSorpresa, PremioCaja,
+    TransaccionCaja, AperturaCaja, BoletoExclusivo,
+    GaleriaExclusiva, BoletoJackpot
+)
 
 @admin.register(Rifa)
 class RifaAdmin(admin.ModelAdmin):
@@ -56,3 +61,48 @@ class LinkReferidoAdmin(admin.ModelAdmin):
 class ConfiguracionReferidosAdmin(admin.ModelAdmin):
     list_display = ('activo', 'monto_minimo_para_generar', 'monto_minimo_para_validar', 'permitir_cadena_referidos')
     readonly_fields = ('id',)
+
+@admin.register(RifaExclusiva)
+class RifaExclusivaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'valor_premio', 'total_boletos', 'finalizada', 'fecha_creacion')
+    search_fields = ('nombre',)
+
+@admin.register(Jackpot)
+class JackpotAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'acumulado', 'finalizado')
+    search_fields = ('nombre',)
+
+@admin.register(CajaSorpresa)
+class CajaSorpresaAdmin(admin.ModelAdmin):
+    list_display = ('rifa_exclusiva', 'precio', 'porcentaje_jackpot', 'drop_boleto_exclusivo')
+    search_fields = ('rifa_exclusiva__nombre',)
+
+@admin.register(PremioCaja)
+class PremioCajaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'caja', 'drop', 'valor_relativo')
+    search_fields = ('nombre',)
+
+@admin.register(TransaccionCaja)
+class TransaccionCajaAdmin(admin.ModelAdmin):
+    list_display = ('folio', 'anon_id', 'monto', 'estado', 'metodo_pago', 'fecha_creacion')
+    search_fields = ('folio', 'anon_id')
+    ordering = ('-fecha_creacion',)
+
+@admin.register(AperturaCaja)
+class AperturaCajaAdmin(admin.ModelAdmin):
+    list_display = ('premio_nombre', 'transaccion', 'valor', 'fue_boleto_exclusivo', 'fue_jackpot', 'fecha')
+    search_fields = ('premio_nombre',)
+
+@admin.register(BoletoExclusivo)
+class BoletoExclusivoAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'rifa', 'asignado')
+    search_fields = ('rifa__nombre', 'numero')
+
+@admin.register(GaleriaExclusiva)
+class GaleriaExclusivaAdmin(admin.ModelAdmin):
+    list_display = ('rifa_exclusiva', 'imagen')
+
+@admin.register(BoletoJackpot)
+class BoletoJackpotAdmin(admin.ModelAdmin):
+    list_display = ('numero', 'jackpot')
+    search_fields = ('numero', 'jackpot__rifa_exclusiva__nombre')

@@ -5,6 +5,11 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 import uuid
 
+
+
+#================================================Rifas Normales===============================================================
+
+#Modelo Principal-----------------------------------------
 class Rifa(models.Model):
     ESTADO_CHOICES = [
         ('activa', 'Activa'),
@@ -26,6 +31,7 @@ class Rifa(models.Model):
         return self.nombre
 
 
+#Galeria de imagenes-------------------------------------------------------------------------
 class Galeria(models.Model):
     rifa = models.ForeignKey(Rifa, related_name='imagenes', on_delete=models.CASCADE)
     imagen = CloudinaryField('image')
@@ -33,7 +39,7 @@ class Galeria(models.Model):
     def __str__(self):
         return f"Imagen de {self.rifa.nombre}"
 
-
+#Transaccione--------------------------------------------------------------------------
 class Transaccion(models.Model):
     METODO_PAGO_CHOICES = [
         ('OXXO', 'OXXO'),
@@ -79,7 +85,7 @@ class Transaccion(models.Model):
     def __str__(self):
         return f"{self.folio} - {self.nombre_completo}"
 
-
+#Boletos Seleccionados------------------------------------------------------------------------------------------
 class BoletoSeleccionado(models.Model):
     rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE)
     transaccion = models.ForeignKey(Transaccion, on_delete=models.CASCADE, related_name='boletos')
@@ -94,6 +100,7 @@ class BoletoSeleccionado(models.Model):
         return f"Boleto {self.numero} - Rifa: {self.rifa.nombre}"
 
 
+#Codigos Promocionales----------------------------------------------------------------------------------------
 class CodigoPromocional(models.Model):
     TIPO_CHOICES = [
         ("porcentaje", "Descuento por porcentaje"),
@@ -135,11 +142,10 @@ class CodigoPromocional(models.Model):
                 raise ValidationError(
                     "Debes definir los campos 'mínimo de boletos' y 'boletos regalo' si el tipo es 'boletos_extra'.")
 
-
     def __str__(self):
         return self.codigo
 
-
+#Codigos promocionales usados----------------------------------------------------------------------------------------
 class CodigoUsado(models.Model):
     codigo = models.ForeignKey(CodigoPromocional, on_delete=models.CASCADE)
     telefono = models.CharField(max_length=15)  # o email si prefieres
@@ -149,7 +155,7 @@ class CodigoUsado(models.Model):
     def __str__(self):
         return f"{self.telefono} usó {self.codigo.codigo}"
 
-
+#Links de referidos---------------------------------------------------------------------------------------------------
 class LinkReferido(models.Model):
     codigo = models.CharField(max_length=100, unique=True, editable=False)
     transaccion_origen = models.ForeignKey('Transaccion', on_delete=models.CASCADE, related_name='referidos_generados')
@@ -179,7 +185,7 @@ class LinkReferido(models.Model):
         return f"Referido {self.codigo} para rifa {self.rifa.nombre}"
 
 
-
+#Configuracion de reglas de referidos--------------------------------------------------------------------------------
 class ConfiguracionReferidos(models.Model):
     activo = models.BooleanField(default=False)
     monto_minimo_para_generar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -192,4 +198,125 @@ class ConfiguracionReferidos(models.Model):
 
     class Meta:
         verbose_name = "Configuración de Referidos"
-        verbose_name_plural = "Configuraciones de Referidos"
+        verbose_name_plural  = "Configuración de Referidos"
+
+#================================================Rifas Exclusivas===============================================================
+
+#Modelo de las rifas Exclusivas-----------------------------------------------------------------------------------
+class RifaExclusiva(models.Model):
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    total_boletos = models.PositiveIntegerField()
+    numero_ganador = models.PositiveIntegerField(null=True, blank=True)
+    valor_premio = models.DecimalField(max_digits=10, decimal_places=2)
+    enlace_video = models.URLField(null=True, blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    finalizada = models.BooleanField(default=False)
+    # Campos para condiciones de finalización anticipada
+    porcentaje_minimo_para_finalizar = models.FloatField(
+        default=70.0, help_text="Ej: 70 para permitir finalizar si se ha vendido al menos el 70% de los boletos"
+    )
+    dias_minimos_para_finalizar = models.PositiveIntegerField(
+        default=30, help_text="Ej: 30 días desde la creación para permitir cierre anticipado"
+    )
+    permitir_finalizacion_por_valor = models.BooleanField(
+        default=False, help_text="Permitir finalizar si el monto acumulado >= valor del premio"
+    )
+
+    def __str__(self):
+        return self.nombre
+
+#Modelo de la rifa Jackpot----------------------------------------------------------------------------------------
+class Jackpot(models.Model):
+    nombre = models.CharField(max_length=200, default="Jackpot")
+    rifa_exclusiva = models.OneToOneField(RifaExclusiva, on_delete=models.CASCADE, related_name="jackpot")
+    acumulado = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ganador = models.ForeignKey("BoletoJackpot", on_delete=models.SET_NULL, null=True, blank=True, related_name="es_ganador")
+
+    finalizado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Jackpot - {self.rifa_exclusiva.nombre}"
+
+#Modelo para las cajas sorpresa---------------------------------------------------------------------------------
+class CajaSorpresa(models.Model):
+    rifa_exclusiva = models.OneToOneField(RifaExclusiva, on_delete=models.CASCADE, related_name="caja")
+    precio = models.DecimalField(max_digits=6, decimal_places=2)
+    porcentaje_jackpot = models.FloatField(default=10.0)
+    drop_boleto_exclusivo = models.FloatField(default=0.025)  # 2.5%
+    permite_ajustes_dinamicos = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Caja para {self.rifa_exclusiva.nombre}"
+
+#Modelo para los premios que entregan las cajas---------------------------------------------------------------
+class PremioCaja(models.Model):
+    caja = models.ForeignKey(CajaSorpresa, on_delete=models.CASCADE, related_name="premios")
+    nombre = models.CharField(max_length=100)
+    valor_relativo = models.FloatField(default=0.0)
+    drop = models.FloatField(help_text="Probabilidad entre 0 y 1")
+
+    def __str__(self):
+        return f"{self.nombre} ({self.drop * 100:.2f}%)"
+
+#Modelo para registrar transacciones de las cajas-------------------------------------------------
+class TransaccionCaja(models.Model):
+    folio = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    anon_id = models.CharField(max_length=200)
+    rifa_exclusiva = models.ForeignKey(RifaExclusiva, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=8, decimal_places=2)
+    metodo_pago = models.CharField(max_length=50)
+    estado = models.CharField(max_length=20, default="pendiente")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Compra Caja {self.folio}"
+
+
+#Modelo para registrar la apertura de una caja_______________________________________________________________________
+class AperturaCaja(models.Model):
+    transaccion = models.ForeignKey(TransaccionCaja, on_delete=models.CASCADE, related_name="aperturas")
+    premio_nombre = models.CharField(max_length=100)
+    valor = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    fue_boleto_exclusivo = models.BooleanField(default=False)
+    fue_jackpot = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    # Datos del usuario (solo si gana boleto exclusivo u otros boletos de otras rifas)
+    nombre_completo = models.CharField(max_length=200, null=True, blank=True)
+    correo = models.EmailField(null=True, blank=True)
+    telefono = models.CharField(max_length=20, null=True, blank=True)
+    fecha_nacimiento = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Premio: {self.premio_nombre} - {self.transaccion.folio}"
+
+#Modelo para los boletos de las rifas exclusivos---------------------------------------------------------------------
+class BoletoExclusivo(models.Model):
+    rifa = models.ForeignKey(RifaExclusiva, on_delete=models.CASCADE, related_name="boletos")
+    numero = models.PositiveIntegerField()
+    apertura = models.OneToOneField(AperturaCaja, on_delete=models.SET_NULL, null=True, blank=True)
+    asignado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Boleto #{self.numero} - {self.rifa.nombre}"
+
+#Modelo para galeria de imagenes de rifas Exclusivas---------------------------------------------------------------
+class GaleriaExclusiva(models.Model):
+    rifa_exclusiva = models.ForeignKey("RifaExclusiva", related_name="imagenes", on_delete=models.CASCADE)
+    imagen = CloudinaryField("image")
+
+    def __str__(self):
+        return f"Imagen de {self.rifa_exclusiva.nombre}"
+
+#Modelo para los boletos de la rifa del jackpot
+class BoletoJackpot(models.Model):
+    jackpot = models.ForeignKey("Jackpot", on_delete=models.CASCADE, related_name="boletos")
+    apertura = models.ForeignKey("AperturaCaja", on_delete=models.CASCADE, related_name="boleto_jackpot")
+    numero = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ("jackpot", "numero")
+
+    def __str__(self):
+        return f"Boleto #{self.numero} - {self.jackpot.rifa_exclusiva.nombre}"

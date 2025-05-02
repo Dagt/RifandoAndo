@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Rifa, Galeria, BoletoSeleccionado, Transaccion, CodigoPromocional
-
+from .models import Rifa, BoletoSeleccionado, Transaccion, CodigoPromocional, GaleriaExclusiva
+from .models import RifaExclusiva, Jackpot, CajaSorpresa, PremioCaja, TransaccionCaja, AperturaCaja, BoletoExclusivo
+#=============================================Serializers para flujo de rifas normales=============================000000
 class RifaSerializer(serializers.ModelSerializer):
     imagen_destacada = serializers.SerializerMethodField()
     boletos_vendidos = serializers.SerializerMethodField()
@@ -41,6 +42,7 @@ class RifaSerializer(serializers.ModelSerializer):
             for img in obj.imagenes.all()
         ]
 
+#Serializer Rifas finalizadas---------------------------------------------------------------------------------
 class RifaFinalizadaSerializer(RifaSerializer):
     boletos_pagados = serializers.SerializerMethodField()
 
@@ -59,6 +61,7 @@ class RifaFinalizadaSerializer(RifaSerializer):
             for b in boletos
         ]
 
+#Serializer Proximas rifas -------------------------------------------------------------------------------
 class ProximasRifasSerializer(serializers.ModelSerializer):
     imagen_destacada = serializers.SerializerMethodField()
     imagenes = serializers.SerializerMethodField()
@@ -97,6 +100,7 @@ class ProximasRifasSerializer(serializers.ModelSerializer):
     def get_boletos_vendidos(self, obj):
         return obj.boletoseleccionado_set.count()
 
+#Serializer para transacciones regulares--------------------------------------------------------------
 class TransaccionSerializer(serializers.ModelSerializer):
     es_referido = serializers.SerializerMethodField()
     uso_codigo = serializers.SerializerMethodField()
@@ -121,6 +125,7 @@ class TransaccionSerializer(serializers.ModelSerializer):
             return obj.codigo_usado.codigo.codigo  # <- accede al string del código promocional
         return None
 
+#Serializer para Codigos Promocionales regulares----------------------------------------------------------------
 class CodigoPromocionalSerializer(serializers.ModelSerializer):
     descuento = serializers.SerializerMethodField()
     x = serializers.SerializerMethodField()
@@ -142,3 +147,72 @@ class CodigoPromocionalSerializer(serializers.ModelSerializer):
 
     def get_rifas_nombres(self, obj):
         return [r.nombre for r in obj.rifas.all()]
+
+
+#==================================Serializers para la logica de Cajas Sorpresa===========================================
+# serializers.py — Serializers para Rifas Exclusivas, Jackpot y Cajas Sorpresa
+class JackpotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Jackpot
+        fields = ['id', 'nombre', 'acumulado', 'finalizado', 'ganador_id']
+
+class RifaExclusivaSerializer(serializers.ModelSerializer):
+    boletos_vendidos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RifaExclusiva
+        fields = [
+            "id", "nombre", "descripcion", "total_boletos", "numero_ganador",
+            "valor_premio", "enlace_video", "fecha_creacion", "finalizada",
+            "permitir_finalizacion_por_valor", "boletos_vendidos"
+        ]
+
+    def get_boletos_vendidos(self, obj):
+        return obj.boletos.filter(asignado=True).count()
+
+class CajaSorpresaSerializer(serializers.ModelSerializer):
+    rifa_exclusiva = RifaExclusivaSerializer()
+
+    class Meta:
+        model = CajaSorpresa
+        fields = [
+            'id', 'rifa_exclusiva', 'precio', 'porcentaje_jackpot',
+            'drop_boleto_exclusivo', 'permite_ajustes_dinamicos'
+        ]
+
+class PremioCajaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PremioCaja
+        fields = ['id', 'caja', 'nombre', 'valor_relativo', 'drop']
+
+class TransaccionCajaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransaccionCaja
+        fields = [
+            'id', 'folio', 'anon_id', 'rifa_exclusiva', 'monto',
+            'metodo_pago', 'estado', 'fecha_creacion'
+        ]
+
+class AperturaCajaSerializer(serializers.ModelSerializer):
+    transaccion = TransaccionCajaSerializer()
+
+    class Meta:
+        model = AperturaCaja
+        fields = [
+            'id', 'transaccion', 'premio_nombre', 'valor', 'fue_boleto_exclusivo',
+            'fue_jackpot', 'fecha', 'nombre_completo', 'correo', 'telefono', 'fecha_nacimiento'
+        ]
+
+class BoletoExclusivoSerializer(serializers.ModelSerializer):
+    apertura = AperturaCajaSerializer()
+
+    class Meta:
+        model = BoletoExclusivo
+        fields = ['id', 'rifa', 'numero', 'apertura', 'asignado']
+
+
+
+class GaleriaExclusivaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GaleriaExclusiva
+        fields = ["id", "imagen"]

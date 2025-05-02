@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from collections import defaultdict
 import traceback
+import math
 import random
 import logging
 from rest_framework.response import Response
@@ -13,14 +14,15 @@ from django.db import transaction
 from django.db.models import Sum, Count, Q, F, Avg
 from django.db.models.functions import NullIf
 from decimal import Decimal
+from django.shortcuts import get_object_or_404
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ValidationError
-from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer
+from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer
 from rest_framework.decorators import (
     api_view,
     permission_classes,
@@ -1378,3 +1380,229 @@ def usar_link_referido(request, codigo):
             },
             "codigo_referido": link.codigo
         }, status=200)
+
+
+#Endpoint con la simulacion y estructura de las Cajas Sorpresa.
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def simular_caja_sorpresa(request):
+    try:
+        valor_premio = float(request.data.get("valorPremio"))
+        boletos_totales = int(request.data.get("boletosTotales"))
+        precio_caja = float(request.data.get("precioCaja"))
+        drop_deseado = float(request.data.get("dropDeseado", 2.5)) / 100
+        porcentaje_jackpot = float(request.data.get("porcentajeJackpot", 10)) / 100
+
+        if not valor_premio or not boletos_totales or not precio_caja:
+            return Response({"error": "Faltan datos requeridos."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Modelo oficial de premios
+        modelo_premios = [
+            {"nombre": "🎟️ Boleto exclusivo", "valor_relativo": 1.0, "drop": drop_deseado},
+            {"nombre": "🎫 Boletos económicos (≤30%)", "valor_relativo": 0.3, "drop": 0.20},
+            {"nombre": "🎫 Boletos intermedios (≤50%)", "valor_relativo": 0.5, "drop": 0.15},
+            {"nombre": "🎫 Boletos raros (≤65%)", "valor_relativo": 0.65, "drop": 0.08},
+
+            {"nombre": "🎁 Descuento 5%", "valor_relativo": 0.0, "drop": 0.12},
+            {"nombre": "🎁 Descuento 10%", "valor_relativo": 0.0, "drop": 0.10},
+            {"nombre": "🎁 Descuento 15%", "valor_relativo": 0.0, "drop": 0.06},
+            {"nombre": "🎁 Descuento 20%", "valor_relativo": 0.0, "drop": 0.04},
+            {"nombre": "🎁 Descuento 30%", "valor_relativo": 0.0, "drop": 0.02},
+
+            {"nombre": "🧩 Código coleccionable", "valor_relativo": 0.0, "drop": 0.05},
+            {"nombre": "🧧 Caja gratis", "valor_relativo": 1.0, "drop": drop_deseado},
+            {"nombre": "🎫 +2 boletos para Jackpot", "valor_relativo": 0.0, "drop": 0.04},
+            {"nombre": "🎫 +3 boletos para Jackpot", "valor_relativo": 0.0, "drop": 0.02},
+            {"nombre": "— Sin premio visible (solo boleto para Jackpot)", "valor_relativo": 0.0, "drop": 1.0}
+        ]
+
+        # Costo promedio de premios menores
+        costo_premio_menor = sum([
+            precio_caja * p["valor_relativo"] * p["drop"]
+            for p in modelo_premios if p["valor_relativo"] > 0
+        ])
+
+        # Escenario 1: Rentabilidad mínima
+        cajas_para_liberar = math.ceil(boletos_totales / drop_deseado)
+        probabilidad_boleto = boletos_totales / cajas_para_liberar
+        ingreso_liberar = cajas_para_liberar * precio_caja
+        ingreso_neto_liberar = ingreso_liberar * (1 - porcentaje_jackpot)
+        utilidad_liberar = ingreso_neto_liberar - valor_premio - (cajas_para_liberar * costo_premio_menor)
+
+        total_costo = valor_premio + cajas_para_liberar * costo_premio_menor
+        cajas_para_rentabilidad = math.ceil(total_costo / precio_caja)
+        ingreso_rentabilidad = cajas_para_rentabilidad * precio_caja
+        utilidad_rentabilidad = ingreso_rentabilidad - valor_premio - (cajas_para_rentabilidad * costo_premio_menor)
+
+        # Escenario 2: Punto medio realista
+        cajas_punto_medio = math.ceil((cajas_para_rentabilidad + cajas_para_liberar) / 2)
+        ingreso_punto_medio = (ingreso_rentabilidad + ingreso_liberar) / 2
+        jackpot_punto_medio = ingreso_punto_medio * porcentaje_jackpot
+        ingreso_neto_medio = ingreso_punto_medio - jackpot_punto_medio
+        utilidad_punto_medio = (utilidad_rentabilidad + utilidad_liberar) / 2
+
+        return Response({
+            "dropUsado": drop_deseado,
+            "precioCaja": precio_caja,
+            "costoPremioMenor": round(costo_premio_menor, 2),
+
+            "cajasParaRentabilidad": cajas_para_rentabilidad,
+            "ingresoRentabilidad": round(ingreso_rentabilidad, 2),
+            "utilidadRentabilidad": round(utilidad_rentabilidad, 2),
+
+            "cajasParaLiberarTodos": cajas_para_liberar,
+            "ingresoTodosBoletos": round(ingreso_liberar, 2),
+            "ingresoNetoLiberar": round(ingreso_neto_liberar, 2),
+            "utilidadNetaLiberar": round(utilidad_liberar, 2),
+            "probabilidadBoleto": round(probabilidad_boleto, 4),
+
+            "escenarioPuntoMedio": {
+                "cajas": cajas_punto_medio,
+                "ingreso": round(ingreso_punto_medio, 2),
+                "jackpot": round(jackpot_punto_medio, 2),
+                "utilidad": round(utilidad_punto_medio, 2),
+            },
+
+            "modeloPremios": modelo_premios
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+#Endpoint para cargar imagenes a la galeria de rifas exclusivas
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def subir_imagen_rifa_exclusiva(request, rifa_id):
+    try:
+        rifa = RifaExclusiva.objects.get(id=rifa_id)
+    except RifaExclusiva.DoesNotExist:
+        return Response({"error": "Rifa exclusiva no encontrada"}, status=404)
+
+    imagen = request.FILES.get("imagen")
+    if not imagen:
+        return Response({"error": "No se recibió imagen"}, status=400)
+
+    GaleriaExclusiva.objects.create(rifa_exclusiva=rifa, imagen=imagen)
+    return Response({"success": True})
+
+#Endpoint para crear Rifas exclusivas
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def crear_rifa_exclusiva(request):
+    data = request.data
+
+    campos = ["nombre", "descripcion", "total_boletos", "valor_premio"]
+    if not all(k in data and data[k] for k in campos):
+        return Response({"error": "Faltan campos obligatorios"}, status=400)
+
+    try:
+        with transaction.atomic():
+            # Crear rifa exclusiva sin asignar aún el Jackpot
+            rifa = RifaExclusiva.objects.create(
+                nombre=data["nombre"],
+                descripcion=data["descripcion"],
+                total_boletos=data["total_boletos"],
+                valor_premio=data["valor_premio"],
+                enlace_video=data.get("enlace_video", None)
+            )
+
+            # Crear el Jackpot ligado a la rifa exclusiva
+            jackpot = Jackpot.objects.create(rifa_exclusiva=rifa)
+
+            # Asignar el Jackpot a la rifa (OneToOne bidireccional)
+            rifa.jackpot = jackpot
+            rifa.save()
+
+        return Response({"success": True, "id": rifa.id})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+#Endpoint para listar las rifas Exclusivas
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def listar_rifas_exclusivas(request):
+    rifas = RifaExclusiva.objects.all().order_by("-fecha_creacion")
+
+    buscar = request.GET.get("buscar", "")
+    if buscar:
+        rifas = rifas.filter(nombre__icontains=buscar)
+
+    finalizada_param = request.GET.get("finalizada")
+    if finalizada_param == "true":
+        rifas = rifas.filter(finalizada=True)
+    elif finalizada_param == "false":
+        rifas = rifas.filter(finalizada=False)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    result_page = paginator.paginate_queryset(rifas, request)
+    serializer = RifaExclusivaSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+#Endpoint para editar las rifas exclusivas
+# views.py
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def editar_rifa_exclusiva(request, rifa_id):
+    try:
+        rifa = RifaExclusiva.objects.get(id=rifa_id)
+    except RifaExclusiva.DoesNotExist:
+        return Response({"error": "Rifa no encontrada"}, status=404)
+
+    data = request.data
+
+    campos_editables = [
+        "nombre", "descripcion", "numero_ganador", "enlace_video", "permitir_finalizacion_por_valor"
+    ]
+
+    for campo in campos_editables:
+        if campo in data:
+            setattr(rifa, campo, data[campo])
+
+    # Solo permitir editar numero_ganador y enlace_video si está finalizada
+    if not rifa.finalizada and ("numero_ganador" in data or "enlace_video" in data):
+        return Response({"error": "Solo puedes asignar número ganador o video si la rifa está finalizada."}, status=400)
+
+    # Actualizar boleto ganador del jackpot si viene en la petición
+    if "id_boleto_jackpot" in data:
+        try:
+            boleto = BoletoJackpot.objects.get(id=data["id_boleto_jackpot"])
+            if boleto.jackpot != rifa.jackpot:
+                return Response({"error": "Ese boleto no pertenece al Jackpot de esta rifa."}, status=400)
+            rifa.jackpot.ganador = boleto
+            rifa.jackpot.save()
+        except BoletoJackpot.DoesNotExist:
+            return Response({"error": "Boleto de Jackpot no encontrado."}, status=404)
+
+    rifa.save()
+    return Response({"success": True})
+
+
+#Endpoint para obtener una rifa Exclusiva especifica
+# views.py
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def obtener_rifa_exclusiva(request, rifa_id):
+    try:
+        rifa = RifaExclusiva.objects.get(id=rifa_id)
+    except RifaExclusiva.DoesNotExist:
+        return Response({"error": "Rifa no encontrada"}, status=404)
+
+    data = {
+        "id": rifa.id,
+        "nombre": rifa.nombre,
+        "descripcion": rifa.descripcion,
+        "total_boletos": rifa.total_boletos,
+        "numero_ganador": rifa.numero_ganador,
+        "valor_premio": float(rifa.valor_premio),
+        "enlace_video": rifa.enlace_video,
+        "fecha_creacion": rifa.fecha_creacion,
+        "finalizada": rifa.finalizada,
+        "permitir_finalizacion_por_valor": rifa.permitir_finalizacion_por_valor,
+        "id_boleto_jackpot": rifa.jackpot.ganador.id if rifa.jackpot and rifa.jackpot.ganador else None,
+    }
+
+    return Response(data)

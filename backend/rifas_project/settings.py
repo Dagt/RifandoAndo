@@ -181,7 +181,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO",  # Puedes poner "DEBUG" si quieres ver TODO
+        "level": "DEBUG",  # Puedes poner "DEBUG" si quieres ver TODO
     },
     "loggers": {
         "django": {

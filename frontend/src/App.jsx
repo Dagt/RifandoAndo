@@ -14,9 +14,12 @@ import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import RutaProtegida from "./utils/RutaProtegida";
 import CrearRifa from "./pages/CrearRifa";
+import CrearRifaExclusiva from "./pages/CrearRifaExclusiva";
 import CodigosPromocionales from "./pages/CodigosPromocionales";
 import Estadisticas from "./pages/Estadisticas";
 import EditarRifa from "./pages/EditarRifa"
+import EditarRifaExclusiva from "./pages/EditarRifaExclusiva.jsx"
+import RifasAdminExclusivas from "./pages/RifasAdminExclusivas.jsx"
 import RifasAdmin from "./pages/RifasAdmin";
 import NotFound from "./pages/NotFound";
 import PanelTransacciones from "./pages/PanelTransacciones";
@@ -28,6 +31,8 @@ import PoliticasCondiciones from "./pages/PoliticasCondiciones";
 import Contacto from "./pages/Contacto";
 import ComoFunciona from "./pages/ComoFunciona";
 import ConfiguracionReferidosAdmin from "./pages/ConfiguracionReferidosAdmin.jsx";
+import SimuladorCajasSorpresa from "./pages/SimuladorCajaSorpresa.jsx";
+import Caja3D from "./components/Caja3D.jsx";
 
 function App() {
   return (
@@ -53,13 +58,18 @@ function App() {
           <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
           <Route path="/panel/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
+          <Route path="/panel/crear-rifa-eclusiva" element={<RutaProtegida> <CrearRifaExclusiva /></RutaProtegida>} />
           <Route path="/panel/codigos-promocion" element={<RutaProtegida> <CodigosPromocionales /></RutaProtegida>} />
           <Route path="/panel/estadisticas" element={<RutaProtegida> <Estadisticas /></RutaProtegida>} />
           <Route path="/panel/rifa/:id/editar" element={<RutaProtegida><EditarRifa /></RutaProtegida>} />
+          <Route path="/panel/rifa-exclusiva/:id/editar" element={<RutaProtegida><EditarRifaExclusiva /></RutaProtegida>} />
+          <Route path="/panel/editar-rifas-exclusivas" element={<RutaProtegida><RifasAdminExclusivas /></RutaProtegida>} />
           <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
           <Route path="/panel/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
           <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
           <Route path="/panel/links-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
+          <Route path="/panel/simular-caja-sorpresa" element={<RutaProtegida><SimuladorCajasSorpresa /></RutaProtegida>} />
+          <Route path="/caja3D" element={<Caja3D />} />
         </Route>
       </Routes>
     </Router>
