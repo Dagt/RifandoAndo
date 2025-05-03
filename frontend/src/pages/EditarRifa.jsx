@@ -41,7 +41,7 @@ const EditarRifa = () => {
 
     if (res.ok) {
       setMensaje("Rifa actualizada correctamente.");
-      setTimeout(() => navigate("/admin/rifas"), 1500);
+      setTimeout(() => navigate("/panel/rifas"), 1500);
     } else {
       setMensaje("Error al guardar cambios.");
     }
