@@ -89,7 +89,9 @@ const RifasAdminExclusivas = () => {
                   <td className="px-4 py-3">
                     {rifa.boletos_encontrados} / {rifa.total_boletos}
                   </td>
-                  <td className="px-4 py-3">${rifa.valor_premio}</td>
+                  <td className="px-4 py-3">
+  ${parseFloat(rifa.valor_premio).toLocaleString("es-MX")}
+</td>
                   <td className="px-4 py-3">
                     {rifa.finalizada ? "🏁 Finalizada" : "✅ Activa"}
                   </td>

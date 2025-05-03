@@ -33,6 +33,7 @@ const Header = () => {
     navigate("/lgn");
   };
 
+
   const enlaces = [
     { to: "/", texto: "Inicio", icono: <Home className="w-4 h-4" /> },
     { to: "/verificador", texto: "Verificador", icono: <Search className="w-4 h-4" /> },

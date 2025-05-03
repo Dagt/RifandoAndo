@@ -167,7 +167,8 @@ class JackpotSerializer(serializers.ModelSerializer):
 #Serializer de las rifas exclusivas---------------------------------------------------------------------------------------
 class RifaExclusivaSerializer(serializers.ModelSerializer):
     imagenes = serializers.SerializerMethodField()
-    boletos_encontrados = serializers.IntegerField()
+    boletos_encontrados = serializers.SerializerMethodField()
+
 
     class Meta:
         model = RifaExclusiva
@@ -177,11 +178,15 @@ class RifaExclusivaSerializer(serializers.ModelSerializer):
             "descripcion",
             "imagenes",
             "total_boletos",
-            "boletos_encontrados"
+            "boletos_encontrados",
+            "valor_premio"
         ]
 
     def get_imagenes(self, obj):
         return [img.imagen.url for img in obj.imagenes.all()]
+
+    def get_boletos_encontrados(self, obj):
+        return obj.boletos.filter(asignado=True).count()
 
 
 #Serializer para Cajas sorpresa---------------------------------------------------------------------------------------
