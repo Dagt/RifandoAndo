@@ -212,13 +212,6 @@ class RifaExclusiva(models.Model):
     enlace_video = models.URLField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     finalizada = models.BooleanField(default=False)
-    # Campos para condiciones de finalización anticipada
-    porcentaje_minimo_para_finalizar = models.FloatField(
-        default=70.0, help_text="Ej: 70 para permitir finalizar si se ha vendido al menos el 70% de los boletos"
-    )
-    dias_minimos_para_finalizar = models.PositiveIntegerField(
-        default=30, help_text="Ej: 30 días desde la creación para permitir cierre anticipado"
-    )
     permitir_finalizacion_por_valor = models.BooleanField(
         default=False, help_text="Permitir finalizar si el monto acumulado >= valor del premio"
     )
@@ -309,7 +302,7 @@ class GaleriaExclusiva(models.Model):
     def __str__(self):
         return f"Imagen de {self.rifa_exclusiva.nombre}"
 
-#Modelo para los boletos de la rifa del jackpot
+#Modelo para los boletos de la rifa del jackpot------------------------------------------------------------------------
 class BoletoJackpot(models.Model):
     jackpot = models.ForeignKey("Jackpot", on_delete=models.CASCADE, related_name="boletos")
     apertura = models.ForeignKey("AperturaCaja", on_delete=models.CASCADE, related_name="boleto_jackpot")

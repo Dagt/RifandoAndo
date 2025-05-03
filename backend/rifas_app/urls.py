@@ -36,7 +36,8 @@ from .views import (
     crear_rifa_exclusiva,
     listar_rifas_exclusivas,
     editar_rifa_exclusiva,
-    obtener_rifa_exclusiva
+    obtener_rifa_exclusiva,
+    rifa_exclusiva_activa
 )
 
 urlpatterns = [
@@ -45,7 +46,7 @@ urlpatterns = [
     path('rifas/<int:rifa_id>/', obtener_rifa, name="obtener_rifa"),
     path('exclusiva/rifa/<int:rifa_id>/', obtener_rifa_exclusiva, name='obtener_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/editar/', editar_rifa, name="editar_rifa"),
-# urls.py
+
     path('exclusiva/rifa/<int:rifa_id>/editar/', editar_rifa_exclusiva, name='editar_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/eliminar/', eliminar_rifa, name="eliminar_rifa"),
     path('rifas/<int:rifa_id>/boletos-disponibles/', boletos_disponibles),
@@ -59,6 +60,7 @@ urlpatterns = [
     path('subir-imagen-exclusiva/<int:rifa_id>/', subir_imagen_rifa_exclusiva),
     path('estadisticas/', resumen_estadisticas),
     path("rifas-activas/", rifas_activas, name="rifas_activas"),
+    path("exclusiva/rifas-activas/",rifa_exclusiva_activa),
     path("transacciones/", listar_transacciones, name="listar_transacciones"),
     path("transacciones/<str:folio>/completar/", completar_transaccion, name="completar_transaccion"),
     path("transacciones/<str:folio>/cancelar/", cancelar_transaccion, name="cancelar_transaccion"),

@@ -150,26 +150,41 @@ class CodigoPromocionalSerializer(serializers.ModelSerializer):
 
 
 #==================================Serializers para la logica de Cajas Sorpresa===========================================
-# serializers.py — Serializers para Rifas Exclusivas, Jackpot y Cajas Sorpresa
+#Serializer para Jackpots-------------------------------------------------------------------------------------------
 class JackpotSerializer(serializers.ModelSerializer):
+    imagen = serializers.SerializerMethodField()
+
     class Meta:
         model = Jackpot
-        fields = ['id', 'nombre', 'acumulado', 'finalizado', 'ganador_id']
+        fields = ["id", "nombre", "acumulado", "imagen"]
 
+    def get_imagen(self, obj):
+        return "jackpot1.png"
+
+
+
+
+#Serializer de las rifas exclusivas---------------------------------------------------------------------------------------
 class RifaExclusivaSerializer(serializers.ModelSerializer):
-    boletos_vendidos = serializers.SerializerMethodField()
+    imagenes = serializers.SerializerMethodField()
+    boletos_encontrados = serializers.IntegerField()
 
     class Meta:
         model = RifaExclusiva
         fields = [
-            "id", "nombre", "descripcion", "total_boletos", "numero_ganador",
-            "valor_premio", "enlace_video", "fecha_creacion", "finalizada",
-            "permitir_finalizacion_por_valor", "boletos_vendidos"
+            "id",
+            "nombre",
+            "descripcion",
+            "imagenes",
+            "total_boletos",
+            "boletos_encontrados"
         ]
 
-    def get_boletos_vendidos(self, obj):
-        return obj.boletos.filter(asignado=True).count()
+    def get_imagenes(self, obj):
+        return [img.imagen.url for img in obj.imagenes.all()]
 
+
+#Serializer para Cajas sorpresa---------------------------------------------------------------------------------------
 class CajaSorpresaSerializer(serializers.ModelSerializer):
     rifa_exclusiva = RifaExclusivaSerializer()
 
@@ -180,11 +195,13 @@ class CajaSorpresaSerializer(serializers.ModelSerializer):
             'drop_boleto_exclusivo', 'permite_ajustes_dinamicos'
         ]
 
+#Serializer para los premios de las cajas---------------------------------------------------------------------------------
 class PremioCajaSerializer(serializers.ModelSerializer):
     class Meta:
         model = PremioCaja
         fields = ['id', 'caja', 'nombre', 'valor_relativo', 'drop']
 
+#Serializer para las transacciones------------------------------------------------------------------------------------
 class TransaccionCajaSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransaccionCaja
@@ -193,6 +210,7 @@ class TransaccionCajaSerializer(serializers.ModelSerializer):
             'metodo_pago', 'estado', 'fecha_creacion'
         ]
 
+#Serializer para la apertura de las cajas----------------------------------------------------------------------
 class AperturaCajaSerializer(serializers.ModelSerializer):
     transaccion = TransaccionCajaSerializer()
 
@@ -203,6 +221,7 @@ class AperturaCajaSerializer(serializers.ModelSerializer):
             'fue_jackpot', 'fecha', 'nombre_completo', 'correo', 'telefono', 'fecha_nacimiento'
         ]
 
+#Serializer para los boletos de las rifas exclusivas--------------------------------------------------------------
 class BoletoExclusivoSerializer(serializers.ModelSerializer):
     apertura = AperturaCajaSerializer()
 
@@ -211,7 +230,7 @@ class BoletoExclusivoSerializer(serializers.ModelSerializer):
         fields = ['id', 'rifa', 'numero', 'apertura', 'asignado']
 
 
-
+#Serializer para la galeria de fotos de las rifas exclusivas----------------------------------------------------------------
 class GaleriaExclusivaSerializer(serializers.ModelSerializer):
     class Meta:
         model = GaleriaExclusiva

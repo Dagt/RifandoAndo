@@ -22,7 +22,7 @@ from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ValidationError
-from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer
+from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer, JackpotSerializer
 from rest_framework.decorators import (
     api_view,
     permission_classes,
@@ -1606,3 +1606,26 @@ def obtener_rifa_exclusiva(request, rifa_id):
     }
 
     return Response(data)
+
+#Endpoint que regresa la rifa Exclusiva activa en el momento
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def rifa_exclusiva_activa(request):
+    try:
+        rifa = (
+            RifaExclusiva.objects
+            .filter(finalizada=False)
+            .annotate(boletos_encontrados=Count("boletos", filter=Q(boletos__asignado=True)))
+            .latest("fecha_creacion")
+        )
+        jackpot = Jackpot.objects.get(rifa_exclusiva=rifa)
+
+        data = {
+            "rifa": RifaExclusivaSerializer(rifa).data,
+            "jackpot": JackpotSerializer(jackpot).data,
+        }
+        return Response(data)
+    except RifaExclusiva.DoesNotExist:
+        return Response({"rifa": None, "jackpot": None})
+    except Jackpot.DoesNotExist:
+        return Response({"rifa": RifaExclusivaSerializer(rifa).data, "jackpot": None})
