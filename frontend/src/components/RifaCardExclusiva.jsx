@@ -70,7 +70,7 @@ const RifaCardExclusiva = ({ data = {}, modo = "exclusiva", mostrarCompartir = t
       ) : (
         <div className="relative h-64 w-full z-10 rounded-t-[28px] overflow-hidden">
           <img
-            src="jackpot3.png"
+            src="/static/jackpot3.png"
             alt="Jackpot"
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
