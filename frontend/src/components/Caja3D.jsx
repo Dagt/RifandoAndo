@@ -26,7 +26,6 @@ const Caja3D = () => {
 
   return (
     <div className="relative flex flex-col items-center justify-between min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4 pt-[72px] pb-24 -mt-[64px] z-0">
-
       {/* Luz de fondo */}
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[500px] h-[500px] bg-yellow-200/10 rounded-full blur-[180px] animate-pulse-slow"></div>
 
@@ -51,13 +50,10 @@ const Caja3D = () => {
         V.I.P
       </h1>
 
-      {/* Cards y caja */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-y-12 gap-x-12 w-full max-w-7xl z-10">
-        <div className="flex-1 max-w-md w-full">
-          <RifaCardExclusiva data={rifa ?? { nombre: "Próximamente" }} modo="exclusiva" />
-        </div>
-
-        <div className="flex flex-col items-center justify-center">
+      {/* Contenido reorganizado */}
+      <div className="flex flex-col items-center justify-center gap-y-12 lg:flex-row lg:justify-between gap-x-12 w-full max-w-7xl z-10">
+        {/* Caja giratoria y botón */}
+        <div className="order-1 lg:order-2 flex flex-col items-center justify-center">
           <motion.div
             className="w-48 h-48 relative [transform-style:preserve-3d] animate-spin-slow"
             animate={{ rotateY: 360 }}
@@ -84,49 +80,49 @@ const Caja3D = () => {
           </motion.button>
         </div>
 
-        <div className="flex-1 max-w-md w-full">
+        {/* Tarjeta de rifa exclusiva */}
+        <div className="order-2 lg:order-1 flex-1 max-w-md w-full">
+          <RifaCardExclusiva data={rifa ?? { nombre: "Próximamente" }} modo="exclusiva" />
+        </div>
+
+        {/* Tarjeta de jackpot */}
+        <div className="order-4 lg:order-3 flex-1 max-w-md w-full">
           <RifaCardExclusiva data={jackpot ?? { nombre: "Próximamente" }} modo="jackpot" />
         </div>
       </div>
 
-      {/* Botón para desplegar descripción */}
+      {/* Botón de descripción */}
       <button
         onClick={() => setMostrarDescripcion(!mostrarDescripcion)}
-        className="fixed bottom-0 z-20 bg-white/10 backdrop-blur-md text-yellow-300 text-lg font-bold px-6 py-3 rounded-t-xl flex items-center gap-2 hover:bg-white/20 border-t border-white/20"
+        className="order-3 lg:order-4 fixed bottom-0 z-20 bg-white/10 backdrop-blur-md text-yellow-300 text-lg font-bold px-6 py-3 rounded-t-xl flex items-center gap-2 hover:bg-white/20 border-t border-white/20"
       >
         <ChevronUp className="w-5 h-5" /> ¿Qué es la Caja Sorpresa?
       </button>
 
       {/* Descripción desplegable */}
       {mostrarDescripcion && (
-  <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-xl bg-gray-900/80 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white z-30 border border-white/10">
-    <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
-
-    <p className="mb-4">
-      Al comprar una <strong>Caja Sorpresa</strong>, <span className="text-yellow-200">¡siempre recibes un premio!</span> Los premios pueden incluir:
-    </p>
-
-    <ul className="list-disc list-inside mb-4 text-white/90 space-y-1">
-      <li>Boletos normales para rifas activas</li>
-      <li>Códigos de descuento</li>
-      <li>Cajas gratis tipo "repetida"</li>
-      <li>Boletos exclusivos para la Rifa Exclusiva</li>
-    </ul>
-
-    <p className="mb-4">
-      Además, <strong>cada caja incluye un boleto automático para el Jackpot</strong>. El Jackpot es un premio acumulado con un porcentaje de cada caja comprada. Este gran premio se sorteará <strong>cuando se realice la Rifa Exclusiva</strong>.
-    </p>
-
-    <p className="mb-4">
-      La <strong>Rifa Exclusiva</strong> es una rifa especial y de alto valor. Sólo puedes participar si obtienes un <strong>boleto exclusivo</strong> desde las cajas. Esta rifa <span className="text-pink-300 font-semibold">no se puede comprar directamente</span> y sólo se llevará a cabo cuando se hayan encontrado todos los boletos.
-    </p>
-
-    <p className="text-white/80">
-      En resumen: <span className="text-yellow-200 font-medium">cada caja es una oportunidad garantizada de ganar</span>. ¡Acumula premios, entra al sorteo del Jackpot y busca tu boleto exclusivo!
-    </p>
-  </div>
-)}
-
+        <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-xl bg-gray-900/80 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white z-30 border border-white/10">
+          <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
+          <p className="mb-4">
+            Al comprar una <strong>Caja Sorpresa</strong>, <span className="text-yellow-200">¡siempre recibes un premio!</span> Los premios pueden incluir:
+          </p>
+          <ul className="list-disc list-inside mb-4 text-white/90 space-y-1">
+            <li>Boletos normales para rifas activas</li>
+            <li>Códigos de descuento</li>
+            <li>Cajas gratis tipo "repetida"</li>
+            <li>Boletos exclusivos para la Rifa Exclusiva</li>
+          </ul>
+          <p className="mb-4">
+            Además, <strong>cada caja incluye un boleto automático para el Jackpot</strong>. El Jackpot es un premio acumulado con un porcentaje de cada caja comprada. Este gran premio se sorteará <strong>cuando se realice la Rifa Exclusiva</strong>.
+          </p>
+          <p className="mb-4">
+            La <strong>Rifa Exclusiva</strong> es una rifa especial y de alto valor. Sólo puedes participar si obtienes un <strong>boleto exclusivo</strong> desde las cajas. Esta rifa <span className="text-pink-300 font-semibold">no se puede comprar directamente</span> y sólo se llevará a cabo cuando se hayan encontrado todos los boletos.
+          </p>
+          <p className="text-white/80">
+            En resumen: <span className="text-yellow-200 font-medium">cada caja es una oportunidad garantizada de ganar</span>. ¡Acumula premios, entra al sorteo del Jackpot y busca tu boleto exclusivo!
+          </p>
+        </div>
+      )}
 
       <style>{`
         .front { transform: rotateY(0deg) translateZ(6rem); }
@@ -152,7 +148,6 @@ const Caja3D = () => {
 
         .animate-float { animation: float ease-in-out infinite; }
       `}</style>
-
     </div>
   );
 };
