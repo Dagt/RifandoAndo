@@ -23,7 +23,7 @@ const Layout = () => {
       {/* Contenido principal */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <Header />
-        <div className="h-[64px] lg:h-[72px]" />
+            <div className="h-[64px] lg:h-[72px]" />
         <main className="flex-grow">
           <Outlet />
         </main>

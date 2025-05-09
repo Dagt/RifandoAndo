@@ -30,7 +30,8 @@ const RifaCardExclusiva = ({ data = {}, modo = "exclusiva", mostrarCompartir = t
   };
 
   return (
-    <div className="relative z-20 rounded-[28px] overflow-visible shadow-xl transition-all duration-300 w-full max-w-sm text-white border border-white/10 backdrop-blur-xl">
+    <div className="relative z-20 rounded-[28px] overflow-visible shadow-2xl transition-all duration-300 w-full max-w-sm text-white border hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]
+ border-white/10 backdrop-blur-md bg-black/30">
       {/* Lucecita trasera más sutil y borde redondeado completo */}
       <div className="absolute -inset-1 z-0 bg-yellow-200/2 blur-[20px] rounded-[32px]" />
 

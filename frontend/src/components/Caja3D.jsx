@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import RifaCardExclusiva from "../components/RifaCardExclusiva";
-import { Gift } from "lucide-react";
+import { Gift, ChevronUp } from "lucide-react";
 
 const Caja3D = () => {
   const confettiColors = ["#FACC15", "#FB923C", "#F472B6", "#86EFAC", "#60A5FA"];
   const [rifa, setRifa] = useState(null);
   const [jackpot, setJackpot] = useState(null);
+  const [mostrarDescripcion, setMostrarDescripcion] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // asegurarse que cargue desde arriba
+    window.scrollTo(0, 0);
     const fetchDatos = async () => {
       try {
         const res = await fetch("/api/exclusiva/rifas-activas/");
@@ -24,7 +25,8 @@ const Caja3D = () => {
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4">
+    <div className="relative flex flex-col items-center justify-between min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4 pt-[72px] pb-24 -mt-[64px] z-0">
+
       {/* Luz de fondo */}
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[500px] h-[500px] bg-yellow-200/10 rounded-full blur-[180px] animate-pulse-slow"></div>
 
@@ -45,7 +47,7 @@ const Caja3D = () => {
         ))}
       </div>
 
-      <h1 className="text-6xl font-extrabold text-center mb-20 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide">
+      <h1 className="text-6xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide">
         V.I.P
       </h1>
 
@@ -57,24 +59,21 @@ const Caja3D = () => {
 
         <div className="flex flex-col items-center justify-center">
           <motion.div
-          className="w-48 h-48 relative [transform-style:preserve-3d] animate-spin-slow"
-          animate={{ rotateY: 360 }}
-          transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-        >
-          {['front', 'back', 'left', 'right', 'top', 'bottom'].map((face) => (
-            <div
-              key={face}
-              className={`absolute w-48 h-48 bg-gradient-to-br from-red-500 via-yellow-300 to-red-400 border-[3px] border-white/30 rounded-xl shadow-2xl ${face}`}
-            >
-
-              <div className="absolute inset-0 flex items-center justify-center text-[9rem] font-black text-red-500 drop-shadow-lg">
-                ?
+            className="w-48 h-48 relative [transform-style:preserve-3d] animate-spin-slow"
+            animate={{ rotateY: 360 }}
+            transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+          >
+            {["front", "back", "left", "right", "top", "bottom"].map((face) => (
+              <div
+                key={face}
+                className={`absolute w-48 h-48 bg-gradient-to-br from-red-500 via-yellow-300 to-red-400 border-[3px] border-white/30 rounded-xl shadow-2xl ${face}`}
+              >
+                <div className="absolute inset-0 flex items-center justify-center text-[9rem] font-black text-red-500 drop-shadow-lg">
+                  ?
+                </div>
               </div>
-            </div>
-          ))}
-
-
-        </motion.div>
+            ))}
+          </motion.div>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -90,17 +89,44 @@ const Caja3D = () => {
         </div>
       </div>
 
-      {/* Descripción */}
-      <div className="max-w-xl mt-20 text-center text-white/90 text-base bg-white/10 rounded-2xl px-8 py-6 backdrop-blur-md shadow-xl z-10">
-        <h2 className="text-xl font-semibold text-yellow-300 mb-3">¿Qué es la Caja Sorpresa?</h2>
-        <p className="mb-2">
-          Cada caja contiene un premio aleatorio: desde boletos normales, descuentos, cajas repetidas o incluso un <b>boleto exclusivo</b> para una rifa especial.
-        </p>
-        <p className="mb-2">
-          ¡Además, cada compra participa automáticamente en el <span className="text-pink-400 font-semibold">Jackpot</span>!
-        </p>
-        <p className="text-white/50 text-xs">* Nadie se queda sin premio. Todos los premios se otorgan al instante.</p>
-      </div>
+      {/* Botón para desplegar descripción */}
+      <button
+        onClick={() => setMostrarDescripcion(!mostrarDescripcion)}
+        className="fixed bottom-0 z-20 bg-white/10 backdrop-blur-md text-yellow-300 text-lg font-bold px-6 py-3 rounded-t-xl flex items-center gap-2 hover:bg-white/20 border-t border-white/20"
+      >
+        <ChevronUp className="w-5 h-5" /> ¿Qué es la Caja Sorpresa?
+      </button>
+
+      {/* Descripción desplegable */}
+      {mostrarDescripcion && (
+  <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-xl bg-gray-900/80 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white z-30 border border-white/10">
+    <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
+
+    <p className="mb-4">
+      Al comprar una <strong>Caja Sorpresa</strong>, <span className="text-yellow-200">¡siempre recibes un premio!</span> Los premios pueden incluir:
+    </p>
+
+    <ul className="list-disc list-inside mb-4 text-white/90 space-y-1">
+      <li>Boletos normales para rifas activas</li>
+      <li>Códigos de descuento</li>
+      <li>Cajas gratis tipo "repetida"</li>
+      <li>Boletos exclusivos para la Rifa Exclusiva</li>
+    </ul>
+
+    <p className="mb-4">
+      Además, <strong>cada caja incluye un boleto automático para el Jackpot</strong>. El Jackpot es un premio acumulado con un porcentaje de cada caja comprada. Este gran premio se sorteará <strong>cuando se realice la Rifa Exclusiva</strong>.
+    </p>
+
+    <p className="mb-4">
+      La <strong>Rifa Exclusiva</strong> es una rifa especial y de alto valor. Sólo puedes participar si obtienes un <strong>boleto exclusivo</strong> desde las cajas. Esta rifa <span className="text-pink-300 font-semibold">no se puede comprar directamente</span> y sólo se llevará a cabo cuando se hayan encontrado todos los boletos.
+    </p>
+
+    <p className="text-white/80">
+      En resumen: <span className="text-yellow-200 font-medium">cada caja es una oportunidad garantizada de ganar</span>. ¡Acumula premios, entra al sorteo del Jackpot y busca tu boleto exclusivo!
+    </p>
+  </div>
+)}
+
 
       <style>{`
         .front { transform: rotateY(0deg) translateZ(6rem); }
@@ -126,6 +152,7 @@ const Caja3D = () => {
 
         .animate-float { animation: float ease-in-out infinite; }
       `}</style>
+
     </div>
   );
 };
