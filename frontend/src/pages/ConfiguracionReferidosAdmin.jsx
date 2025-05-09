@@ -22,7 +22,7 @@ const ConfiguracionReferidosAdmin = () => {
     if (!token) return; // Evita llamada si no hay token
 
     try {
-      const res = await fetch("/api/simular-caja/", {
+      const res = await fetch("/api/configuracion-referidos/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
