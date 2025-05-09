@@ -118,7 +118,7 @@ USE_I18N = True
 USE_TZ = True
 
 # === CORS ===
-CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=True)
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=False)
 
 # === Autenticación ===
 REST_FRAMEWORK = {

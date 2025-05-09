@@ -250,7 +250,7 @@ const SeleccionBoletos = () => {
                 onClick={pruebaSuerte}
                 className="w-full lg:w-auto bg-yellow-400 text-indigo-900 font-semibold py-2 px-4 rounded-xl hover:bg-yellow-500 transition text-sm"
               >
-                🍀 Prueba tu suerte
+                Boletos Aleatorios
               </button>
             </div>
           </div>
