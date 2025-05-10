@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import RifaCardExclusiva from "../components/RifaCardExclusiva";
-import { Gift, ChevronUp } from "lucide-react";
+import { Gift, ChevronUp, X } from "lucide-react";
 
 const Caja3D = () => {
   const confettiColors = ["#FACC15", "#FB923C", "#F472B6", "#86EFAC", "#60A5FA"];
@@ -25,7 +25,7 @@ const Caja3D = () => {
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center justify-between min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4 pt-[72px] pb-24 -mt-[64px] z-0">
+    <div className="relative flex flex-col items-center justify-between min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4 pt-[100px] pb-24 -mt-[64px] z-0">
       {/* Luz de fondo */}
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[500px] h-[500px] bg-yellow-200/10 rounded-full blur-[180px] animate-pulse-slow"></div>
 
@@ -46,7 +46,7 @@ const Caja3D = () => {
         ))}
       </div>
 
-      <h1 className="text-6xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide">
+      <h1 className="text-6xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide mb-6">
         V.I.P
       </h1>
 
@@ -101,26 +101,34 @@ const Caja3D = () => {
 
       {/* Descripción desplegable */}
       {mostrarDescripcion && (
-        <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-xl bg-gray-900/80 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white z-30 border border-white/10">
-          <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
-          <p className="mb-4">
-            Al comprar una <strong>Caja Sorpresa</strong>, <span className="text-yellow-200">¡siempre recibes un premio!</span> Los premios pueden incluir:
-          </p>
-          <ul className="list-disc list-inside mb-4 text-white/90 space-y-1">
-            <li>Boletos normales para rifas activas</li>
-            <li>Códigos de descuento</li>
-            <li>Cajas gratis tipo "repetida"</li>
-            <li>Boletos exclusivos para la Rifa Exclusiva</li>
-          </ul>
-          <p className="mb-4">
-            Además, <strong>cada caja incluye un boleto automático para el Jackpot</strong>. El Jackpot es un premio acumulado con un porcentaje de cada caja comprada. Este gran premio se sorteará <strong>cuando se realice la Rifa Exclusiva</strong>.
-          </p>
-          <p className="mb-4">
-            La <strong>Rifa Exclusiva</strong> es una rifa especial y de alto valor. Sólo puedes participar si obtienes un <strong>boleto exclusivo</strong> desde las cajas. Esta rifa <span className="text-pink-300 font-semibold">no se puede comprar directamente</span> y sólo se llevará a cabo cuando se hayan encontrado todos los boletos.
-          </p>
-          <p className="text-white/80">
-            En resumen: <span className="text-yellow-200 font-medium">cada caja es una oportunidad garantizada de ganar</span>. ¡Acumula premios, entra al sorteo del Jackpot y busca tu boleto exclusivo!
-          </p>
+        <div className="fixed inset-0 flex items-center justify-center px-4 z-30">
+          <div className="relative w-full max-w-xl bg-gray-900/90 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white border border-white/10 overflow-y-auto max-h-[90vh]">
+            <button
+              onClick={() => setMostrarDescripcion(false)}
+              className="absolute top-2 right-2 text-white/70 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
+            <p className="mb-4">
+              Al comprar una <strong>Caja Sorpresa</strong>, <span className="text-yellow-200">¡siempre recibes un premio!</span> Los premios pueden incluir:
+            </p>
+            <ul className="list-disc list-inside mb-4 text-white/90 space-y-1">
+              <li>Boletos normales para rifas activas</li>
+              <li>Códigos de descuento</li>
+              <li>Cajas gratis tipo "repetida"</li>
+              <li>Boletos exclusivos para la Rifa Exclusiva</li>
+            </ul>
+            <p className="mb-4">
+              Además, <strong>cada caja incluye un boleto automático para el Jackpot</strong>. El Jackpot es un premio acumulado con un porcentaje de cada caja comprada. Este gran premio se sorteará <strong>cuando se realice la Rifa Exclusiva</strong>.
+            </p>
+            <p className="mb-4">
+              La <strong>Rifa Exclusiva</strong> es una rifa especial y de alto valor. Sólo puedes participar si obtienes un <strong>boleto exclusivo</strong> desde las cajas. Esta rifa <span className="text-pink-300 font-semibold">no se puede comprar directamente</span> y sólo se llevará a cabo cuando se hayan encontrado todos los boletos.
+            </p>
+            <p className="text-white/80">
+              En resumen: <span className="text-yellow-200 font-medium">cada caja es una oportunidad garantizada de ganar</span>. ¡Acumula premios, entra al sorteo del Jackpot y busca tu boleto exclusivo!
+            </p>
+          </div>
         </div>
       )}
 
