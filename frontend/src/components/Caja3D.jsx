@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import RifaCardExclusiva from "../components/RifaCardExclusiva";
 import { Gift, ChevronUp, X } from "lucide-react";
@@ -8,6 +8,7 @@ const Caja3D = () => {
   const [rifa, setRifa] = useState(null);
   const [jackpot, setJackpot] = useState(null);
   const [mostrarDescripcion, setMostrarDescripcion] = useState(false);
+  const modalRef = useRef();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,6 +24,21 @@ const Caja3D = () => {
     };
     fetchDatos();
   }, []);
+
+  const handleClickOutside = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      setMostrarDescripcion(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mostrarDescripcion) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mostrarDescripcion]);
 
   return (
     <div className="relative flex flex-col items-center justify-between min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden text-white px-4 pt-[100px] pb-24 -mt-[64px] z-0">
@@ -101,13 +117,13 @@ const Caja3D = () => {
 
       {/* Descripción desplegable */}
       {mostrarDescripcion && (
-        <div className="fixed inset-0 flex items-center justify-center px-4 z-30">
-          <div className="relative w-full max-w-xl bg-gray-900/90 rounded-2xl px-8 py-6 backdrop-blur-md shadow-2xl text-white border border-white/10 overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 z-30 flex items-start justify-center px-4 pt-[100px] overflow-y-auto bg-black/80">
+          <div ref={modalRef} className="relative w-full max-w-xl bg-gray-900/90 rounded-2xl px-6 py-6 backdrop-blur-md shadow-2xl text-white border border-white/10">
             <button
               onClick={() => setMostrarDescripcion(false)}
-              className="absolute top-2 right-2 text-white/70 hover:text-white"
+              className="absolute top-4 right-4 text-white/70 hover:text-white"
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
             <h2 className="text-2xl font-bold text-yellow-300 mb-4">¿Qué es la Caja Sorpresa?</h2>
             <p className="mb-4">
