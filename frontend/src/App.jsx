@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import RifaDetalle from "./pages/RifaDetalle";
 import SeleccionBoletos from "./pages/SeleccionBoletos";
 import ConfirmarCompra from "./pages/ConfirmarCompra";
+import ConfirmarCompraCaja from "./pages/ConfirmarCompraCaja";
 import Layout from "./components/Layout";
 import ConfirmacionFinal from "./pages/ConfirmacionFinal";
 import Verificador from "./pages/Verificador";
@@ -43,6 +44,7 @@ function App() {
           <Route path="/rifa/:id" element={<RifaDetalle />} />
           <Route path="/rifa/:id/participar" element={<SeleccionBoletos />} />
           <Route path="/rifa/:id/confirmar" element={<ConfirmarCompra />} />
+          <Route path="/caja/confirmar-compra" element={<ConfirmarCompraCaja />} />
           <Route path="/compra-exitosa" element={<ConfirmacionFinal />} />
           <Route path="/verificador" element={<Verificador />} />
           <Route path="/ganadores" element={<Ganadores />} />

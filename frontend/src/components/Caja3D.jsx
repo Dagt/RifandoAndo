@@ -2,13 +2,34 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import RifaCardExclusiva from "../components/RifaCardExclusiva";
 import { Gift, ChevronUp, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const Caja3D = () => {
   const confettiColors = ["#FACC15", "#FB923C", "#F472B6", "#86EFAC", "#60A5FA"];
   const [rifa, setRifa] = useState(null);
   const [jackpot, setJackpot] = useState(null);
   const [mostrarDescripcion, setMostrarDescripcion] = useState(false);
+  const navigate = useNavigate();
   const modalRef = useRef();
+  const [precioCaja, setPrecioCaja] = useState(null);
+const [cantidad, setCantidad] = useState(1);
+
+// Obtener precio desde /api/caja-actual/
+useEffect(() => {
+  const fetchPrecio = async () => {
+    try {
+      const res = await fetch("/api/caja-actual/");
+      const data = await res.json();
+      if (res.ok && data?.precio) {
+        setPrecioCaja(data.precio);
+      }
+    } catch (error) {
+      console.error("Error al obtener precio de caja:", error);
+    }
+  };
+  fetchPrecio();
+}, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,9 +83,10 @@ const Caja3D = () => {
         ))}
       </div>
 
-      <h1 className="text-6xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide mb-6">
-        V.I.P
+      <h1 className="text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 drop-shadow-[0_5px_15px_rgba(255,255,255,0.25)] z-10 leading-tight font-serif tracking-wide mb-6">
+        {precioCaja ? `$${(precioCaja * cantidad).toLocaleString( { minimumFractionDigits: 2 })}` : "—"}
       </h1>
+
 
       {/* Contenido reorganizado */}
       <div className="flex flex-col items-center justify-center gap-y-12 lg:flex-row lg:justify-between gap-x-12 w-full max-w-7xl z-10">
@@ -87,12 +109,23 @@ const Caja3D = () => {
             ))}
           </motion.div>
 
+          <input
+    type="number"
+  min={1}
+  max={99}
+  value={cantidad}
+  onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
+  className="mt-4 mb-4 text-center text-lg w-24 py-1 rounded-full bg-white/10 border border-white/20 text-white font-semibold shadow-inner backdrop-blur-sm"
+/>
+
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(`/caja/confirmar-compra?cantidad=${cantidad}`)}
             className="mt-6 px-10 py-4 rounded-full bg-gradient-to-r from-yellow-400 to-pink-500 text-black font-bold text-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.6)] transition-all border border-white/20 backdrop-blur-md flex items-center gap-3"
           >
-            <Gift className="w-6 h-6 text-black" /> ¡Abrir caja sorpresa!
+            <Gift className="w-6 h-6 text-black" /> ¡Abrir caja(s) sorpresa!
           </motion.button>
         </div>
 

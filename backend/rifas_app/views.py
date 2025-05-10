@@ -16,7 +16,7 @@ from django.db.models.functions import NullIf
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
@@ -1396,8 +1396,10 @@ def simular_caja_sorpresa(request):
         if not valor_premio or not boletos_totales or not precio_caja:
             return Response({"error": "Faltan datos requeridos."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Modelo oficial de premios
-        modelo_premios = [
+        # ⚠️ NUEVO: Usa los premios que manda el frontend (si existen)
+        modelo_premios = request.data.get("premios")
+        if not modelo_premios:
+            modelo_premios = [
             {"nombre": "🎟️ Boleto exclusivo", "valor_relativo": 1.0, "drop": drop_deseado},
             {"nombre": "🎫 Boletos económicos (≤30%)", "valor_relativo": 0.3, "drop": 0.20},
             {"nombre": "🎫 Boletos intermedios (≤50%)", "valor_relativo": 0.5, "drop": 0.15},
@@ -1629,3 +1631,173 @@ def rifa_exclusiva_activa(request):
         return Response({"rifa": None, "jackpot": None})
     except Jackpot.DoesNotExist:
         return Response({"rifa": RifaExclusivaSerializer(rifa).data, "jackpot": None})
+
+#Endpoint para crear una caja sorpresa
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def crear_caja_sorpresa(request):
+    try:
+        rifa = RifaExclusiva.objects.filter(finalizada=False).latest("fecha_creacion")
+    except RifaExclusiva.DoesNotExist:
+        return Response({"error": "No hay rifa activa"}, status=400)
+
+    data = request.data
+
+    # Eliminar cualquier caja anterior asociada a esta rifa para evitar duplicados
+    CajaSorpresa.objects.filter(rifa_exclusiva=rifa).delete()
+
+    try:
+        with transaction.atomic():
+            caja = CajaSorpresa.objects.create(
+                rifa_exclusiva=rifa,
+                precio=data["precio"],
+                porcentaje_jackpot=data["porcentaje_jackpot"],
+                drop_boleto_exclusivo=data["drop_boleto_exclusivo"],
+                permite_ajustes_dinamicos=True
+            )
+
+            for premio in data["premios"]:
+                PremioCaja.objects.create(
+                    caja=caja,
+                    nombre=premio["nombre"],
+                    valor_relativo=premio["valor_relativo"],
+                    drop=premio["drop"]
+                )
+
+        return Response({"success": True})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+#Endpoint para obtener la config de la caja actual
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def obtener_caja_actual(request):
+    try:
+        rifa = RifaExclusiva.objects.filter(finalizada=False).latest("fecha_creacion")
+        caja = CajaSorpresa.objects.get(rifa_exclusiva=rifa)
+        premios = list(caja.premios.values("nombre", "drop", "valor_relativo"))
+
+        return Response({
+            "precio": float(caja.precio),
+            "porcentaje_jackpot": caja.porcentaje_jackpot,
+            "drop_boleto_exclusivo": caja.drop_boleto_exclusivo,
+            "valor_premio": float(rifa.valor_premio),
+            "total_boletos": rifa.total_boletos,
+            "premios": premios
+        })
+
+    except (RifaExclusiva.DoesNotExist, CajaSorpresa.DoesNotExist):
+        return Response({"error": "No hay caja activa"}, status=404)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def actualizar_premios_caja(request):
+    try:
+        rifa = RifaExclusiva.objects.filter(finalizada=False).latest("fecha_creacion")
+        caja = CajaSorpresa.objects.get(rifa_exclusiva=rifa)
+
+        # Eliminar premios anteriores
+        caja.premios.all().delete()
+
+        # Agregar nuevos premios desde el frontend
+        for premio in request.data.get("premios", []):
+            PremioCaja.objects.create(
+                caja=caja,
+                nombre=premio["nombre"],
+                valor_relativo=premio["valor_relativo"],
+                drop=premio["drop"]
+            )
+
+        return Response({"success": True})
+    except RifaExclusiva.DoesNotExist:
+        return Response({"error": "No hay rifa activa"}, status=400)
+    except CajaSorpresa.DoesNotExist:
+        return Response({"error": "No hay caja creada aún"}, status=400)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+#Endpoint para generar transacciones de Cajas
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def confirmar_compra_caja(request):
+    data = request.data
+    campos = ["nombre", "correo", "telefono", "nacimiento", "cantidad", "metodo_pago", "anon_id"]
+
+    if not all(k in data for k in campos):
+        return Response({"error": "Faltan campos obligatorios"}, status=400)
+
+    try:
+        rifa = RifaExclusiva.objects.filter(finalizada=False).latest("fecha_creacion")
+        caja = CajaSorpresa.objects.get(rifa_exclusiva=rifa)
+    except (RifaExclusiva.DoesNotExist, CajaSorpresa.DoesNotExist):
+        return Response({"error": "No hay rifa o caja activa"}, status=404)
+
+    telefono = data["telefono"]
+    if telefono.isdigit() and len(telefono) == 10:
+        telefono = f"+52{telefono}"
+
+    cantidad = int(data["cantidad"])
+    monto_total = round(cantidad * float(caja.precio), 2)
+
+    tiempo_expiracion = timezone.now() + timedelta(hours=2)
+    expires_at = int(tiempo_expiracion.timestamp())
+
+    # Crear transacción
+    trans = TransaccionCaja.objects.create(
+        anon_id=data["anon_id"],
+        rifa_exclusiva=rifa,
+        monto=monto_total,
+        metodo_pago=data["metodo_pago"],
+        estado="pendiente",
+    )
+
+    # Instrucciones de pago
+    instrucciones = None
+    try:
+        metodo = data["metodo_pago"].lower()
+
+        if metodo == "oxxo":
+            instrucciones = crear_orden_oxxo(
+                nombre=data["nombre"],
+                correo=data["correo"],
+                telefono=telefono,
+                monto=monto_total,
+                folio=str(trans.folio),
+                expires_at=expires_at
+            )
+        elif metodo == "spei":
+            instrucciones = crear_orden_spei(
+                nombre=data["nombre"],
+                correo=data["correo"],
+                telefono=telefono,
+                monto=monto_total,
+                folio=str(trans.folio),
+                expires_at=expires_at
+            )
+        elif metodo == "tarjeta":
+            instrucciones = crear_orden_tarjeta(
+                nombre=data["nombre"],
+                correo=data["correo"],
+                telefono=telefono,
+                monto=monto_total,
+                folio=str(trans.folio),
+                expires_at=expires_at
+            )
+        if instrucciones is None:
+            trans.delete()
+            return Response({"error": "Error al generar instrucciones de pago"}, status=400)
+
+    except Exception as e:
+        trans.delete()
+        return Response({"error": f"Error al generar orden: {str(e)}"}, status=500)
+
+    return Response({
+        "success": True,
+        "folio": trans.folio,
+        "metodo": data["metodo_pago"],
+        "monto": monto_total,
+        "expira_pago": expires_at,
+        "instrucciones": instrucciones,
+    })
+

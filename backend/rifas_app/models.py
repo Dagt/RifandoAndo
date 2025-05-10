@@ -233,14 +233,22 @@ class Jackpot(models.Model):
 
 #Modelo para las cajas sorpresa---------------------------------------------------------------------------------
 class CajaSorpresa(models.Model):
-    rifa_exclusiva = models.OneToOneField(RifaExclusiva, on_delete=models.CASCADE, related_name="caja")
+    rifa_exclusiva = models.OneToOneField(
+        RifaExclusiva,
+        on_delete=models.CASCADE,
+        related_name="caja",
+        help_text="Solo puede haber una caja activa por rifa"
+    )
     precio = models.DecimalField(max_digits=6, decimal_places=2)
     porcentaje_jackpot = models.FloatField(default=10.0)
     drop_boleto_exclusivo = models.FloatField(default=0.025)  # 2.5%
     permite_ajustes_dinamicos = models.BooleanField(default=True)
+    activa = models.BooleanField(default=True, help_text="Se marca como False al finalizar la rifa")
+    fecha_creacion = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Caja para {self.rifa_exclusiva.nombre}"
+
 
 #Modelo para los premios que entregan las cajas---------------------------------------------------------------
 class PremioCaja(models.Model):
@@ -254,17 +262,44 @@ class PremioCaja(models.Model):
 
 #Modelo para registrar transacciones de las cajas-------------------------------------------------
 class TransaccionCaja(models.Model):
+    METODO_PAGO_CHOICES = [
+        ('tarjeta', 'Tarjeta'),
+        ('oxxo', 'OXXO'),
+        ('spei', 'Transferencia SPEI'),
+        ('gratis', 'Caja gratuita'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('completado', 'Completado'),
+        ('cancelado', 'Cancelado'),
+    ]
+
     folio = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     anon_id = models.CharField(max_length=200)
+
     rifa_exclusiva = models.ForeignKey(RifaExclusiva, on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=8, decimal_places=2)
-    metodo_pago = models.CharField(max_length=50)
-    estado = models.CharField(max_length=20, default="pendiente")
+
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default='tarjeta',
+        help_text="Método con el que se pagó la caja"
+    )
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='pendiente',
+        help_text="Estado de la transacción"
+    )
+
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_expiracion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Compra Caja {self.folio}"
-
+        return f"Compra Caja {self.folio} - {self.metodo_pago.upper()} - {self.estado}"
 
 #Modelo para registrar la apertura de una caja_______________________________________________________________________
 class AperturaCaja(models.Model):

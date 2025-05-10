@@ -1,14 +1,23 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
 const Layout = () => {
+  const location = useLocation();
+  const rutaActual = location.pathname;
+
+  // Detectar si estamos en una sección con estilo tipo Caja3D
+  const esCaja = rutaActual.startsWith("/caja");
+
   return (
     <div className="relative min-h-screen flex flex-col text-white overflow-hidden">
 
-      {/* Fondo degradado detrás de todo */}
-      <div className="fixed inset-0 z-[-20] bg-gradient-to-b from-indigo-900 to-purple-900" />
+      {/* Fondo degradado dinámico */}
+      <div className={`fixed inset-0 z-[-20] transition-all duration-700 ${esCaja 
+        ? "bg-gradient-to-br from-black via-gray-900 to-black" 
+        : "bg-gradient-to-b from-indigo-900 to-purple-900"
+      }`} />
 
       {/* Logo decorativo — centrado en móviles, esquina en desktop */}
       <div className="pointer-events-none fixed z-[-10]
@@ -23,7 +32,7 @@ const Layout = () => {
       {/* Contenido principal */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <Header />
-            <div className="h-[64px] lg:h-[72px]" />
+        <div className="h-[64px] lg:h-[72px]" />
         <main className="flex-grow">
           <Outlet />
         </main>

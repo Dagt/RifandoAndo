@@ -37,7 +37,11 @@ from .views import (
     listar_rifas_exclusivas,
     editar_rifa_exclusiva,
     obtener_rifa_exclusiva,
-    rifa_exclusiva_activa
+    rifa_exclusiva_activa,
+    crear_caja_sorpresa,
+    obtener_caja_actual,
+    actualizar_premios_caja,
+    confirmar_compra_caja
 )
 
 urlpatterns = [
@@ -80,5 +84,9 @@ urlpatterns = [
     path("usar-link/<str:codigo>/", usar_link_referido),
     path("codigos-promocionales/<int:codigo_id>/toggle-pausa/", toggle_codigo_pausado),
     path("simular-caja/", simular_caja_sorpresa),
+    path("crear-caja/", crear_caja_sorpresa, name="crear-caja-sorpresa"),
+    path("caja-actual/", obtener_caja_actual),
+    path("actualizar-premios-caja/", actualizar_premios_caja),
+    path("caja/confirmar-compra/", confirmar_compra_caja),
 
 ]
