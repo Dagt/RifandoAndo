@@ -5,7 +5,7 @@ import { Gift, ChevronUp, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
-const Caja3D = () => {
+const CajasHome = () => {
   const confettiColors = ["#FACC15", "#FB923C", "#F472B6", "#86EFAC", "#60A5FA"];
   const [rifa, setRifa] = useState(null);
   const [jackpot, setJackpot] = useState(null);
@@ -122,7 +122,11 @@ useEffect(() => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(`/caja/confirmar-compra?cantidad=${cantidad}`)}
+            onClick={() => {
+  localStorage.setItem("cantidad_cajas", cantidad);
+  navigate("/caja/confirmar-compra");
+}}
+
             className="mt-6 px-10 py-4 rounded-full bg-gradient-to-r from-yellow-400 to-pink-500 text-black font-bold text-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_35px_rgba(255,255,255,0.6)] transition-all border border-white/20 backdrop-blur-md flex items-center gap-3"
           >
             <Gift className="w-6 h-6 text-black" /> ¡Abrir caja(s) sorpresa!
@@ -209,4 +213,4 @@ useEffect(() => {
   );
 };
 
-export default Caja3D;
+export default CajasHome;

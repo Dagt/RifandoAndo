@@ -41,7 +41,8 @@ from .views import (
     crear_caja_sorpresa,
     obtener_caja_actual,
     actualizar_premios_caja,
-    confirmar_compra_caja
+    confirmar_compra_caja,
+    listar_transacciones_caja
 )
 
 urlpatterns = [
@@ -88,5 +89,7 @@ urlpatterns = [
     path("caja-actual/", obtener_caja_actual),
     path("actualizar-premios-caja/", actualizar_premios_caja),
     path("caja/confirmar-compra/", confirmar_compra_caja),
+    path("caja/confirmar-compra/", confirmar_compra_caja),
+    path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
 
 ]

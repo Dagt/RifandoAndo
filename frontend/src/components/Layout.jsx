@@ -7,7 +7,7 @@ const Layout = () => {
   const location = useLocation();
   const rutaActual = location.pathname;
 
-  // Detectar si estamos en una sección con estilo tipo Caja3D
+  // Detectar si estamos en una sección con estilo tipo CajasHome
   const esCaja = rutaActual.startsWith("/caja");
 
   return (

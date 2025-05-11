@@ -24,6 +24,7 @@ import RifasAdminExclusivas from "./pages/RifasAdminExclusivas.jsx"
 import RifasAdmin from "./pages/RifasAdmin";
 import NotFound from "./pages/NotFound";
 import PanelTransacciones from "./pages/PanelTransacciones";
+import PanelTransaccionesCaja from "./pages/PanelTransaccionesCaja";
 import BuscadorBoletos from "./pages/BuscadorBoletos";
 import InstruccionesPago from "./pages/InstruccionesPago";
 import InstruccionesTransferencia from "./pages/InstruccionesTransferencia";
@@ -33,7 +34,7 @@ import Contacto from "./pages/Contacto";
 import ComoFunciona from "./pages/ComoFunciona";
 import ConfiguracionReferidosAdmin from "./pages/ConfiguracionReferidosAdmin.jsx";
 import SimuladorCajasSorpresa from "./pages/SimuladorCajaSorpresa.jsx";
-import Caja3D from "./components/Caja3D.jsx";
+import CajasHome from "./components/CajasHome.jsx";
 
 function App() {
   return (
@@ -68,10 +69,11 @@ function App() {
           <Route path="/panel/editar-rifas-exclusivas" element={<RutaProtegida><RifasAdminExclusivas /></RutaProtegida>} />
           <Route path="/panel/rifas" element={<RutaProtegida><RifasAdmin /></RutaProtegida>} />
           <Route path="/panel/transacciones" element={<RutaProtegida><PanelTransacciones /></RutaProtegida>} />
+          <Route path="/panel/cajas-transacciones" element={<RutaProtegida><PanelTransaccionesCaja /></RutaProtegida>} />
           <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
           <Route path="/panel/links-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
           <Route path="/panel/simular-caja-sorpresa" element={<RutaProtegida><SimuladorCajasSorpresa /></RutaProtegida>} />
-          <Route path="/caja3D" element={<Caja3D />} />
+          <Route path="/cajas-home" element={<CajasHome />} />
         </Route>
       </Routes>
     </Router>

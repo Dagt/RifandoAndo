@@ -275,7 +275,7 @@ class TransaccionCaja(models.Model):
         ('cancelado', 'Cancelado'),
     ]
 
-    folio = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    folio = models.CharField(max_length=100, unique=True, blank=True)  # Folio tipo "20250510-XYZ123"
     anon_id = models.CharField(max_length=200)
 
     rifa_exclusiva = models.ForeignKey(RifaExclusiva, on_delete=models.CASCADE)
@@ -284,22 +284,39 @@ class TransaccionCaja(models.Model):
     metodo_pago = models.CharField(
         max_length=20,
         choices=METODO_PAGO_CHOICES,
-        default='tarjeta',
-        help_text="Método con el que se pagó la caja"
+        default='tarjeta'
     )
 
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
-        default='pendiente',
-        help_text="Estado de la transacción"
+        default='pendiente'
     )
+
+    nombre_completo = models.CharField(max_length=200, blank=True, null=True)
+    correo = models.EmailField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_expiracion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Compra Caja {self.folio} - {self.metodo_pago.upper()} - {self.estado}"
+        return f"Caja {self.folio} - {self.metodo_pago.upper()} - {self.estado}"
+
+    def save(self, *args, **kwargs):
+        if not self.folio:
+            timestamp = now().strftime('%Y%m%d')
+            short_uuid = str(uuid.uuid4())[:8].upper()
+            base_folio = f"{timestamp}-{short_uuid}"
+            while TransaccionCaja.objects.filter(folio=base_folio).exists():
+                short_uuid = str(uuid.uuid4())[:8].upper()
+                base_folio = f"{timestamp}-{short_uuid}"
+            self.folio = base_folio
+
+        super().save(*args, **kwargs)
+
+
 
 #Modelo para registrar la apertura de una caja_______________________________________________________________________
 class AperturaCaja(models.Model):

@@ -16,19 +16,19 @@ from django.db.models.functions import NullIf
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
-from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja
+from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja, AperturaCaja
 from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ValidationError
-from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer, JackpotSerializer
+from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer, JackpotSerializer, TransaccionCajaSerializer, AperturaCajaSerializer
 from rest_framework.decorators import (
     api_view,
     permission_classes,
     parser_classes
 )
-
+logger = logging.getLogger(__name__)
 class RifaActivaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Rifa.objects.filter(estado='activa', fecha_inicio__lte=now())
     serializer_class = RifaSerializer
@@ -1743,16 +1743,21 @@ def confirmar_compra_caja(request):
     tiempo_expiracion = timezone.now() + timedelta(hours=2)
     expires_at = int(tiempo_expiracion.timestamp())
 
-    # Crear transacción
-    trans = TransaccionCaja.objects.create(
-        anon_id=data["anon_id"],
-        rifa_exclusiva=rifa,
-        monto=monto_total,
-        metodo_pago=data["metodo_pago"],
-        estado="pendiente",
-    )
+    try:
+        trans = TransaccionCaja.objects.create(
+            anon_id=data["anon_id"],
+            rifa_exclusiva=rifa,
+            monto=monto_total,
+            metodo_pago=data["metodo_pago"],
+            estado="pendiente",
+            nombre_completo=data["nombre"],
+            correo=data["correo"],
+            telefono=data["telefono"],
+            fecha_nacimiento=data["nacimiento"]
+        )
+    except Exception as e:
+        return Response({"error": f"Error al crear transacción: {str(e)}"}, status=500)
 
-    # Instrucciones de pago
     instrucciones = None
     try:
         metodo = data["metodo_pago"].lower()
@@ -1763,7 +1768,7 @@ def confirmar_compra_caja(request):
                 correo=data["correo"],
                 telefono=telefono,
                 monto=monto_total,
-                folio=str(trans.folio),
+                folio=trans.folio,
                 expires_at=expires_at
             )
         elif metodo == "spei":
@@ -1772,7 +1777,7 @@ def confirmar_compra_caja(request):
                 correo=data["correo"],
                 telefono=telefono,
                 monto=monto_total,
-                folio=str(trans.folio),
+                folio=trans.folio,
                 expires_at=expires_at
             )
         elif metodo == "tarjeta":
@@ -1781,9 +1786,10 @@ def confirmar_compra_caja(request):
                 correo=data["correo"],
                 telefono=telefono,
                 monto=monto_total,
-                folio=str(trans.folio),
+                folio=trans.folio,
                 expires_at=expires_at
             )
+
         if instrucciones is None:
             trans.delete()
             return Response({"error": "Error al generar instrucciones de pago"}, status=400)
@@ -1801,3 +1807,51 @@ def confirmar_compra_caja(request):
         "instrucciones": instrucciones,
     })
 
+
+
+#Endpoint para listar transacciones exclusivas
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def listar_transacciones_caja(request):
+    pagina = request.query_params.get("page", 1)
+    buscar = request.query_params.get("buscar", "").strip()
+    estado = request.query_params.get("estado", "").lower()
+    metodo = request.query_params.get("metodo", "").lower()
+
+    transacciones = TransaccionCaja.objects.all().order_by("-fecha_creacion")
+
+    if buscar:
+        transacciones = transacciones.filter(
+            Q(folio__icontains=buscar) |
+            Q(anon_id__icontains=buscar) |
+            Q(nombre_completo__icontains=buscar)
+        )
+
+    if estado:
+        transacciones = transacciones.filter(estado__iexact=estado)
+
+    if metodo:
+        transacciones = transacciones.filter(metodo_pago__iexact=metodo)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    resultado_paginado = paginator.paginate_queryset(transacciones, request)
+
+    data_final = []
+    for trans in resultado_paginado:
+        aperturas = AperturaCaja.objects.filter(transaccion=trans)
+        premios = [
+            {
+                "nombre": ap.premio_nombre,
+                "valor": ap.valor,
+                "boleto_exclusivo": ap.fue_boleto_exclusivo,
+                "jackpot": ap.fue_jackpot
+            } for ap in aperturas
+        ]
+
+        data_final.append({
+            **TransaccionCajaSerializer(trans).data,
+            "aperturas": premios,
+        })
+
+    return paginator.get_paginated_response(data_final)

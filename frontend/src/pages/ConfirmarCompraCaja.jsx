@@ -107,7 +107,7 @@ const ConfirmarCompraCaja = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 text-white flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
+    <div className="min-h-screen p-6 text-white flex items-center justify-center">
       <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 w-full max-w-xl shadow-lg border border-white/20">
         <h2 className="text-2xl font-extrabold text-center text-yellow-300 mb-6">
           Confirma tu información para comprar

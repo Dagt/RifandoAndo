@@ -138,7 +138,16 @@ const AdminPanel = () => {
             </h2>
             <p className="text-sm text-white/80">Configura una rifa exclusiva y su Jackpot asociado.</p>
           </div>
-
+          <div
+            onClick={() => navigate("/panel/editar-rifas-exclusivas")}
+            className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
+          >
+            <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+              <ClipboardList className="w-6 h-6 text-blue-300" />
+              Editar Rifas Exclusivas
+            </h2>
+            <p className="text-sm text-white/80">Edita los valores de las Rifas Exclusivas.</p>
+          </div>
           <div
             onClick={() => navigate("/panel/simular-caja-sorpresa")}
             className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
@@ -150,14 +159,14 @@ const AdminPanel = () => {
             <p className="text-sm text-white/80">Simula y configura los valores de las cajas sorpresa.</p>
           </div>
           <div
-            onClick={() => navigate("/panel/editar-rifas-exclusivas")}
+            onClick={() => navigate("/panel/cajas-transacciones")}
             className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
           >
             <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
-              <ClipboardList className="w-6 h-6 text-blue-300" />
-              Editar Rifas Exclusivas
+              <CreditCard className="w-6 h-6 text-red-400" />
+              Ver Transacciones exclusivas
             </h2>
-            <p className="text-sm text-white/80">Edita los valores de las Rifas Exclusivas.</p>
+            <p className="text-sm text-white/80">Consulta las compras realizadas y valida pagos de las cajas sorpresa.</p>
           </div>
         </div>
       </div>

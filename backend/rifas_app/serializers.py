@@ -211,8 +211,18 @@ class TransaccionCajaSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransaccionCaja
         fields = [
-            'id', 'folio', 'anon_id', 'rifa_exclusiva', 'monto',
-            'metodo_pago', 'estado', 'fecha_creacion'
+            'id',
+            'folio',
+            'anon_id',
+            'rifa_exclusiva',
+            'monto',
+            'metodo_pago',
+            'estado',
+            'fecha_creacion',
+            'nombre_completo',
+            'correo',
+            'telefono',
+            'fecha_nacimiento',
         ]
 
 #Serializer para la apertura de las cajas----------------------------------------------------------------------
