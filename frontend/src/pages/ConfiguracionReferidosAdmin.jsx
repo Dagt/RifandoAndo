@@ -17,35 +17,18 @@ const ConfiguracionReferidosAdmin = () => {
 
 
     useEffect(() => {
-  const fetchData = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return; // Evita llamada si no hay token
+        fetch("/api/configuracion-referidos/", {
+            headers: {Authorization: `Bearer ${token}`},
+        })
+            .then(res => res.json())
+            .then(data => setConfiguracion({
+                ...data,
+                reglas_premios: data.reglas_premios || []
+            }))
+            .catch(() => setMensaje("❌ No se pudo cargar la configuración."));
 
-    try {
-      const res = await fetch("/api/configuracion-referidos/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(input),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setResultados(data);
-      } else {
-        console.warn("❌ Error de autenticación o formato:", data);
-        setResultados(null);
-      }
-    } catch (err) {
-      console.error("❌ Error de conexión:", err);
-      setResultados(null);
-    }
-  };
-
-  fetchData();
-}, [input]);
+        fetchLinksReferidos(1); // Cargar links al inicio
+    }, [token]);
 
     const toggleSwitch = (campo) => {
         fetch(`/api/configuracion-referidos/toggle/${campo}/`, {
