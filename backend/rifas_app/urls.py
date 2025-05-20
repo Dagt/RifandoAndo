@@ -1,4 +1,5 @@
 from django.urls import path
+from rifas_app.views_webhooks import conekta_webhook
 from .views import (
     boletos_disponibles,
     confirmar_compra,
@@ -91,5 +92,6 @@ urlpatterns = [
     path("caja/confirmar-compra/", confirmar_compra_caja),
     path("caja/confirmar-compra/", confirmar_compra_caja),
     path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
+    path("webhooks/conekta/", conekta_webhook, name="conekta-webhook"),
 
 ]

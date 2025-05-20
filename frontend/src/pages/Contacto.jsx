@@ -36,7 +36,7 @@ const Contacto = () => {
               rel="noopener noreferrer"
               className="hover:text-green-300 transition"
             >
-              WhatsApp: 492 290 0619
+              WhatsApp: 449 886 0396
             </a>
           </li>
         </ul>

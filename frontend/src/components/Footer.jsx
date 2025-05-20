@@ -9,13 +9,13 @@ const Footer = () => {
         <a href="https://www.facebook.com/profile.php?id=61557059177764" target="_blank" rel="noreferrer">
           <Facebook className="w-4 h-4 hover:text-blue-400" />
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noreferrer">
+        <a href="https://instagram.com/rifandoandoclub" target="_blank" rel="noreferrer">
           <Instagram className="w-4 h-4 hover:text-pink-400" />
         </a>
         <a href="https://tiktok.com" target="_blank" rel="noreferrer">
           <SiTiktok className="w-4 h-4 hover:text-white" />
         </a>
-        <a href="https://youtube.com" target="_blank" rel="noreferrer">
+        <a href="https://www.youtube.com/@RifandoAndoClub" target="_blank" rel="noreferrer">
           <Youtube className="w-4 h-4 hover:text-red-500" />
         </a>
       </div>

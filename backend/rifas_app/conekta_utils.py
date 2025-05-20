@@ -74,6 +74,7 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
 
         data = {
             "currency": "MXN",
+            "metadata": {"folio": folio},
             "customer_info": {
                 "name": nombre_limpio,
                 "email": correo,
