@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   Home,
   Search,
@@ -32,6 +33,7 @@ const Header = () => {
     logout();
     navigate("/lgn");
   };
+
 
   const enlaces = [
     { to: "/", texto: "Inicio", icono: <Home className="w-4 h-4" /> },
@@ -124,7 +126,8 @@ const Header = () => {
 
       {/* Menú lateral móvil */}
       {menuAbierto && (
-        <div className="fixed top-0 right-0 h-screen w-2/3 bg-black/80 backdrop-blur-md p-6 flex flex-col gap-6 text-white font-bold text-[17px] z-[100]">
+        <div className="fixed top-0 right-0 h-screen w-2/3 bg-black/80 backdrop-blur-md p-6 flex flex-col gap-6 text-white font-bold text-[17px] z-[100] overflow-y-auto">
+          <div className="absolute bottom-0 left-0 w-full h-10 pointer-events-none bg-gradient-to-t from-black/80 to-transparent z-[110]" />
           {enlaces.map(({ to, texto, icono }) => (
             <Link key={to} to={to} onClick={() => setMenuAbierto(false)} className="flex items-center gap-2 hover:text-yellow-300">
               {icono}

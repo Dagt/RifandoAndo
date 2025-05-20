@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Trophy, Sparkles, PartyPopper } from "lucide-react";
+import { Trophy, Sparkles } from "lucide-react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
@@ -19,16 +19,15 @@ const Ganadores = () => {
   }, []);
 
   const formatearNumero = (n, total) => {
-    const longitud = total.toString().length;
+    const longitud = String(total - 1).length;
     return String(n).padStart(longitud, "0");
   };
 
   const obtenerGanador = (rifa) => {
-    if (!rifa.numero_ganador || !rifa.boletos_pagados) return null;
-    const match = rifa.boletos_pagados.find(
-      (b) => b.numero === rifa.numero_ganador
-    );
-    return match ? match.transaccion.nombre_completo : null;
+    if (rifa.numero_ganador === null || !Array.isArray(rifa.boletos_pagados)) return null;
+    return rifa.boletos_pagados.find(
+      (b) => parseInt(b.numero) === parseInt(rifa.numero_ganador)
+    )?.transaccion?.nombre_completo || null;
   };
 
   return (
@@ -39,10 +38,9 @@ const Ganadores = () => {
         <Trophy className="w-8 h-8 text-yellow-300" />
       </h1>
 
-      {/* Contador */}
       <div className="text-center text-lg mb-8">
         <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-bold shadow-lg animate-bounce mx-auto">
-            Rifas Completadas: {rifas.length}
+          Rifas Completadas: {rifas.length}
         </span>
       </div>
 
@@ -93,7 +91,6 @@ const Ganadores = () => {
                 </p>
               )}
 
-              {/* Carrusel de imágenes */}
               {rifa.imagenes.length > 0 && (
                 <div className="mt-4">
                   <Carousel
@@ -117,7 +114,6 @@ const Ganadores = () => {
                 </div>
               )}
 
-              {/* Video */}
               {rifa.enlace_video && (
                 <div className="mt-4 text-center">
                   <a
@@ -131,7 +127,6 @@ const Ganadores = () => {
                 </div>
               )}
 
-              {/* Lotenal link */}
               <div className="mt-3 text-center">
                 <a
                   href="https://www.lotenal.gob.mx/sorteos"

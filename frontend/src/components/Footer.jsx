@@ -9,7 +9,7 @@ const Footer = () => {
         <a href="https://www.facebook.com/profile.php?id=61557059177764" target="_blank" rel="noreferrer">
           <Facebook className="w-4 h-4 hover:text-blue-400" />
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noreferrer">
+        <a href="https://www.instagram.com/rifandoandoclub/" target="_blank" rel="noreferrer">
           <Instagram className="w-4 h-4 hover:text-pink-400" />
         </a>
         <a href="https://tiktok.com" target="_blank" rel="noreferrer">

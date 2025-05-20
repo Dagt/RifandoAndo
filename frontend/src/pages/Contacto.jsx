@@ -31,7 +31,7 @@ const Contacto = () => {
           <li className="flex items-center gap-2">
             <Phone className="w-5 h-5 text-green-400" />
             <a
-              href="https://wa.me/524922900619"
+              href="https://wa.me/52449"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-green-300 transition"
