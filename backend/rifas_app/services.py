@@ -1,10 +1,10 @@
-import logging, random
+import random, logging
+from datetime import timedelta
 from django.db import transaction as db_tx
 from django.utils import timezone
-from datetime import timedelta
 from rifas_app.models import (
     BoletoSeleccionado, ConfiguracionReferidos, LinkReferido,
-    Transaccion, CodigoPromocional
+    Transaccion, CodigoPromocional, CodigoUsado
 )
 from rifas_app.emails import (
     enviar_correo_boletos_regalo, enviar_correo_confirmacion_compra
@@ -13,143 +13,164 @@ from rifas_app.emails import (
 log = logging.getLogger(__name__)
 
 @db_tx.atomic
-def procesar_transaccion_completada(tx: Transaccion):
-    """
-    Marca la transacción como completada y ejecuta TODA la lógica
-    (boletos, referidos, correos…).  Es idempotente.
-    """
-    if tx.estado == "completado":
+def procesar_transaccion_completada(transaccion: Transaccion) -> None:
+    if transaccion.estado == "completado":
         return
 
-    cfg = ConfiguracionReferidos.objects.first()
+    configuracion = ConfiguracionReferidos.objects.first()
 
-    # ── 1. Cambiar estado ────────────────────────────────
-    tx.estado = "completado"
-    tx.save(update_fields=["estado"])
+    # Marcar transacción como completada
+    transaccion.estado = "completado"
+    transaccion.save()
 
-    # ── 2. Boletos pagados ───────────────────────────────
-    BoletoSeleccionado.objects.filter(
-        transaccion=tx
-    ).update(pagado=True, apartado=False)
+    # Marcar boletos como pagados y no apartados
+    BoletoSeleccionado.objects.filter(transaccion=transaccion).update(pagado=True, apartado=False)
 
-    # ── 3. Premios por referido ──────────────────────────
-    if tx.codigo_referido:
+    # Procesar referidos si existe un código de referido
+    if transaccion.codigo_referido:
         try:
-            with transaction.atomic():
-                link = (
-                    LinkReferido.objects.select_for_update()
-                    .select_related("transaccion_origen", "rifa")
-                    .get(codigo=tx.codigo_referido)
-                )
+            with db_tx.atomic():
+                link = LinkReferido.objects.select_for_update().select_related('transaccion_origen').get(codigo=transaccion.codigo_referido)
 
-                if link.usado or not cfg or tx.monto < cfg.monto_minimo_para_validar:
-                    raise Exception("No cumple para premio referidos")
+                if not link.usado:
+                    if configuracion and transaccion.monto >= configuracion.monto_minimo_para_validar:
+                        transaccion_origen = link.transaccion_origen
 
-                link.usado = True
-                link.transaccion_usada = tx
-                link.save()
+                        link.usado = True
+                        link.transaccion_usada = transaccion
+                        link.save()
 
-                # Boletos disponibles
-                boletos_ocupados = BoletoSeleccionado.objects.filter(
-                    rifa=link.rifa
-                ).values_list("numero", flat=True)
-                disponibles = sorted(
-                    set(range(1, link.rifa.total_boletos + 1)) - set(boletos_ocupados)
-                )
-                if not disponibles:
-                    raise Exception("Sin boletos libres para premio")
+                        boletos_ocupados = BoletoSeleccionado.objects.filter(rifa=link.rifa).values_list('numero', flat=True)
+                        todos_los_numeros = set(range(1, link.rifa.total_boletos + 1))
+                        numeros_disponibles = list(todos_los_numeros - set(boletos_ocupados))
+                        numeros_disponibles.sort()
 
-                # ¿Cuántos regalar?
-                boletos_a_regalar = 1
-                for regla in sorted(cfg.reglas_premios, key=lambda r: r["monto_minimo"], reverse=True):
-                    if tx.monto >= regla["monto_minimo"]:
-                        boletos_a_regalar = regla["boletos_regalo"]
-                        break
-                boletos_a_regalar = min(boletos_a_regalar, len(disponibles))
-                random.shuffle(disponibles)
+                        if numeros_disponibles:
+                            boletos_a_regalar = 1
+                            reglas = sorted(configuracion.reglas_premios, key=lambda x: x['monto_minimo'], reverse=True) if configuracion and configuracion.reglas_premios else []
 
-                # Transacción “premio”
-                origen = link.transaccion_origen
-                nueva_tx = Transaccion.objects.create(
-                    nombre_completo=origen.nombre_completo,
-                    correo=origen.correo,
-                    telefono=origen.telefono,
-                    fecha_nacimiento=origen.fecha_nacimiento,
-                    monto=0,
-                    metodo_pago="premio",
-                    estado="completado",
-                    rifa_nombre=link.rifa.nombre,
-                    es_premio=True
-                )
-                link.transaccion_premio = nueva_tx
-                link.save()
+                            for regla in reglas:
+                                if transaccion.monto >= regla['monto_minimo']:
+                                    boletos_a_regalar = regla['boletos_regalo']
+                                    break
 
-                for _ in range(boletos_a_regalar):
-                    BoletoSeleccionado.objects.create(
-                        rifa=link.rifa,
-                        transaccion=nueva_tx,
-                        numero=disponibles.pop(0),
-                        pagado=True,
-                        apartado=False,
-                    )
+                            boletos_a_regalar = min(boletos_a_regalar, len(numeros_disponibles))
+                            random.shuffle(numeros_disponibles)
 
-                # Correo premio
-                numeros = list(
-                    BoletoSeleccionado.objects.filter(transaccion=nueva_tx)
-                    .values_list("numero", flat=True)
-                )
-                digitos = len(str(link.rifa.total_boletos - 1))
-                formateados = [str(n).zfill(digitos) for n in numeros]
-                enviar_correo_boletos_regalo(
-                    origen, link.rifa.nombre, formateados,
-                    nueva_tx.folio, tx.nombre_completo
-                )
+                            nueva_transaccion = Transaccion.objects.create(
+                                nombre_completo=transaccion_origen.nombre_completo,
+                                correo=transaccion_origen.correo,
+                                telefono=transaccion_origen.telefono,
+                                fecha_nacimiento=transaccion_origen.fecha_nacimiento,
+                                monto=0,
+                                metodo_pago='premio',
+                                estado='completado',
+                                rifa_nombre=link.rifa.nombre,
+                                es_premio=True
+                            )
 
+                            link.transaccion_premio = nueva_transaccion
+                            link.save()
+
+                            for _ in range(boletos_a_regalar):
+                                numero = numeros_disponibles.pop(0)
+                                BoletoSeleccionado.objects.create(
+                                    rifa=link.rifa,
+                                    transaccion=nueva_transaccion,
+                                    numero=numero,
+                                    pagado=True,
+                                    apartado=False
+                                )
+                            log.info(f"🎁 Se asignaron {boletos_a_regalar} boletos de regalo a {transaccion_origen.nombre_completo}")
+                            try:
+                                boletos_asignados = list(
+                                    BoletoSeleccionado.objects.filter(transaccion=nueva_transaccion)
+                                    .values_list('numero', flat=True)
+                                )
+                                digitos = len(str(link.rifa.total_boletos - 1))
+                                boletos_formateados = [str(n).zfill(digitos) for n in boletos_asignados]
+
+                                enviar_correo_boletos_regalo(
+                                    transaccion_origen,
+                                    link.rifa.nombre,
+                                    boletos_formateados,
+                                    nueva_transaccion.folio,
+                                    transaccion.nombre_completo
+                                )
+                            except Exception as e:
+                                log.warning(f"⚠️ Error al enviar correo de boletos de regalo: {e}")
+                        else:
+                            log.warning(f"❌ No se encontraron boletos disponibles para asignar premio.")
+                    else:
+                        log.info(f"⚠️ El comprador no cumplió el monto mínimo para premio. Link sigue disponible.")
+        except LinkReferido.DoesNotExist:
+            log.warning(f"⚠️ No se encontró LinkReferido con código {transaccion.codigo_referido}")
         except Exception as e:
-            log.warning("Premio referidos saltado: %s", e)
+            log.error(f"❌ Error procesando premios de referido: {str(e)}")
 
-    # ── 4. Código promocional ────────────────────────────
-    if tx.codigo_usado:
+    # Registrar uso de código promocional si aplica
+    if transaccion.codigo_usado:
         try:
-            cp = tx.codigo_usado.codigo
-            cp.usos_actuales = (cp.usos_actuales or 0) + 1
-            cp.save()
-        except CodigoPromocional.DoesNotExist:
-            log.warning("Código promo ausente")
+            transaccion.codigo_usado.fecha_uso = timezone.now()
+            transaccion.codigo_usado.save()
+            codigo = transaccion.codigo_usado.codigo
+            codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
+            codigo.save()
+        except Exception as e:
+            log.warning(f"❌ Error registrando uso de código promocional: {e}")
 
-    # ── 5. Generar link referido nuevo ───────────────────
+    # Crear Link de Referido si aplica
     link_url = None
     try:
-        if cfg and cfg.activo and tx.monto >= cfg.monto_minimo_para_generar:
-            cadena_ok = cfg.permitir_cadena_referidos or not tx.codigo_referido
-            if cadena_ok and not LinkReferido.objects.filter(transaccion_origen=tx).exists():
-                rifa = tx.boletos.first().rifa if tx.boletos.exists() else None
-                if rifa:
-                    link = LinkReferido.objects.create(
-                        transaccion_origen=tx,
-                        rifa=rifa,
-                        fecha_creacion=timezone.now(),
-                        fecha_expiracion=timezone.now() + timedelta(days=1)
-                    )
-                    link_url = f"https://www.rifandoando.club/usar-link/{link.codigo}/"
-    except Exception as e:
-        log.warning("No se pudo generar link referido: %s", e)
+        if configuracion and configuracion.activo:
+            cumple_monto = transaccion.monto >= configuracion.monto_minimo_para_generar
+            permitir_cadena = configuracion.permitir_cadena_referidos if configuracion.permitir_cadena_referidos is not None else False
 
-    # ── 6. Correo de confirmación ────────────────────────
+            puede_generar_link = False
+            if cumple_monto:
+                if not transaccion.codigo_referido:
+                    puede_generar_link = True
+                elif permitir_cadena:
+                    puede_generar_link = True
+
+            if puede_generar_link:
+                if not LinkReferido.objects.filter(transaccion_origen=transaccion).exists():
+                    primera_rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+                    if primera_rifa:
+                        link_obj = LinkReferido.objects.create(
+                            transaccion_origen=transaccion,
+                            rifa=primera_rifa,
+                            fecha_creacion=timezone.now(),
+                            fecha_expiracion=timezone.now() + timedelta(days=1),
+                        )
+                        link_url = f"https://www.rifandoando.club/usar-link/{link_obj.codigo}/"
+                        log.info(f"✅ Link generado: {link_url}")
+            else:
+                if not cumple_monto:
+                    log.info(f"⛔️ No se generó link: No cumplió monto mínimo (${configuracion.monto_minimo_para_generar})")
+                elif transaccion.codigo_referido and not permitir_cadena:
+                    log.info(f"🔒 No se generó link: Usó referido y no se permiten cadenas")
+    except Exception as e:
+        log.warning(f"⚠️ Error al crear link de referido: {e}")
+
+    # Enviar correo de confirmación
     try:
-        numeros = list(
-            BoletoSeleccionado.objects.filter(transaccion=tx, pagado=True)
-            .values_list("numero", flat=True)
+        boletos_pagados = list(
+            BoletoSeleccionado.objects.filter(transaccion=transaccion, pagado=True)
+            .values_list('numero', flat=True)
         )
-        if numeros:
-            rifa = tx.boletos.first().rifa
-            digitos = len(str(rifa.total_boletos - 1)) if rifa else len(str(max(numeros)))
-            formateados = [str(n).zfill(digitos) for n in numeros]
-            enviar_correo_confirmacion_compra(
-                tx, formateados, link_url,
-                cfg.monto_minimo_para_validar if cfg else None
-            )
-    except Exception as e:
-        log.warning("Correo confirmación falló: %s", e)
+        rifa = transaccion.boletos.first().rifa if transaccion.boletos.exists() else None
+        if rifa:
+            digitos = len(str(rifa.total_boletos - 1))
+            boletos_formateados = [str(n).zfill(digitos) for n in boletos_pagados]
+        else:
+            boletos_formateados = [str(n) for n in boletos_pagados]
+        enviar_correo_confirmacion_compra(
+            transaccion,
+            boletos_formateados,
+            link_url,
+            configuracion.monto_minimo_para_validar if configuracion else None
+        )
 
-    log.info("Transacción %s completada", tx.folio)
+    except Exception as e:
+        log.error(f"⚠️ Error al enviar correo de confirmación: {e}")

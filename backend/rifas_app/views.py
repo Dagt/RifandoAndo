@@ -693,13 +693,14 @@ def listar_transacciones(request):
     return paginador.get_paginated_response(serializer.data)
 
 
-#Endpoint para completar transacciones manualmente@api_view(["PUT"])
+#Endpoint para completar transacciones manualmente
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def completar_transaccion(request, folio):
     tx = get_object_or_404(Transaccion, folio=folio)
     procesar_transaccion_completada(tx)
     return Response({"mensaje": "Transacción completada correctamente"})
+
 
 
 #Endpoint para poder cancelar Transacciones

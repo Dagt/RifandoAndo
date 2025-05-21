@@ -16,7 +16,7 @@ const UsarLink = () => {
   useEffect(() => {
     const validarLink = async () => {
       try {
-        const response = await fetch(`https://www.rifandoando.club/api/usar-link/${codigo}/`);
+        const response = await fetch(`/api/usar-link/${codigo}/`);
         const data = await response.json();
 
         if (data.success) {

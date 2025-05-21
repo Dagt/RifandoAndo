@@ -2,6 +2,7 @@
 import requests
 from datetime import datetime, timedelta
 from django.conf import settings
+from django.utils import timezone
 import re
 
 def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
@@ -74,7 +75,6 @@ def crear_orden_spei(nombre, correo, telefono, monto, folio, expires_at=None):
 
         data = {
             "currency": "MXN",
-            "metadata": {"folio": folio},
             "customer_info": {
                 "name": nombre_limpio,
                 "email": correo,
