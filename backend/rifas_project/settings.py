@@ -16,7 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key")
 DEBUG = env("DEBUG", default=False)
 
-# === Hosts permitidos ===
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[
     ".herokuapp.com",
     "localhost",
@@ -36,6 +35,14 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[
 SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+# Asegúrarse de que esto esté presente:
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+
+# Personalizar error de CSRF (para ignorarlo en /webhooks/conekta/)
+CSRF_FAILURE_VIEW = 'rifas_app.views_webhooks.csrf_failure_custom'
+
 
 # === Aplicaciones ===
 INSTALLED_APPS = [

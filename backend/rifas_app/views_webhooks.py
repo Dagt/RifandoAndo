@@ -1,6 +1,7 @@
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
+from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
@@ -10,6 +11,7 @@ from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
 
 @csrf_exempt
+@require_POST
 def conekta_webhook(request):
     if request.method != "POST":
         return HttpResponse("Método no permitido", status=405)
@@ -42,3 +44,9 @@ def conekta_webhook(request):
 
     except Exception as e:
         return HttpResponse(f"Firma inválida o error: {e}", status=400)
+
+
+def csrf_failure_custom(request, reason=""):
+    if request.path.startswith("/webhooks/conekta/"):
+        return HttpResponse("CSRF bypass para webhook", status=200)
+    return HttpResponse("Forbidden: CSRF", status=403)
