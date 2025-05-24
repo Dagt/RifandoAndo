@@ -10,13 +10,17 @@ import json
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
 
+import logging
+log = logging.getLogger(__name__)
+
 @csrf_exempt
 @require_POST
 def conekta_webhook(request):
-    if request.method != "POST":
-        return HttpResponse("Método no permitido", status=405)
-
     try:
+        # LOG 1: headers y raw body
+        log.info(f"📩 Headers: {dict(request.headers)}")
+        log.info(f"📩 Body: {request.body.decode()}")
+
         signature_b64 = request.headers.get("x-conekta-signature-256", "")
         signature = base64.b64decode(signature_b64)
 
@@ -31,11 +35,23 @@ def conekta_webhook(request):
         )
 
         data = json.loads(request.body)
+
+        # LOG 2: objeto parseado
+        log.info(f"✅ Webhook parseado: {data}")
+
         if data.get("type") != "order.paid":
             return HttpResponse("Evento ignorado", status=200)
 
         folio = data.get("data", {}).get("object", {}).get("metadata", {}).get("folio")
         if not folio:
+            # Fallback si metadata viene vacío
+            for item in data.get("data", {}).get("object", {}).get("line_items", {}).get("data", []):
+                if "Folio" in item.get("name", ""):
+                    folio = item["name"].split("Folio")[-1].strip()
+                    break
+
+        if not folio:
+            log.warning("⚠️ Webhook sin folio.")
             return HttpResponse("No folio", status=400)
 
         tx = Transaccion.objects.select_for_update().get(folio=folio)
@@ -43,7 +59,9 @@ def conekta_webhook(request):
         return HttpResponse("OK", status=200)
 
     except Exception as e:
+        log.error(f"❌ Error en webhook: {e}")
         return HttpResponse(f"Firma inválida o error: {e}", status=400)
+
 
 
 def csrf_failure_custom(request, reason=""):
