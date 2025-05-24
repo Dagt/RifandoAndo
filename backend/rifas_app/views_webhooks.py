@@ -11,6 +11,8 @@ from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
 
 import logging
+logging.getLogger().setLevel(logging.DEBUG)  # ⬅️ activa logs globalmente
+
 log = logging.getLogger(__name__)
 
 @csrf_exempt
