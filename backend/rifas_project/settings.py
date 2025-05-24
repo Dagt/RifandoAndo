@@ -41,6 +41,9 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = False
 
 
+CSRF_FAILURE_VIEW = 'rifas_app.views_webhooks.csrf_failure_custom'
+
+
 # === Aplicaciones ===
 INSTALLED_APPS = [
     'corsheaders',
