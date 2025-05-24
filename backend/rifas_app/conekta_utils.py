@@ -33,7 +33,12 @@ def crear_orden_oxxo(nombre, correo, telefono, monto, folio, expires_at=None):
                     "type": "oxxo_cash",
                     "expires_at": expires_at
                 }
-            }]
+            }],
+            "metadata": {
+                "folio": folio,
+                "concepto": folio
+            }
+
         }
 
         response = requests.post("https://api.conekta.io/orders", json=data, headers=headers)
