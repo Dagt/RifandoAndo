@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 @csrf_exempt
 @require_POST
 def conekta_webhook(request):
+    print("🎯 Webhook recibido")
     try:
         # LOG 1: headers y raw body
         log.info(f"📩 Headers: {dict(request.headers)}")
@@ -28,7 +29,8 @@ def conekta_webhook(request):
 
         public_key_pem = settings.CONEKTA_PUBLIC_KEY_PEM.encode()
         public_key = serialization.load_pem_public_key(public_key_pem, backend=default_backend())
-
+        print("📩 Headers:", dict(request.headers))
+        print("📩 Raw Body:", request.body.decode())
         public_key.verify(
             signature,
             request.body,
