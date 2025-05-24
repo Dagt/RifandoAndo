@@ -40,9 +40,6 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = False
 
-# Personalizar error de CSRF (para ignorarlo en /webhooks/conekta/)
-CSRF_FAILURE_VIEW = 'rifas_app.views_webhooks.csrf_failure_custom'
-
 
 # === Aplicaciones ===
 INSTALLED_APPS = [
@@ -67,7 +64,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'rifas_app.middleware.CsrfBypassWebhookMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

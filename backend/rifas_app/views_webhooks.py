@@ -1,9 +1,9 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 @csrf_exempt
-@api_view(["POST"])
+@require_POST
 def conekta_webhook(request):
-    print("🔥 ¡ENTRÓ AL WEBHOOK!")
-    return Response({"mensaje": "¡Webhook recibido correctamente!"}, status=200)
+    print("🎯 Webhook recibido correctamente")
+    return JsonResponse({"ok": True})
