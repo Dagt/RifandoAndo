@@ -1,19 +1,19 @@
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 import base64
 import json
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
 
 @csrf_exempt
-@require_POST
 def conekta_webhook(request):
+    if request.method != "POST":
+        return HttpResponse("Método no permitido", status=405)
+
     try:
         signature_b64 = request.headers.get("x-conekta-signature-256", "")
         signature = base64.b64decode(signature_b64)
