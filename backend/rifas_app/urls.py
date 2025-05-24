@@ -90,7 +90,6 @@ urlpatterns = [
     path("caja-actual/", obtener_caja_actual),
     path("actualizar-premios-caja/", actualizar_premios_caja),
     path("caja/confirmar-compra/", confirmar_compra_caja),
-    path("caja/confirmar-compra/", confirmar_compra_caja),
     path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
     path("webhooks/conekta/", conekta_webhook, name="conekta-webhook"),
 
