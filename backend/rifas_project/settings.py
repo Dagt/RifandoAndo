@@ -64,7 +64,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'rifas_app.middleware.CsrfBypassWebhookMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -146,6 +145,7 @@ TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
 
 CONEKTA_API_KEY = env("CONEKTA_API_KEY")
+CONEKTA_PUBLIC_KEY_PEM = env("CONEKTA_PUBLIC_KEY_PEM")
 CONEKTA_API_VERSION = env("CONEKTA_API_VERSION")
 
 # === ID automático por defecto ===
