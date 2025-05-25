@@ -94,5 +94,4 @@ urlpatterns = [
     path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
     path("webhooks/conekta/", ConektaWebhookView.as_view(), name="conekta-webhook"),
 
-
 ]

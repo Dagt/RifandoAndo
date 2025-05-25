@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 @method_decorator(csrf_exempt, name='dispatch')
 class ConektaWebhookView(APIView):
     def post(self, request):
-        log.info("🎯 Webhook recibido (APIView)")
+        print("🎯 Webhook recibido")
         try:
             signature_b64 = request.headers.get("x-conekta-signature-256", "")
             signature = base64.b64decode(signature_b64)
