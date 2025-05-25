@@ -1,6 +1,5 @@
 from django.urls import path
 from rifas_app.views_webhooks import ConektaWebhookView
-
 from .views import (
     boletos_disponibles,
     confirmar_compra,
@@ -48,12 +47,12 @@ from .views import (
 )
 
 urlpatterns = [
+    path("webhooks/conekta/", ConektaWebhookView.as_view(), name="conekta-webhook"),
     path('rifas/', listar_rifas, name="listar_rifas"),
     path('exclusiva/listar-rifas/', listar_rifas_exclusivas, name="listar_rifas_exclusivas"),
     path('rifas/<int:rifa_id>/', obtener_rifa, name="obtener_rifa"),
     path('exclusiva/rifa/<int:rifa_id>/', obtener_rifa_exclusiva, name='obtener_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/editar/', editar_rifa, name="editar_rifa"),
-
     path('exclusiva/rifa/<int:rifa_id>/editar/', editar_rifa_exclusiva, name='editar_rifa_exclusiva'),
     path('rifas/<int:rifa_id>/eliminar/', eliminar_rifa, name="eliminar_rifa"),
     path('rifas/<int:rifa_id>/boletos-disponibles/', boletos_disponibles),
@@ -92,6 +91,4 @@ urlpatterns = [
     path("actualizar-premios-caja/", actualizar_premios_caja),
     path("caja/confirmar-compra/", confirmar_compra_caja),
     path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
-    path("webhooks/conekta/", ConektaWebhookView.as_view(), name="conekta-webhook"),
-
 ]

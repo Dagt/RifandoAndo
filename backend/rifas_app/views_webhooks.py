@@ -1,32 +1,32 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
-
 import base64
 import json
+import logging
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
-import logging
 
 log = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ConektaWebhookView(APIView):
+    authentication_classes = []  # sin auth
+    permission_classes = []      # sin permisos
+
     def post(self, request, *args, **kwargs):
-        log.info("🎯 Webhook recibido")
         try:
+            log.info("✅ Webhook recibido")
             signature_b64 = request.headers.get("x-conekta-signature-256", "")
             signature = base64.b64decode(signature_b64)
             public_key_pem = settings.CONEKTA_PUBLIC_KEY_PEM.encode()
             public_key = serialization.load_pem_public_key(public_key_pem, backend=default_backend())
-
             public_key.verify(
                 signature,
                 request.body,
@@ -53,7 +53,6 @@ class ConektaWebhookView(APIView):
 
             tx = Transaccion.objects.select_for_update().get(folio=folio)
             procesar_transaccion_completada(tx)
-
             return Response({"message": "OK"}, status=status.HTTP_200_OK)
 
         except Exception as e:
