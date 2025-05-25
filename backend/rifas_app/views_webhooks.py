@@ -3,13 +3,11 @@ import json
 import logging
 
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 
@@ -18,12 +16,15 @@ from rifas_app.services import procesar_transaccion_completada
 
 log = logging.getLogger(__name__)
 
-@method_decorator(csrf_exempt, name='dispatch')
 class ConektaWebhookView(APIView):
+    authentication_classes = []  # Webhook no requiere autenticación
+    permission_classes = []      # ... ni permisos
+
     def post(self, request):
         log.info("✅ Webhook recibido")
         try:
-            signature_b64 = request.headers.get("x-conekta-signature-256", "")
+            # Leer y validar la firma
+            signature_b64 = request.headers.get("x-conekta-signature-256")
             if not signature_b64:
                 raise ValueError("Falta header de firma")
 
@@ -44,7 +45,7 @@ class ConektaWebhookView(APIView):
             if data.get("type") != "order.paid":
                 return Response({"message": "Evento ignorado"}, status=status.HTTP_200_OK)
 
-            # Extraer folio
+            # Extraer el folio desde metadata o nombre del item
             folio = data.get("data", {}).get("object", {}).get("metadata", {}).get("folio")
             if not folio:
                 for item in data.get("data", {}).get("object", {}).get("line_items", {}).get("data", []):
