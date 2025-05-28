@@ -33,16 +33,17 @@ def mercadopago_webhook(request):
             request.query_params.get("id")
         )
         if not payment_id:
-            log.error("❌ No se pudo extraer el payment_id")
             return Response({"error": "Sin ID de pago"}, status=400)
 
         log.info(f"🔎 Consultando pago {payment_id}")
+
+        # Consultar estado real del pago
         headers = {
             "Authorization": f"Bearer {settings.MERCADO_PAGO_ACCESS_TOKEN}"
         }
         r = requests.get(f"https://api.mercadopago.com/v1/payments/{payment_id}", headers=headers)
         if r.status_code != 200:
-            log.warning(f"❌ Error al consultar pago {payment_id}: {r.status_code} {r.text}")
+            log.warning(f"❌ No se pudo consultar el pago {payment_id}: {r.text}")
             return Response({"error": "No se pudo verificar el pago"}, status=400)
 
         pago = r.json()
@@ -50,30 +51,21 @@ def mercadopago_webhook(request):
         log.debug(f"🔎 Estado del pago {payment_id}: {status_pago}")
 
         if status_pago != "approved":
-            log.info(f"🟡 Pago {payment_id} no aprobado aún — estado: {status_pago}")
             return Response({"message": f"Estado actual: {status_pago}"}, status=200)
 
-        # Obtener folio (external_reference)
+        # Marcar transacción como completada
         folio = pago.get("external_reference")
         if not folio:
-            log.error("❌ No se encontró external_reference en el pago")
-            return Response({"error": "Folio faltante"}, status=400)
+            return Response({"error": "Folio no disponible"}, status=400)
 
-        # Procesar transacción local
-        try:
-            tx = Transaccion.objects.select_for_update().get(folio=folio)
-        except Transaccion.DoesNotExist:
-            log.error(f"❌ No se encontró transacción con folio {folio}")
-            return Response({"error": "Transacción no encontrada"}, status=404)
-
-        if tx.estado == "completado":
-            log.info(f"🔁 Transacción {folio} ya estaba completada")
-            return Response({"message": "Ya estaba completada"}, status=200)
-
-        log.info(f"✅ Procesando transacción {folio}")
+        tx = Transaccion.objects.get(folio=folio)
         procesar_transaccion_completada(tx)
+
         return Response({"message": "Transacción procesada correctamente"}, status=200)
 
+    except Transaccion.DoesNotExist:
+        log.error(f"❌ No se encontró transacción con ese folio")
+        return Response({"error": "Transacción no encontrada"}, status=404)
     except Exception as e:
         log.exception("❌ Error procesando webhook Mercado Pago")
         return Response({"error": str(e)}, status=400)
