@@ -154,7 +154,7 @@ def confirmar_compra(request):
         f"RifandoAndo\n\n"
         f"Folio: {folio}\n"
         f"Monto: ${monto}\n\n"
-        f"\nPaga antes de {hora_limite}"
+        f"Paga antes de {hora_limite}\n"
         f"Verifica tu compra en:\n {verificador_url}"
         f"Accede a tus instrucciones:\n{instrucciones['checkout_url']}"
     )
