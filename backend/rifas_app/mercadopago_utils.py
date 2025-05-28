@@ -1,13 +1,12 @@
 import mercadopago
 from django.conf import settings
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import os
 
 sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
 
-def crear_preferencia_pago(transaccion, rifa, boletos_solicitados):
-    base_url = os.environ.get("BASE_FRONTEND_URL", "http://localhost:3000")
-    expires_at_dt = datetime.now(timezone.utc) + timedelta(hours=2)
+def crear_preferencia_pago(transaccion, rifa, boletos_solicitados, tiempo_expiracion):
+    expires_at_dt = tiempo_expiracion.astimezone(timezone.utc)
 
     preference_data = {
         "items": [
@@ -27,14 +26,15 @@ def crear_preferencia_pago(transaccion, rifa, boletos_solicitados):
             "folio": transaccion.folio,
             "boletos": boletos_solicitados,
         },
-        "notification_url": os.environ.get("MP_WEBHOOK_URL", "https://tusitio.com/api/webhook-mercadopago/"),
+        "notification_url": settings.MP_WEBHOOK_URL,
         "external_reference": transaccion.folio,
         "expires": True,
-        "expiration_date_to": expires_at_dt.isoformat(),
+        "expiration_date_to": expires_at_dt.isoformat().replace("+00:00", "Z"),
         "back_urls": {
-            "success": f"{base_url}/compra-exitosa?folio={transaccion.folio}&payment_status=paid",
-            "failure": f"{base_url}/fallo-pago?folio={transaccion.folio}"
-        }
+            "success": f"{settings.BASE_FRONTEND_URL}/verificador?folio={transaccion.folio}",
+            "failure": f"{settings.BASE_FRONTEND_URL}/verificador?folio={transaccion.folio}"
+        },
+        "auto_return": "approved"
     }
 
     result = sdk.preference().create(preference_data)

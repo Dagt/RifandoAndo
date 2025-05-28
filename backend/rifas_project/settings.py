@@ -147,6 +147,9 @@ TWILIO_PHONE_NUMBER = env("TWILIO_PHONE_NUMBER")
 MERCADO_PAGO_ACCESS_TOKEN = env("MERCADO_PAGO_ACCESS_TOKEN")
 MERCADO_PAGO_PUBLIC_KEY = env("MERCADO_PAGO_PUBLIC_KEY", default="")
 
+BASE_FRONTEND_URL = env("BASE_FRONTEND_URL", default="http://localhost:3000")
+MP_WEBHOOK_URL = env("MP_WEBHOOK_URL", default="https://tusitio.com/api/webhooks/mercadopago/")
+
 # === ID automático por defecto ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -82,7 +82,7 @@ def confirmar_compra(request):
     if telefono.isdigit() and len(telefono) == 10:
         telefono = f"+52{telefono}"
 
-    tiempo_expiracion = timezone.now() + timedelta(hours=2)
+    tiempo_expiracion = timezone.now() + timedelta(hours=4)
     expires_at = int(tiempo_expiracion.timestamp())
 
     # Código promocional (si aplica)
@@ -119,7 +119,8 @@ def confirmar_compra(request):
         instrucciones = crear_preferencia_pago(
             transaccion=transaccion,
             rifa=rifa,
-            boletos_solicitados=boletos_solicitados
+            boletos_solicitados=boletos_solicitados,
+            tiempo_expiracion=tiempo_expiracion
         )
 
         if instrucciones is None:
@@ -153,6 +154,8 @@ def confirmar_compra(request):
         f"RifandoAndo\n\n"
         f"Folio: {folio}\n"
         f"Monto: ${monto}\n\n"
+        f"\nPaga antes de {hora_limite}"
+        f"Verifica tu compra en:\n {verificador_url}"
         f"Accede a tus instrucciones:\n{instrucciones['checkout_url']}"
     )
 
