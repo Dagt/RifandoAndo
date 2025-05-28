@@ -14,7 +14,7 @@ const PanelTransacciones = () => {
 
   const [buscar, setBuscar] = useState("");
   const [estado, setEstado] = useState("");
-  const [metodo, setMetodo] = useState("");
+
 
   const fetchTransacciones = async () => {
     setLoadingDatos(true);
@@ -23,7 +23,6 @@ const PanelTransacciones = () => {
       params.append("page", pagina);
       if (buscar) params.append("buscar", buscar);
       if (estado) params.append("estado", estado.toLowerCase());
-      if (metodo) params.append("metodo", metodo);
 
       const res = await fetch(`/api/transacciones/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -46,7 +45,7 @@ const PanelTransacciones = () => {
 
   useEffect(() => {
     if (!loading && token) fetchTransacciones();
-  }, [pagina, token, buscar, estado, metodo, loading]);
+  }, [pagina, token, buscar, estado, loading]);
 
   useEffect(() => {
     if (mensaje) {
@@ -136,21 +135,6 @@ const PanelTransacciones = () => {
   <option value="cancelado" className="text-black">❌ Cancelado</option>
 </select>
 
-<select
-  value={metodo}
-  onChange={(e) => {
-    setMetodo(e.target.value);
-    setPagina(1);
-  }}
-  className="p-2 rounded border border-white/20 bg-white/10 text-white backdrop-blur-md w-full md:w-auto focus:outline-none"
->
-  <option value="" className="text-black">Todos los métodos</option>
-  <option value="SPEI" className="text-black">🏦 Transferencia</option>
-  <option value="OXXO" className="text-black">🧾 OXXO</option>
-  <option value="tarjeta" className="text-black">💳 Tarjeta</option>
-  <option value="premio" className="text-black">🎁 Premio</option>
-
-</select>
       </div>
 
       {/* Tabla */}
@@ -165,7 +149,7 @@ const PanelTransacciones = () => {
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Rifa</th>
                 <th className="px-4 py-3">Monto</th>
-                <th className="px-4 py-3">Método</th>
+                <th className="px-4 py-3">Premio</th>
                 <th className="px-4 py-3">Código</th>
                 <th className="px-4 py-3">Referido</th>
                 <th className="px-4 py-3">Estado</th>
@@ -186,7 +170,9 @@ const PanelTransacciones = () => {
                     <td className="px-4 py-3">{t.nombre_completo}</td>
                     <td className="px-4 py-3">{t.rifa_nombre}</td>
                     <td className="px-4 py-3">${t.monto}</td>
-                    <td className="px-4 py-3">{t.metodo_pago}</td>
+                    <td className="px-4 py-3 text-center">
+  {t.es_premio ? <span className="text-pink-400 font-bold">🎁</span> : <span className="text-white/40">—</span>}
+</td>
                     <td className="px-4 py-3 font-mono text-center">{t.codigo || <span className="text-white/40">—</span>}</td>
                     <td className="px-4 py-3 text-center">
                       {t.es_referido ? (

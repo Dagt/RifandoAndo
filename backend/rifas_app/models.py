@@ -41,12 +41,7 @@ class Galeria(models.Model):
 
 #Transaccione--------------------------------------------------------------------------
 class Transaccion(models.Model):
-    METODO_PAGO_CHOICES = [
-        ('OXXO', 'OXXO'),
-        ('SPEI', 'Transferencia SPEI'),
-        ('tarjeta', 'Tarjeta'),
-        ('premio', 'Premio'),
-    ]
+
 
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
@@ -60,7 +55,6 @@ class Transaccion(models.Model):
     fecha_nacimiento = models.DateField()
     folio = models.CharField(max_length=100, unique=True, blank=True)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
-    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_expiracion = models.DateTimeField(null=True, blank=True)

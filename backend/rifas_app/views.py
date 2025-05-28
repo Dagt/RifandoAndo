@@ -17,7 +17,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja, AperturaCaja
-from .conekta_utils import crear_orden_oxxo, crear_orden_tarjeta, crear_orden_spei
+from .mercadopago_utils import crear_preferencia_pago
 from django.utils import timezone
 from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
@@ -57,7 +57,7 @@ def confirmar_compra(request):
     data = request.data
     campos_requeridos = [
         "nombre", "correo", "telefono", "nacimiento",
-        "rifa_id", "boletos", "monto", "metodo_pago"
+        "rifa_id", "boletos", "monto"
     ]
 
     if not all(k in data for k in campos_requeridos):
@@ -108,54 +108,24 @@ def confirmar_compra(request):
         telefono=telefono,
         fecha_nacimiento=data["nacimiento"],
         monto=data["monto"],
-        metodo_pago=data["metodo_pago"],
         fecha_expiracion=tiempo_expiracion,
         rifa_nombre=rifa.nombre,
         codigo_usado = codigo_usado,
         codigo_referido=data.get("codigo_referido")
     )
-    metodo = data["metodo_pago"].lower()
     instrucciones = None
 
     try:
-        if metodo == "oxxo":
-            instrucciones = crear_orden_oxxo(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=transaccion.folio,
-                expires_at=expires_at
-            )
-        elif metodo == "spei":
-            instrucciones = crear_orden_spei(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=transaccion.folio,
-                expires_at=expires_at
-            )
-        elif metodo == "tarjeta":
-            checkout = crear_orden_tarjeta(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=data["monto"],
-                folio=transaccion.folio,
-                expires_at=expires_at
-            )
-            if checkout and checkout.get("checkout_url"):
-                instrucciones = {
-                    "checkout_url": checkout["checkout_url"],
-                    "expires_at": expires_at
-                }
+        instrucciones = crear_preferencia_pago(
+            transaccion=transaccion,
+            rifa=rifa,
+            boletos_solicitados=boletos_solicitados
+        )
 
         if instrucciones is None:
             transaccion.delete()
             return Response({"error": "No se pudieron generar las instrucciones de pago"}, status=400)
 
-        # Apartamos los boletos solo si todo lo anterior fue exitoso
         BoletoSeleccionado.objects.bulk_create([
             BoletoSeleccionado(
                 rifa=rifa,
@@ -179,24 +149,12 @@ def confirmar_compra(request):
     monto = transaccion.monto
 
     mensaje = None
-    if instrucciones and metodo == "oxxo":
-        mensaje = (
-            f"RifandoAndo\n\n"
-            f"Folio: {folio}\n\n"
-            f"Ref. OXXO: {instrucciones['referencia']}\n"
-            f"Monto: ${monto}\n\n"
-            f"Paga antes de: {hora_limite}\n"
-            f"Verifica tu compra\n{verificador_url}"
-        )
-    elif instrucciones and metodo == "spei":
-        mensaje = (
-            f"RifandoAndo\n\n"
-            f"CLABE: {instrucciones['clabe']}\n"
-            f"Folio/Concepto: {instrucciones['concepto']}\n"
-            f"Monto: ${monto}\n\n"
-            f"Paga antes del: {hora_limite}\n"
-            f"Verifica tu compra en:\n{verificador_url}"
-        )
+    mensaje = (
+        f"RifandoAndo\n\n"
+        f"Folio: {folio}\n"
+        f"Monto: ${monto}\n\n"
+        f"Accede a tus instrucciones:\n{instrucciones['checkout_url']}"
+    )
 
     if mensaje:
         try:
@@ -210,7 +168,6 @@ def confirmar_compra(request):
         "nombre": transaccion.nombre_completo,
         "telefono": transaccion.telefono,
         "correo": transaccion.correo,
-        "metodo_pago": transaccion.metodo_pago,
         "fecha": transaccion.fecha_creacion,
         "expira_pago": expires_at,
         "monto": transaccion.monto,
@@ -240,7 +197,6 @@ def verificar_folio(request, folio):
         "correo": transaccion.correo,
         "estado": transaccion.estado,
         "monto": transaccion.monto,
-        "metodo_pago": transaccion.metodo_pago,
         "fecha": transaccion.fecha_creacion,
         "expira_pago": int(transaccion.fecha_expiracion.timestamp()) if transaccion.fecha_expiracion else None,
         "boletos": list(boletos),
@@ -322,9 +278,6 @@ def resumen_estadisticas(request):
     fecha_fin = request.GET.get("fecha_fin")
     rifa_id = request.GET.get("rifa_id")
 
-    # -------------------------
-    # Preparar datos base
-    # -------------------------
     rifas = Rifa.objects.all()
     transacciones = Transaccion.objects.filter(estado="completado")
     boletos = BoletoSeleccionado.objects.filter(pagado=True)
@@ -342,12 +295,8 @@ def resumen_estadisticas(request):
         transacciones = transacciones.filter(fecha_creacion__lte=fecha_fin)
         boletos = boletos.filter(transaccion__fecha_creacion__lte=fecha_fin)
 
-    # Filtrar solo transacciones normales (no premio)
     transacciones_sin_premio = transacciones.filter(es_premio=False)
 
-    # -------------------------
-    # Métricas de Rifas
-    # -------------------------
     activas = rifas.filter(estado='activa').count()
     en_espera = rifas.filter(estado='en_espera').count()
     finalizadas = rifas.filter(estado='finalizada').count()
@@ -355,21 +304,12 @@ def resumen_estadisticas(request):
     boletos_vendidos = boletos.count()
     boletos_regalados = BoletoSeleccionado.objects.filter(transaccion__es_premio=True, pagado=True).count()
 
-    # -------------------------
-    # Ventas, Ingresos, Métodos
-    # -------------------------
     ingresos_totales = transacciones_sin_premio.aggregate(total=Sum("monto"))['total'] or 0
-
-    pagos = transacciones_sin_premio.values("metodo_pago").annotate(total=Count("id"))
-    metodos_pago = {p["metodo_pago"].upper(): p["total"] for p in pagos}
 
     transacciones_canceladas = Transaccion.objects.filter(estado="cancelado").count()
     transacciones_completadas = Transaccion.objects.filter(estado="completado").count()
     transacciones_totales = Transaccion.objects.count()
 
-    # -------------------------
-    # Gráficas por Rifa y Mes
-    # -------------------------
     boletos_por_rifa = rifas.annotate(
         vendidos=Count('boletoseleccionado', filter=Q(boletoseleccionado__pagado=True))
     ).values("nombre", "vendidos").order_by("-vendidos")
@@ -416,13 +356,6 @@ def resumen_estadisticas(request):
         for t in ticket_promedio_raw if t["total"] and t["cantidad"]
     ]
 
-    ticket_promedio_por_metodo = {}
-    for metodo in ["SPEI", "OXXO", "tarjeta"]:
-        promedio = transacciones_sin_premio.filter(metodo_pago=metodo).aggregate(avg=Avg("monto"))["avg"]
-        ticket_promedio_por_metodo[metodo.upper()] = round(promedio or 0, 2)
-    # -------------------------
-    # Códigos Promocionales
-    # -------------------------
     ahora = now()
     codigos = CodigoPromocional.objects.all()
     codigos_activos = codigos.filter(
@@ -477,17 +410,11 @@ def resumen_estadisticas(request):
             "porcentaje_del_total": porcentaje_rifa
         })
 
-    # -------------------------
-    # Links de Referidos
-    # -------------------------
     total_links_generados = LinkReferido.objects.count()
     total_links_usados = LinkReferido.objects.filter(usado=True).count()
     total_links_expirados = LinkReferido.objects.filter(usado=False, fecha_expiracion__lt=now()).count()
     porcentaje_conversion = (total_links_usados / total_links_generados * 100) if total_links_generados else 0
 
-    # -------------------------
-    # Ventas por Links
-    # -------------------------
     ventas_generaron_link = (
         Transaccion.objects.filter(estado="completado", referidos_generados__isnull=False, es_premio=False)
         .aggregate(total=Sum('monto'))["total"] or 0
@@ -498,9 +425,6 @@ def resumen_estadisticas(request):
     )
     proporcion_ventas = (ventas_usando_link / ventas_generaron_link * 100) if ventas_generaron_link else 0
 
-    # -------------------------
-    # Uso de Links por Rifa
-    # -------------------------
     rifas_links = []
     for rifa in Rifa.objects.all():
         links_usados = LinkReferido.objects.filter(rifa=rifa, usado=True).count()
@@ -523,9 +447,6 @@ def resumen_estadisticas(request):
 
     rifas_links = sorted(rifas_links, key=lambda r: r["usos"], reverse=True)[:10]
 
-    # -------------------------
-    # Respuesta final
-    # -------------------------
     return Response({
         "activas": activas,
         "en_espera": en_espera,
@@ -538,10 +459,8 @@ def resumen_estadisticas(request):
         "total_generado_por_codigos": sum(c["monto_generado"] for c in codigos_resumen),
         "boletos_por_rifa": list(boletos_por_rifa),
         "rifas_por_mes": rifas_por_mes,
-        "metodos_pago": metodos_pago,
         "porcentaje_vendidos_por_tamano": porcentaje_vendidos,
         "porcentaje_por_precio": porcentaje_por_precio,
-        "ticket_promedio_por_metodo": ticket_promedio_por_metodo,
         "ticket_promedio_por_rifa": ticket_promedio_por_rifa,
         "top_rifas_mas_vendidas": list(boletos_por_rifa)[:10],
         "codigos_mas_usados": codigos_resumen,
@@ -564,8 +483,6 @@ def resumen_estadisticas(request):
         },
         "uso_links_por_rifa": rifas_links,
     })
-
-
 
 #Endpoint para listar rifas
 @api_view(["GET"])
@@ -669,14 +586,10 @@ def listar_transacciones(request):
     transacciones = Transaccion.objects.all().order_by("-fecha_creacion")
 
     estado = request.GET.get("estado", "").lower().strip()
-    metodo = request.GET.get("metodo", "").lower().strip()
     buscar = request.GET.get("buscar", "").strip()
 
     if estado:
         transacciones = transacciones.filter(estado__iexact=estado)
-
-    if metodo:
-        transacciones = transacciones.filter(metodo_pago__iexact=metodo)
 
     if buscar:
         transacciones = transacciones.filter(
@@ -803,7 +716,6 @@ def buscar_boleto(request):
             "nombre_completo": transaccion.nombre_completo,
             "correo": transaccion.correo,
             "telefono": transaccion.telefono,
-            "metodo_pago": transaccion.metodo_pago,
             "estado_transaccion": transaccion.estado,
             "fecha_transaccion": transaccion.fecha_creacion,
         })
@@ -812,76 +724,6 @@ def buscar_boleto(request):
         return Response({"mensaje": "Boleto no ha sido vendido aún."}, status=200)
 
     return Response(resultados)
-
-#Endpoint para marcar como completada la transaccion pagada con tdc
-@api_view(["POST"])
-def conekta_success(request):
-    from .models import Transaccion, BoletoSeleccionado
-    import requests
-
-    checkout_id = request.data.get("checkout_id")
-    order_id = request.data.get("order_id")
-
-    if not checkout_id or not order_id:
-        return Response({"error": "Faltan datos"}, status=400)
-
-    # Consultar la orden en Conekta
-    headers = {
-        "Accept": f"application/vnd.conekta-v2.1.0+json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.CONEKTA_API_KEY}"
-    }
-
-    url = f"https://api.conekta.io/orders/{order_id}"
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        return Response({"error": "No se pudo obtener información de Conekta"}, status=400)
-
-    orden = response.json()
-    folio = None
-
-    # Obtener el folio desde metadata o nombre del producto
-    try:
-        for item in orden["line_items"]["data"]:
-            if "Folio" in item["name"]:
-                folio = item["name"].split("Folio")[-1].strip()
-                break
-    except:
-        return Response({"error": "No se pudo extraer el folio"}, status=400)
-
-    if not folio:
-        return Response({"error": "Folio no encontrado"}, status=400)
-
-    try:
-        transaccion = Transaccion.objects.get(folio=folio)
-    except Transaccion.DoesNotExist:
-        return Response({"error": "Transacción no encontrada"}, status=404)
-
-    # Marcar como completada si no lo está
-    if transaccion.estado != "completado":
-        transaccion.estado = "completado"
-        transaccion.save()
-
-        BoletoSeleccionado.objects.filter(transaccion=transaccion).update(pagado=True)
-
-    boletos = list(
-        BoletoSeleccionado.objects.filter(transaccion=transaccion).values_list("numero", flat=True)
-    )
-
-    return Response({
-        "success": True,
-        "folio": transaccion.folio,
-        "nombre": transaccion.nombre_completo,
-        "correo": transaccion.correo,
-        "telefono": transaccion.telefono,
-        "metodo": transaccion.metodo_pago,
-        "estado": transaccion.estado,
-        "monto": transaccion.monto,
-        "rifa": transaccion.rifa_nombre,
-        "boletos": boletos,
-        "fecha": transaccion.fecha_creacion,
-        "total_boletos": transaccion.rifa.total_boletos if hasattr(transaccion, 'rifa') else 10000
-    })
 
 #Endpoint para validar codigos de promocion
 @api_view(["POST"])
@@ -1552,97 +1394,6 @@ def actualizar_premios_caja(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-#Endpoint para generar transacciones de Cajas
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def confirmar_compra_caja(request):
-    data = request.data
-    campos = ["nombre", "correo", "telefono", "nacimiento", "cantidad", "metodo_pago", "anon_id"]
-
-    if not all(k in data for k in campos):
-        return Response({"error": "Faltan campos obligatorios"}, status=400)
-
-    try:
-        rifa = RifaExclusiva.objects.filter(finalizada=False).latest("fecha_creacion")
-        caja = CajaSorpresa.objects.get(rifa_exclusiva=rifa)
-    except (RifaExclusiva.DoesNotExist, CajaSorpresa.DoesNotExist):
-        return Response({"error": "No hay rifa o caja activa"}, status=404)
-
-    telefono = data["telefono"]
-    if telefono.isdigit() and len(telefono) == 10:
-        telefono = f"+52{telefono}"
-
-    cantidad = int(data["cantidad"])
-    monto_total = round(cantidad * float(caja.precio), 2)
-
-    tiempo_expiracion = timezone.now() + timedelta(hours=2)
-    expires_at = int(tiempo_expiracion.timestamp())
-
-    try:
-        trans = TransaccionCaja.objects.create(
-            anon_id=data["anon_id"],
-            rifa_exclusiva=rifa,
-            monto=monto_total,
-            metodo_pago=data["metodo_pago"],
-            estado="pendiente",
-            nombre_completo=data["nombre"],
-            correo=data["correo"],
-            telefono=data["telefono"],
-            fecha_nacimiento=data["nacimiento"]
-        )
-    except Exception as e:
-        return Response({"error": f"Error al crear transacción: {str(e)}"}, status=500)
-
-    instrucciones = None
-    try:
-        metodo = data["metodo_pago"].lower()
-
-        if metodo == "oxxo":
-            instrucciones = crear_orden_oxxo(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=monto_total,
-                folio=trans.folio,
-                expires_at=expires_at
-            )
-        elif metodo == "spei":
-            instrucciones = crear_orden_spei(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=monto_total,
-                folio=trans.folio,
-                expires_at=expires_at
-            )
-        elif metodo == "tarjeta":
-            instrucciones = crear_orden_tarjeta(
-                nombre=data["nombre"],
-                correo=data["correo"],
-                telefono=telefono,
-                monto=monto_total,
-                folio=trans.folio,
-                expires_at=expires_at
-            )
-
-        if instrucciones is None:
-            trans.delete()
-            return Response({"error": "Error al generar instrucciones de pago"}, status=400)
-
-    except Exception as e:
-        trans.delete()
-        return Response({"error": f"Error al generar orden: {str(e)}"}, status=500)
-
-    return Response({
-        "success": True,
-        "folio": trans.folio,
-        "metodo": data["metodo_pago"],
-        "monto": monto_total,
-        "expira_pago": expires_at,
-        "instrucciones": instrucciones,
-    })
-
-
 
 #Endpoint para listar transacciones exclusivas
 @api_view(["GET"])
@@ -1651,7 +1402,6 @@ def listar_transacciones_caja(request):
     pagina = request.query_params.get("page", 1)
     buscar = request.query_params.get("buscar", "").strip()
     estado = request.query_params.get("estado", "").lower()
-    metodo = request.query_params.get("metodo", "").lower()
 
     transacciones = TransaccionCaja.objects.all().order_by("-fecha_creacion")
 
@@ -1665,8 +1415,6 @@ def listar_transacciones_caja(request):
     if estado:
         transacciones = transacciones.filter(estado__iexact=estado)
 
-    if metodo:
-        transacciones = transacciones.filter(metodo_pago__iexact=metodo)
 
     paginator = PageNumberPagination()
     paginator.page_size = 10

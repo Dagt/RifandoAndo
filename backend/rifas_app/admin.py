@@ -21,8 +21,8 @@ class GaleriaAdmin(admin.ModelAdmin):
 
 @admin.register(Transaccion)
 class TransaccionAdmin(admin.ModelAdmin):
-    list_display = ('folio', 'nombre_completo', 'monto', 'estado', 'metodo_pago', 'fecha_creacion')
-    list_filter = ('estado', 'metodo_pago')
+    list_display = ('folio', 'nombre_completo', 'monto', 'estado', 'fecha_creacion')
+    list_filter = ('estado',)
     search_fields = ('folio', 'nombre_completo', 'correo', 'telefono')
     ordering = ('-fecha_creacion',)
 
@@ -82,11 +82,6 @@ class PremioCajaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'caja', 'drop', 'valor_relativo')
     search_fields = ('nombre',)
 
-@admin.register(TransaccionCaja)
-class TransaccionCajaAdmin(admin.ModelAdmin):
-    list_display = ('folio', 'anon_id', 'monto', 'estado', 'metodo_pago', 'fecha_creacion')
-    search_fields = ('folio', 'anon_id')
-    ordering = ('-fecha_creacion',)
 
 @admin.register(AperturaCaja)
 class AperturaCajaAdmin(admin.ModelAdmin):

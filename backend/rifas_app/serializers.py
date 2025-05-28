@@ -110,8 +110,8 @@ class TransaccionSerializer(serializers.ModelSerializer):
         model = Transaccion
         fields = [
             "id", "folio", "nombre_completo", "correo", "telefono",
-            "estado", "metodo_pago", "monto", "fecha_creacion", "rifa_nombre",
-            "es_referido", "uso_codigo", "codigo"  # <- asegurarse de incluirlo
+            "estado", "monto", "fecha_creacion", "rifa_nombre",
+            "es_referido", "uso_codigo", "codigo", "es_premio"
         ]
 
     def get_es_referido(self, obj):
@@ -216,13 +216,12 @@ class TransaccionCajaSerializer(serializers.ModelSerializer):
             'anon_id',
             'rifa_exclusiva',
             'monto',
-            'metodo_pago',
             'estado',
             'fecha_creacion',
             'nombre_completo',
             'correo',
             'telefono',
-            'fecha_nacimiento',
+            'fecha_nacimiento'
         ]
 
 #Serializer para la apertura de las cajas----------------------------------------------------------------------

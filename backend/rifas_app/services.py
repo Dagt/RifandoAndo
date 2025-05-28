@@ -63,7 +63,6 @@ def procesar_transaccion_completada(transaccion: Transaccion) -> None:
                                 telefono=transaccion_origen.telefono,
                                 fecha_nacimiento=transaccion_origen.fecha_nacimiento,
                                 monto=0,
-                                metodo_pago='premio',
                                 estado='completado',
                                 rifa_nombre=link.rifa.nombre,
                                 es_premio=True

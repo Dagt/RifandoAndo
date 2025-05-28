@@ -157,10 +157,6 @@ const BuscadorBoletos = () => {
                     {res.rifa}
                   </p>
                   <p>
-                    <CreditCard className="inline w-4 h-4 text-orange-300 mr-1" />
-                    {res.metodo_pago}
-                  </p>
-                  <p>
                     {res.pagado ? (
                       <CheckCircle className="inline w-4 h-4 text-green-400 mr-1" />
                     ) : (

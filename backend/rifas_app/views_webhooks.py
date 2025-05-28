@@ -1,68 +1,59 @@
-from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-import json
-import base64
-import logging
-
-from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.backends import default_backend
-
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada
+import requests
+import logging
 
 log = logging.getLogger(__name__)
 
-class ConektaWebhookView(APIView):
-    authentication_classes = []
-    permission_classes = []
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([])
+def mercadopago_webhook(request):
+    log.info("📦 Webhook recibido de Mercado Pago")
 
-    def post(self, request):
-        log.info("✅ Webhook recibido")
+    try:
+        evento = request.data
+        log.debug(f"🔍 Payload recibido: {evento}")
 
-        try:
-            # Obtener la firma si existe
-            signature_b64 = request.headers.get("x-conekta-signature-256", "")
-            if not signature_b64:
-                log.error("❌ Error en webhook: Falta header de firma")
-                return Response({"message": "Evento recibido sin firma. Ignorado."}, status=200)
+        if evento.get("type") not in ["payment.updated", "payment.created"]:
+            return Response({"message": "Evento no relevante"}, status=200)
 
-            # Verificar firma
-            signature = base64.b64decode(signature_b64)
-            public_key_pem = settings.CONEKTA_PUBLIC_KEY_PEM.encode()
-            public_key = serialization.load_pem_public_key(public_key_pem, backend=default_backend())
+        payment_id = evento.get("data", {}).get("id")
+        if not payment_id:
+            return Response({"error": "Sin ID de pago"}, status=400)
 
-            public_key.verify(
-                signature,
-                request.body,
-                padding.PKCS1v15(),
-                hashes.SHA256()
-            )
+        # Consulta el estado del pago directamente a MP
+        headers = {
+            "Authorization": f"Bearer {settings.MERCADO_PAGO_ACCESS_TOKEN}"
+        }
+        r = requests.get(f"https://api.mercadopago.com/v1/payments/{payment_id}", headers=headers)
+        if r.status_code != 200:
+            log.warning(f"❌ No se pudo consultar el pago {payment_id}: {r.text}")
+            return Response({"error": "No se pudo verificar el pago"}, status=400)
 
-            data = json.loads(request.body)
-            log.info(f"📦 Evento recibido: {data.get('type')}")
+        pago = r.json()
+        if pago.get("status") != "approved":
+            log.info(f"ℹ️ Pago {payment_id} no aprobado: estado = {pago.get('status')}")
+            return Response({"message": "Pago aún no aprobado"}, status=200)
 
-            if data.get("type") != "order.paid":
-                return Response({"message": "Evento ignorado"}, status=200)
+        folio = pago.get("external_reference")
+        if not folio:
+            log.error("❌ No se encontró external_reference en el pago")
+            return Response({"error": "Folio faltante en metadata"}, status=400)
 
-            # Extraer el folio desde metadata o line_items
-            folio = data.get("data", {}).get("object", {}).get("metadata", {}).get("folio")
-            if not folio:
-                for item in data.get("data", {}).get("object", {}).get("line_items", {}).get("data", []):
-                    if "Folio" in item.get("name", ""):
-                        folio = item["name"].split("Folio")[-1].strip()
-                        break
+        tx = Transaccion.objects.select_for_update().get(folio=folio)
+        procesar_transaccion_completada(tx)
 
-            if not folio:
-                log.warning("⚠️ Webhook sin folio.")
-                return Response({"error": "No folio"}, status=400)
+        return Response({"message": "Transacción procesada"}, status=200)
 
-            tx = Transaccion.objects.select_for_update().get(folio=folio)
-            procesar_transaccion_completada(tx)
-            return Response({"message": "Transacción procesada"}, status=200)
-
-        except Exception as e:
-            log.error(f"❌ Error en webhook: {e}")
-            return Response({"error": str(e)}, status=400)
+    except Transaccion.DoesNotExist:
+        log.error(f"❌ No se encontró transacción con folio recibido")
+        return Response({"error": "Transacción no encontrada"}, status=404)
+    except Exception as e:
+        log.exception(f"❌ Error en webhook Mercado Pago")
+        return Response({"error": str(e)}, status=400)

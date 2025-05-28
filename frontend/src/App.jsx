@@ -4,7 +4,6 @@ import Home from "./pages/Home";
 import RifaDetalle from "./pages/RifaDetalle";
 import SeleccionBoletos from "./pages/SeleccionBoletos";
 import ConfirmarCompra from "./pages/ConfirmarCompra";
-import ConfirmarCompraCaja from "./pages/ConfirmarCompraCaja";
 import Layout from "./components/Layout";
 import ConfirmacionFinal from "./pages/ConfirmacionFinal";
 import Verificador from "./pages/Verificador";
@@ -26,8 +25,6 @@ import NotFound from "./pages/NotFound";
 import PanelTransacciones from "./pages/PanelTransacciones";
 import PanelTransaccionesCaja from "./pages/PanelTransaccionesCaja";
 import BuscadorBoletos from "./pages/BuscadorBoletos";
-import InstruccionesPago from "./pages/InstruccionesPago";
-import InstruccionesTransferencia from "./pages/InstruccionesTransferencia";
 import FalloPago from "./pages/FalloPago";
 import PoliticasCondiciones from "./pages/PoliticasCondiciones";
 import Contacto from "./pages/Contacto";
@@ -45,7 +42,6 @@ function App() {
           <Route path="/rifa/:id" element={<RifaDetalle />} />
           <Route path="/rifa/:id/participar" element={<SeleccionBoletos />} />
           <Route path="/rifa/:id/confirmar" element={<ConfirmarCompra />} />
-          <Route path="/caja/confirmar-compra" element={<ConfirmarCompraCaja />} />
           <Route path="/compra-exitosa" element={<ConfirmacionFinal />} />
           <Route path="/verificador" element={<Verificador />} />
           <Route path="/ganadores" element={<Ganadores />} />
@@ -53,12 +49,10 @@ function App() {
           <Route path="/lgn" element={<Login />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/fallo-pago" element={<FalloPago />} />
-          <Route path="/instrucciones-pago" element={<InstruccionesPago />} />
           <Route path="/terminos" element={<PoliticasCondiciones />} />
           <Route path="/como-funciona" element={<ComoFunciona />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/usar-link/:codigo" element={<UsarLink />} />
-          <Route path="/instrucciones-transferencia" element={<InstruccionesTransferencia />} />
           <Route path="/adm-panel" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
           <Route path="/panel/crear-rifa" element={<RutaProtegida> <CrearRifa /></RutaProtegida>} />
           <Route path="/panel/crear-rifa-eclusiva" element={<RutaProtegida> <CrearRifaExclusiva /></RutaProtegida>} />

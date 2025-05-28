@@ -1,5 +1,5 @@
 from django.urls import path
-from rifas_app.views_webhooks import ConektaWebhookView
+from rifas_app.views_webhooks import mercadopago_webhook
 from .views import (
     boletos_disponibles,
     confirmar_compra,
@@ -18,7 +18,6 @@ from .views import (
     completar_transaccion,
     cancelar_transaccion,
     buscar_boleto,
-    conekta_success,
     validar_codigo,
     listar_codigos_promocionales,
     crear_codigo_promocional,
@@ -42,12 +41,11 @@ from .views import (
     crear_caja_sorpresa,
     obtener_caja_actual,
     actualizar_premios_caja,
-    confirmar_compra_caja,
     listar_transacciones_caja
 )
 
 urlpatterns = [
-    path("webhooks/conekta/", ConektaWebhookView.as_view(), name="conekta-webhook"),
+    path("webhooks/mercadopago/", mercadopago_webhook, name="mercadopago-webhook"),
     path('rifas/', listar_rifas, name="listar_rifas"),
     path('exclusiva/listar-rifas/', listar_rifas_exclusivas, name="listar_rifas_exclusivas"),
     path('rifas/<int:rifa_id>/', obtener_rifa, name="obtener_rifa"),
@@ -71,7 +69,6 @@ urlpatterns = [
     path("transacciones/<str:folio>/completar/", completar_transaccion, name="completar_transaccion"),
     path("transacciones/<str:folio>/cancelar/", cancelar_transaccion, name="cancelar_transaccion"),
     path("buscar-boletos/", buscar_boleto, name="buscar_boleto"),
-    path("conekta/success/<str:order_id>/", conekta_success),
     path("validar-codigo/", validar_codigo, name="validar_codigo"),
     path("codigos-promocionales/", listar_codigos_promocionales),
     path("codigos-promocionales/crear/", crear_codigo_promocional),
@@ -89,6 +86,5 @@ urlpatterns = [
     path("crear-caja/", crear_caja_sorpresa, name="crear-caja-sorpresa"),
     path("caja-actual/", obtener_caja_actual),
     path("actualizar-premios-caja/", actualizar_premios_caja),
-    path("caja/confirmar-compra/", confirmar_compra_caja),
     path("transacciones-caja/", listar_transacciones_caja, name="transacciones-caja"),
 ]
