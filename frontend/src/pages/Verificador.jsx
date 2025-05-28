@@ -122,7 +122,6 @@ const Verificador = () => {
               <p className="flex items-center gap-2"><User className="w-4 h-4 text-orange-300" /><span className="font-bold">Nombre:</span> {resultado.nombre}</p>
               <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-blue-300" /><span className="font-bold">Correo:</span> {resultado.correo}</p>
               <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-pink-300" /><span className="font-bold">Teléfono:</span> {resultado.telefono}</p>
-              <p className="flex items-center gap-2"><Receipt className="w-4 h-4 text-green-300" /><span className="font-bold">Método:</span> {resultado.metodo_pago}</p>
               <p className="flex items-center gap-2"><Calendar className="w-4 h-4 text-white/80" /><span className="font-bold">Fecha:</span> {new Date(resultado.fecha).toLocaleString()}</p>
               <p className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-white/80" /><span className="font-bold">Total:</span> ${resultado.monto}</p>
               <p className="flex items-center gap-2"><Gift className="w-4 h-4 text-yellow-300" /><span className="font-bold">Rifa:</span> {resultado.rifa}</p>

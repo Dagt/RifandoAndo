@@ -139,11 +139,9 @@ const Estadisticas = () => {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 mb-8">
         <ChartCard title="Rifas por Estado" type="pie" series={[data.activas, data.en_espera, data.finalizadas]} categories={["Activas", "En espera", "Finalizadas"]} color={["#f97316", "#facc15", "#a78bfa"]} />
         <ChartCard title="Boletos por Rifa" type="bar" series={data.boletos_por_rifa.map(r => r.vendidos)} categories={data.boletos_por_rifa.map(r => r.nombre)} color="#facc15" />
-        <ChartCard title="Métodos de Pago" type="donut" series={["SPEI", "OXXO", "TARJETA"].map(m => data.metodos_pago[m] || 0)} categories={["SPEI", "OXXO", "TARJETA"]} color={["#22c55e", "#f97316", "#ef4444"]} />
         <ChartCard title="Rifas por Mes" type="area" series={Object.values(data.rifas_por_mes)} categories={Object.keys(data.rifas_por_mes)} color="#38bdf8" />
         <ChartCard title="% Boletos Vendidos por Tamaño" type="bar" series={Object.values(data.porcentaje_vendidos_por_tamano)} categories={Object.keys(data.porcentaje_vendidos_por_tamano)} color="#34d399" />
         <ChartCard title="% Ventas por Precio" type="bar" series={Object.values(data.porcentaje_por_precio)} categories={Object.keys(data.porcentaje_por_precio)} color="#f87171" />
-        <ChartCard title="Ticket Promedio por Método" type="bar" series={Object.values(data.ticket_promedio_por_metodo)} categories={Object.keys(data.ticket_promedio_por_metodo)} color="#7c3aed" />
         <ChartCard title="Ticket Promedio por Rifa" type="bar" series={ticketPromedioVisible.map(r => r.ticket_promedio)} categories={ticketPromedioVisible.map(r => r.nombre)} color="#4ade80" />
         <ChartCard title="Estado de Transacciones" type="pie" series={[data.transacciones_completadas, data.transacciones_canceladas]} categories={["Completadas", "Canceladas"]} color={["#22c55e", "#ef4444"]} />
       </div>
@@ -182,10 +180,8 @@ const Estadisticas = () => {
         <ul className="list-disc pl-6 space-y-2">
           <li><b>Rifas por Estado:</b> cantidad actual de rifas activas, en espera y finalizadas.</li>
           <li><b>Boletos por Rifa:</b> muestra cuáles rifas han vendido más boletos.</li>
-          <li><b>Métodos de Pago:</b> compara la popularidad de SPEI, OXXO y tarjeta.</li>
           <li><b>% Boletos por Tamaño:</b> qué tanto se están vendiendo proporcionalmente las rifas según su tamaño total de boletos (no suma 100%).</li>
           <li><b>% Ventas por Precio:</b> qué precios de boleto generan más ventas.</li>
-          <li><b>Ticket Promedio por Método:</b> cuánto gasta en promedio un usuario por tipo de pago.</li>
           <li><b>Ticket Promedio por Rifa:</b> gasto promedio por comprador en cada rifa.</li>
           <li><b>Top Códigos por Ingresos:</b> qué códigos han generado más dinero.</li>
           <li><b>Distribución por Tipo de Código:</b> tipos de códigos usados (porcentaje o boletos gratis).</li>
