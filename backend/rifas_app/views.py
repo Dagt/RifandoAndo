@@ -5,7 +5,7 @@ import math
 import random
 import logging
 from rest_framework.response import Response
-from rifas_app.services import procesar_transaccion_completada
+from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now, timedelta, localtime, datetime,  get_current_timezone
@@ -19,7 +19,6 @@ from datetime import timedelta
 from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja, AperturaCaja
 from .mercadopago_utils import crear_preferencia_pago
 from django.utils import timezone
-from .sms_utils import enviar_sms
 from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ValidationError
 from .serializers import RifaSerializer, RifaFinalizadaSerializer, ProximasRifasSerializer, TransaccionSerializer, CodigoPromocionalSerializer, RifaExclusivaSerializer, JackpotSerializer, TransaccionCajaSerializer, AperturaCajaSerializer
@@ -95,9 +94,8 @@ def confirmar_compra(request):
                 codigo_usado = CodigoUsado.objects.create(
                     codigo=promo,
                     telefono=telefono,
-                    monto_generado=data["monto"]
+                    monto_generado=0  # Solo lo actualizaremos si se completa el pago
                 )
-                promo.save()
         except CodigoPromocional.DoesNotExist:
             print("⚠️ Código promocional no encontrado")
 
@@ -142,28 +140,6 @@ def confirmar_compra(request):
         transaccion.delete()
         logger.error("❌ Error al generar la orden", exc_info=True)
         return Response({"error": f"Error al generar la orden: {str(e)}"}, status=400)
-
-    # SMS
-    hora_limite = transaccion.fecha_expiracion.astimezone(get_current_timezone()).strftime('%d/%b %H:%Mh')
-    verificador_url = f"https://www.rifandoando.club/verificador?folio={transaccion.folio}"
-    folio = transaccion.folio
-    monto = transaccion.monto
-
-    mensaje = None
-    mensaje = (
-        f"RifandoAndo\n\n"
-        f"Folio: {folio}\n"
-        f"Monto: ${monto}\n\n"
-        f"Paga antes de {hora_limite}\n"
-        f"Verifica tu compra en:\n {verificador_url}"
-       # f"Accede a tus instrucciones:\n{instrucciones['checkout_url']}"
-    )
-
-    if mensaje:
-        try:
-            enviar_sms(mensaje, telefono)
-        except Exception as e:
-            print("❌ Error al enviar SMS:", e)
 
     response_data = {
         "success": True,
@@ -628,56 +604,12 @@ def cancelar_transaccion(request, folio):
     except Transaccion.DoesNotExist:
         return Response({"error": "Transacción no encontrada."}, status=404)
 
-    if transaccion.estado == "cancelado":
+    if not cancelar_transaccion_completa(transaccion):
         return Response({"error": "La transacción ya fue cancelada."}, status=400)
 
-    # Cambiar estado de la transacción
-    transaccion.estado = "cancelado"
-    transaccion.save()
-
-    # Eliminar todos los boletos asociados a la transacción
-    BoletoSeleccionado.objects.filter(transaccion=transaccion).delete()
-
-    # Invalidar link de referido generado (si existe)
-    try:
-        link = LinkReferido.objects.get(transaccion_origen=transaccion)
-        link.expirado = True
-        link.usado = True
-        link.save()
-
-        # Cancelar la transacción de boletos de premio, si existiera
-        if link.transaccion_premio:
-            transaccion_premio = link.transaccion_premio
-            transaccion_premio.estado = "cancelado"
-            transaccion_premio.save()
-
-            # Borrar boletos de la transacción de premio
-            BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
-
-    except LinkReferido.DoesNotExist:
-        pass  # No hay problema si no existe
-
-    # Revertir uso de código promocional (si aplicaba)
-    if transaccion.codigo_usado:
-        try:
-            codigo_usado = transaccion.codigo_usado
-            codigo_promocional = codigo_usado.codigo
-
-            if codigo_promocional:
-                # Disminuir usos_actuales
-                codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
-                codigo_promocional.save()
-
-            # Eliminar registro de uso
-            codigo_usado.delete()
-
-        except Exception as e:
-            print(f"Error al revertir uso de código promocional: {str(e)}")
-
     return Response({
-        "mensaje": "Transacción cancelada, boletos liberados, link invalidado, boletos de premio borrados y código promocional revertido si aplicaba."
-    })
-
+        "mensaje": "Transacción cancelada correctamente, boletos liberados, links y códigos revertidos si aplicaban."
+    }, status=200)
 
 
 #Endpoint para la busqueda de boletos

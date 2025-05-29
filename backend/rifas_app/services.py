@@ -110,9 +110,12 @@ def procesar_transaccion_completada(transaccion: Transaccion) -> None:
     # Registrar uso de código promocional si aplica
     if transaccion.codigo_usado:
         try:
-            transaccion.codigo_usado.fecha_uso = timezone.now()
-            transaccion.codigo_usado.save()
-            codigo = transaccion.codigo_usado.codigo
+            codigo_usado = transaccion.codigo_usado
+            codigo_usado.fecha_uso = timezone.now()
+            codigo_usado.monto_generado = transaccion.monto
+            codigo_usado.save()
+
+            codigo = codigo_usado.codigo
             codigo.usos_actuales = (codigo.usos_actuales or 0) + 1
             codigo.save()
         except Exception as e:
@@ -173,3 +176,43 @@ def procesar_transaccion_completada(transaccion: Transaccion) -> None:
 
     except Exception as e:
         log.error(f"⚠️ Error al enviar correo de confirmación: {e}")
+
+
+
+def cancelar_transaccion_completa(transaccion: Transaccion) -> bool:
+    if transaccion.estado == "cancelado":
+        return False
+
+    transaccion.estado = "cancelado"
+    transaccion.save()
+
+    BoletoSeleccionado.objects.filter(transaccion=transaccion).delete()
+
+    try:
+        link = LinkReferido.objects.get(transaccion_origen=transaccion)
+        link.expirado = True
+        link.usado = True
+        link.save()
+
+        if link.transaccion_premio:
+            transaccion_premio = link.transaccion_premio
+            transaccion_premio.estado = "cancelado"
+            transaccion_premio.save()
+            BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
+    except LinkReferido.DoesNotExist:
+        pass
+
+    if transaccion.codigo_usado:
+        try:
+            codigo_usado = transaccion.codigo_usado
+            codigo_promocional = codigo_usado.codigo
+
+            if codigo_promocional:
+                codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
+                codigo_promocional.save()
+
+            codigo_usado.delete()
+        except Exception as e:
+            log.warning(f"⚠️ Error al revertir código promocional: {str(e)}")
+
+    return True

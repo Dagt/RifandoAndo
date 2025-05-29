@@ -68,6 +68,7 @@ class Transaccion(models.Model):
     )
     codigo_referido = models.CharField(max_length=100, null=True, blank=True)
     es_premio = models.BooleanField(default=False)
+    payment_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
 
     def save(self, *args, **kwargs):
         if not self.folio:

@@ -29,7 +29,7 @@ def crear_preferencia_pago(transaccion, rifa, boletos_solicitados, tiempo_expira
         "notification_url": settings.MP_WEBHOOK_URL,
         "external_reference": transaccion.folio,
         "expires": True,
-        "expiration_date_to": expires_at_dt.isoformat().replace("+00:00", "Z"),
+        "date_of_expiration": expires_at_dt.strftime("%Y-%m-%dT%H:%M:%S.000-06:00"),
         "back_urls": {
             "success": f"{settings.BASE_FRONTEND_URL}/verificador?folio={transaccion.folio}",
             "failure": f"{settings.BASE_FRONTEND_URL}/verificador?folio={transaccion.folio}"
