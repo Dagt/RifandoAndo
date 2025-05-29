@@ -72,8 +72,6 @@ def mercadopago_webhook(request):
 
         # Completar si aún no estaba completada
         if trans.estado != "completado":
-            trans.estado = "completado"
-            trans.save(update_fields=["estado"])
             procesar_transaccion_completada(trans)
             log.info(f"✅ Transacción completada con éxito: {trans.folio}")
 
