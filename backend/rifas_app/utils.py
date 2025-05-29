@@ -16,8 +16,8 @@ def enviar_sms_pago_creado(trans):
 
 def enviar_sms_pago_exitoso(trans):
     mensaje = (
-        f"🎉 Gracias por tu compra en RifandoAndo\n\n"
-        f"Folio: {trans.folio}\n"
+        f"Gracias por tu compra en RifandoAndo!\n\n"
+        
         f"Verifica tu compra en:\n{settings.BASE_FRONTEND_URL}/verificador?folio={trans.folio}"
     )
     enviar_sms(mensaje, trans.telefono)

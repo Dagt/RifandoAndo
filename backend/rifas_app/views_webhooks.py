@@ -60,23 +60,18 @@ def mercadopago_webhook(request):
             log.error("❌ No se encontró transacción con ese folio")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
-        if trans.estado == "completado":
-            return Response({"ok": "Transacción ya procesada"}, status=200)
-
-        # 1. Pago instantáneo (tarjeta) aprobado
+        # Pago con tarjeta → se procesa y se envía SMS
         if status_pago == "approved" and tipo_pago == "credit_card":
-            trans.estado = "completado"
-            trans.save()
-            procesar_transaccion_completada(trans)
-            enviar_sms_pago_exitoso(trans)  # SOLO en este caso
+            procesar_transaccion_completada(trans)  # Esto ya marca como completado, actualiza códigos, referidos, etc.
+            enviar_sms_pago_exitoso(trans)  # SOLO aquí se envía este SMS
 
-        # 2. Cancelado / rechazado / expirado → cancelar, sin SMS
+        # Rechazado, cancelado o expirado → cancelar sin SMS
         elif status_pago in ["rejected", "cancelled", "expired"]:
             cancelar_transaccion_completa(trans)
 
-        # 3. Pago creado con referencia (OXXO o SPEI)
+        # Pago creado (OXXO o SPEI) → solo enviar SMS inicial
         elif evento.get("action") == "payment.created" and tipo_pago in ["ticket", "bank_transfer"]:
-            enviar_sms_pago_creado(trans)  # SOLO aquí se envía SMS con instrucciones
+            enviar_sms_pago_creado(trans)  # SOLO aquí se manda este SMS
 
         return Response({"message": f"Estado procesado: {status_pago}"}, status=200)
 
