@@ -4,8 +4,7 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rifas_app.models import Transaccion
-from rifas_app.utils import enviar_sms_pago_creado, enviar_sms_pago_exitoso
-from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
+from rifas_app.services import procesar_transaccion_completada
 import requests
 import logging
 
@@ -18,76 +17,63 @@ def mercadopago_webhook(request):
     log.info("📦 Webhook recibido de Mercado Pago")
 
     try:
-        evento = request.data
-        log.debug(f"🔍 Payload recibido: {evento}")
+        data = request.data
+        log.debug(f"🔍 Payload: {data}")
 
-        topic = evento.get("topic") or evento.get("type")
-        if topic != "payment":
-            log.info(f"🟡 Evento ignorado — topic recibido: {topic}")
-            return Response({"message": "Evento no relevante"}, status=200)
+        # Aceptamos solo eventos de tipo payment
+        if (data.get("type") or data.get("topic")) != "payment":
+            return Response({"message": "Evento ignorado"}, status=200)
 
+        # Intentamos obtener el ID de pago
         payment_id = (
-            evento.get("data", {}).get("id") or
-            evento.get("id") or
+            data.get("data", {}).get("id") or
+            data.get("id") or
             request.query_params.get("id")
         )
+
         if not payment_id:
             return Response({"error": "Sin ID de pago"}, status=400)
 
         log.info(f"🔎 Consultando pago {payment_id}")
-
         headers = {
             "Authorization": f"Bearer {settings.MERCADO_PAGO_ACCESS_TOKEN}"
         }
         r = requests.get(f"https://api.mercadopago.com/v1/payments/{payment_id}", headers=headers)
         if r.status_code != 200:
-            log.warning(f"❌ No se pudo consultar el pago {payment_id}: {r.text}")
-            return Response({"error": "No se pudo verificar el pago"}, status=400)
+            log.warning(f"❌ Error al consultar pago: {r.text}")
+            return Response({"error": "Pago no encontrado"}, status=200)  # Respondemos 200 aunque sea error
 
         pago = r.json()
         status_pago = pago.get("status")
         tipo_pago = pago.get("payment_type_id")
         external_reference = pago.get("external_reference")
 
-        log.debug(f"🔎 Estado del pago {payment_id}: {status_pago} | Tipo: {tipo_pago}")
+        if status_pago != "approved" or tipo_pago != "credit_card":
+            log.info(f"⏭️ Ignorado: status {status_pago} tipo {tipo_pago}")
+            return Response({"message": "No procesado"}, status=200)
 
         if not external_reference:
-            return Response({"error": "Folio no disponible"}, status=400)
+            return Response({"error": "Sin folio (external_reference)"}, status=400)
 
+        # Buscar transacción y completar
         try:
             trans = Transaccion.objects.select_related("codigo_usado").prefetch_related("boletos").get(folio=external_reference)
         except Transaccion.DoesNotExist:
-            log.error("❌ No se encontró transacción con ese folio")
+            log.error(f"❌ No se encontró la transacción con folio {external_reference}")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
-        # Ya completada y ya tiene payment_id, ignoramos
-        if trans.estado == "completado" and trans.payment_id:
-            log.info(f"✅ Webhook duplicado ignorado para transacción {trans.folio}")
-            return Response({"ok": "Transacción ya procesada"}, status=200)
-
-        # Guardar payment_id si aún no está
         if not trans.payment_id:
             trans.payment_id = payment_id
             trans.save(update_fields=["payment_id"])
 
-        if status_pago == "approved":
-            # Solo ahora procesamos completado si no lo estaba
-            if trans.estado != "completado":
-                trans.estado = "completado"
-                trans.save(update_fields=["estado"])
-                procesar_transaccion_completada(trans)
+        if trans.estado != "completado":
+            trans.estado = "completado"
+            trans.save(update_fields=["estado"])
+            procesar_transaccion_completada(trans)
+            log.info(f"✅ Transacción completada: {trans.folio}")
 
-            if tipo_pago == "credit_card":
-                enviar_sms_pago_exitoso(trans)
-
-        elif status_pago in ["rejected", "cancelled", "expired"]:
-            cancelar_transaccion_completa(trans)
-
-        elif evento.get("action") == "payment.created" and tipo_pago in ["ticket", "bank_transfer"]:
-            enviar_sms_pago_creado(trans)
-
-        return Response({"message": f"Estado procesado: {status_pago}"}, status=200)
+        return Response({"ok": True}, status=200)
 
     except Exception as e:
-        log.exception("❌ Error procesando webhook Mercado Pago")
+        log.exception("❌ Error procesando webhook")
         return Response({"error": str(e)}, status=400)
