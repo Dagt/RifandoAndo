@@ -20,17 +20,17 @@ def mercadopago_webhook(request):
         data = request.data
         log.debug(f"🔍 Payload: {data}")
 
-        # Aceptamos solo eventos de tipo payment
+        # Solo procesamos eventos de tipo payment
         if (data.get("type") or data.get("topic")) != "payment":
+            log.info("⏭️ Evento ignorado por tipo")
             return Response({"message": "Evento ignorado"}, status=200)
 
-        # Intentamos obtener el ID de pago
+        # Extraer payment_id
         payment_id = (
             data.get("data", {}).get("id") or
             data.get("id") or
             request.query_params.get("id")
         )
-
         if not payment_id:
             return Response({"error": "Sin ID de pago"}, status=400)
 
@@ -40,39 +40,44 @@ def mercadopago_webhook(request):
         }
         r = requests.get(f"https://api.mercadopago.com/v1/payments/{payment_id}", headers=headers)
         if r.status_code != 200:
-            log.warning(f"❌ Error al consultar pago: {r.text}")
-            return Response({"error": "Pago no encontrado"}, status=200)  # Respondemos 200 aunque sea error
+            log.warning(f"❌ No se pudo consultar el pago {payment_id}: {r.text}")
+            return Response({"error": "Pago no encontrado"}, status=200)
 
         pago = r.json()
         status_pago = pago.get("status")
         tipo_pago = pago.get("payment_type_id")
         external_reference = pago.get("external_reference")
+        order_id = pago.get("order", {}).get("id") or pago.get("order_id")
+
+        log.debug(f"🧾 Detalles del pago — status: {status_pago} | tipo: {tipo_pago} | ext_ref: {external_reference} | order_id: {order_id}")
 
         if status_pago != "approved" or tipo_pago != "credit_card":
-            log.info(f"⏭️ Ignorado: status {status_pago} tipo {tipo_pago}")
-            return Response({"message": "No procesado"}, status=200)
+            log.info("⏭️ Webhook ignorado por estado o tipo de pago")
+            return Response({"message": "Pago no aplicable"}, status=200)
 
         if not external_reference:
-            return Response({"error": "Sin folio (external_reference)"}, status=400)
+            return Response({"error": "Folio (external_reference) ausente"}, status=400)
 
-        # Buscar transacción y completar
         try:
             trans = Transaccion.objects.select_related("codigo_usado").prefetch_related("boletos").get(folio=external_reference)
         except Transaccion.DoesNotExist:
-            log.error(f"❌ No se encontró la transacción con folio {external_reference}")
+            log.error(f"❌ Transacción no encontrada para folio: {external_reference}")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
+        # Guardar payment_id si no estaba registrado
         if not trans.payment_id:
-            trans.payment_id = payment_id
+            trans.payment_id = str(payment_id)
             trans.save(update_fields=["payment_id"])
+            log.info(f"💾 payment_id guardado en transacción: {payment_id}")
 
+        # Completar si aún no estaba completada
         if trans.estado != "completado":
             trans.estado = "completado"
             trans.save(update_fields=["estado"])
             procesar_transaccion_completada(trans)
-            log.info(f"✅ Transacción completada: {trans.folio}")
+            log.info(f"✅ Transacción completada con éxito: {trans.folio}")
 
-        return Response({"ok": True}, status=200)
+        return Response({"ok": True, "payment_id": payment_id, "folio": trans.folio}, status=200)
 
     except Exception as e:
         log.exception("❌ Error procesando webhook")
