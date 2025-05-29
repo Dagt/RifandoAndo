@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rifas_app.models import Transaccion
 from rifas_app.utils import enviar_sms_pago_creado, enviar_sms_pago_exitoso
-from rifas_app.services.transacciones import procesar_transaccion_completada, cancelar_transaccion_completa
+from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
 import requests
 import logging
 
@@ -21,13 +21,11 @@ def mercadopago_webhook(request):
         evento = request.data
         log.debug(f"🔍 Payload recibido: {evento}")
 
-        # Soporte para topic o type
         topic = evento.get("topic") or evento.get("type")
         if topic != "payment":
             log.info(f"🟡 Evento ignorado — topic recibido: {topic}")
             return Response({"message": "Evento no relevante"}, status=200)
 
-        # Obtener ID del pago
         payment_id = (
             evento.get("data", {}).get("id") or
             evento.get("id") or
@@ -61,11 +59,11 @@ def mercadopago_webhook(request):
             log.error("❌ No se encontró transacción con ese folio")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
-        if trans.estado == "completada":
+        if trans.estado == "completado":
             return Response({"ok": "Transacción ya procesada"}, status=200)
 
         if status_pago == "approved":
-            trans.estado = "completada"
+            trans.estado = "completado"
             trans.save()
             procesar_transaccion_completada(trans)
 
@@ -83,3 +81,4 @@ def mercadopago_webhook(request):
     except Exception as e:
         log.exception("❌ Error procesando webhook Mercado Pago")
         return Response({"error": str(e)}, status=400)
+    
