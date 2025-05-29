@@ -18,6 +18,8 @@ def procesar_transaccion_completada(tx: Transaccion):
     Marca la transacción como completada y ejecuta TODA la lógica
     (boletos, referidos, correos…).  Es idempotente.
     """
+
+    tx = Transaccion.objects.select_for_update().get(id=tx.id)
     if tx.estado == "completado":
         return
 
