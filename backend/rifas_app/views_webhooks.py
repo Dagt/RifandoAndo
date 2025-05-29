@@ -48,24 +48,34 @@ def mercadopago_webhook(request):
         status_pago = pago.get("status")
         tipo_pago = pago.get("payment_type_id")
         external_reference = pago.get("external_reference")
+
         log.debug(f"🔎 Estado del pago {payment_id}: {status_pago} | Tipo: {tipo_pago}")
 
         if not external_reference:
             return Response({"error": "Folio no disponible"}, status=400)
 
         try:
-            trans = Transaccion.objects.get(folio=external_reference)
+            trans = Transaccion.objects.select_related("codigo_usado").prefetch_related("boletos").get(folio=external_reference)
         except Transaccion.DoesNotExist:
             log.error("❌ No se encontró transacción con ese folio")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
-        if trans.estado == "completado":
+        # Ya completada y ya tiene payment_id, ignoramos
+        if trans.estado == "completado" and trans.payment_id:
+            log.info(f"✅ Webhook duplicado ignorado para transacción {trans.folio}")
             return Response({"ok": "Transacción ya procesada"}, status=200)
 
+        # Guardar payment_id si aún no está
+        if not trans.payment_id:
+            trans.payment_id = payment_id
+            trans.save(update_fields=["payment_id"])
+
         if status_pago == "approved":
-            trans.estado = "completado"
-            trans.save()
-            procesar_transaccion_completada(trans)
+            # Solo ahora procesamos completado si no lo estaba
+            if trans.estado != "completado":
+                trans.estado = "completado"
+                trans.save(update_fields=["estado"])
+                procesar_transaccion_completada(trans)
 
             if tipo_pago == "credit_card":
                 enviar_sms_pago_exitoso(trans)
@@ -81,4 +91,3 @@ def mercadopago_webhook(request):
     except Exception as e:
         log.exception("❌ Error procesando webhook Mercado Pago")
         return Response({"error": str(e)}, status=400)
-    
