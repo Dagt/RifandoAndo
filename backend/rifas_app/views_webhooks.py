@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
-from rifas_app.utils import enviar_sms_pago_exitoso
+from rifas_app.utils import enviar_sms_pago_exitoso, enviar_sms_pago_creado
 import requests
 import logging
 
@@ -23,12 +23,10 @@ def mercadopago_webhook(request):
         data = request.data
         log.debug(f"🔍 Payload recibido: {data}")
 
-        # Aceptamos solo eventos de tipo payment
         if (data.get("type") or data.get("topic")) != "payment":
             log.info("⏭️ Webhook ignorado por tipo")
             return Response({"message": "Evento ignorado"}, status=200)
 
-        # Extraer payment_id
         payment_id = (
             data.get("data", {}).get("id") or
             data.get("id") or
@@ -63,6 +61,11 @@ def mercadopago_webhook(request):
                     tx.save(update_fields=["payment_id"])
                     log.info(f"💾 payment_id guardado en transacción: {payment_id}")
 
+                # 👇 Enviar SMS si es recién creado (status "pending") y método es OXXO o SPEI
+                if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec", "account_money"]:
+                    enviar_sms_pago_creado(tx)
+                    log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
+
                 if status_pago == "approved":
                     if tx.estado != "completado":
                         procesar_transaccion_completada(tx)
@@ -70,7 +73,6 @@ def mercadopago_webhook(request):
 
                         if tipo_pago == "credit_card":
                             enviar_sms_pago_exitoso(tx)
-
 
                 elif status_pago in ["rejected", "cancelled", "expired"]:
                     if tx.estado != "cancelado":
