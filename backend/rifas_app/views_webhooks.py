@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 @csrf_exempt
 @api_view(["POST"])
-@permission_classes([])  # Webhook no requiere autenticación
+@permission_classes([])
 def mercadopago_webhook(request):
     log.info("📦 Webhook recibido de Mercado Pago")
 
@@ -60,18 +60,21 @@ def mercadopago_webhook(request):
             log.error("❌ No se encontró transacción con ese folio")
             return Response({"error": "Transacción no encontrada"}, status=404)
 
-        # Pago con tarjeta → se procesa y se envía SMS
+        # Procesar pago aprobado con tarjeta
         if status_pago == "approved" and tipo_pago == "credit_card":
-            procesar_transaccion_completada(trans)  # Esto ya marca como completado, actualiza códigos, referidos, etc.
-            enviar_sms_pago_exitoso(trans)  # SOLO aquí se envía este SMS
+            if trans.estado != "completado":
+                procesar_transaccion_completada(trans)
+                enviar_sms_pago_exitoso(trans)
+            else:
+                log.info("⚠️ Transacción ya estaba completada. Se ignora re-procesamiento.")
 
-        # Rechazado, cancelado o expirado → cancelar sin SMS
+        # Procesar rechazo/cancelación
         elif status_pago in ["rejected", "cancelled", "expired"]:
             cancelar_transaccion_completa(trans)
 
-        # Pago creado (OXXO o SPEI) → solo enviar SMS inicial
+        # SMS para pagos creados (OXXO/SPEI)
         elif evento.get("action") == "payment.created" and tipo_pago in ["ticket", "bank_transfer"]:
-            enviar_sms_pago_creado(trans)  # SOLO aquí se manda este SMS
+            enviar_sms_pago_creado(trans)
 
         return Response({"message": f"Estado procesado: {status_pago}"}, status=200)
 
