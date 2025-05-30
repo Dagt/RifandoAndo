@@ -159,9 +159,6 @@ def procesar_transaccion_completada(tx: Transaccion, tipo_pago=None):
         if tipo_pago in ["credit_card", "debit_card", "account_money"]:
             enviar_sms_pago_exitoso(tx)
             log.info(f"📲 SMS de confirmación enviado: {tx.folio}")
-        elif tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec"]:
-            enviar_sms_pago_creado(tx)
-            log.info(f"📲 SMS de instrucciones enviado: {tx.folio}")
     except Exception as e:
         log.warning(f"⚠️ Error al enviar SMS: {e}")
 
@@ -196,10 +193,10 @@ def cancelar_transaccion_completa(transaccion: Transaccion) -> bool:
             codigo_usado = transaccion.codigo_usado
             codigo_promocional = codigo_usado.codigo
 
-            if codigo_promocional:
-                if transaccion.estado == "completado":
-                    codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
-                    codigo_promocional.save()
+
+            if transaccion.estado == "completado":
+                codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
+                codigo_promocional.save()
 
             codigo_usado.delete()
         except Exception as e:
