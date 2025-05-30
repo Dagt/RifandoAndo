@@ -7,10 +7,9 @@ def enviar_sms_pago_creado(trans):
     fecha_exp = localtime(trans.fecha_expiracion).strftime("%H:%M del %d/%m")
     mensaje = (
         f"RifandoAndo\n\n"
-        f"Folio: {trans.folio}\n"
         f"Monto: ${trans.monto}\n"
         f"Paga hoy o los boletos se liberarán\n"
-        f"Verifica el estatus de tus boletos en:\n{settings.BASE_FRONTEND_URL}/verificador?folio={trans.folio}"
+        f"Verifica tu estatus:\n{settings.BASE_FRONTEND_URL}/verificador?folio={trans.folio}"
     )
     enviar_sms(mensaje, trans.telefono)
 

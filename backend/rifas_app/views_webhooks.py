@@ -71,8 +71,9 @@ def mercadopago_webhook(request):
                         procesar_transaccion_completada(tx)
                         log.info(f"✅ Transacción completada: {tx.folio}")
 
-                        if tipo_pago == "credit_card":
+                        if tipo_pago in ["credit_card", "debit_card"]:
                             enviar_sms_pago_exitoso(tx)
+
 
                 elif status_pago in ["rejected", "cancelled", "expired"]:
                     if tx.estado != "cancelado":
