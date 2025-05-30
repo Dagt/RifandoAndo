@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from rifas_app.models import Transaccion
 from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
-from rifas_app.utils import enviar_sms_pago_exitoso, enviar_sms_pago_creado
+from rifas_app.utils import enviar_sms_pago_creado
 import requests
 import logging
 
