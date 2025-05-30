@@ -58,7 +58,8 @@ def mercadopago_webhook(request):
 
                 if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec"]:
                     if not tx.payment_id:
-                        enviar_sms_pago_creado(tx)
+                        url_pago = pago.get("transaction_details", {}).get("external_resource_url")
+                        enviar_sms_pago_creado(tx, url_pago=url_pago)
                         log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
                         tx.payment_id = str(payment_id)
                         tx.save(update_fields=["payment_id"])

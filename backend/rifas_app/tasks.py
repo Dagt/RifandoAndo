@@ -12,32 +12,39 @@ log = logging.getLogger(__name__)
 
 @shared_task
 def liberar_boletos_expirados():
-    limite_48h = now() - timedelta(hours=48)
-    limite_2h = now() - timedelta(hours=2)
+    ahora = now()
+    limite_48h = ahora - timedelta(hours=48)
+    limite_2h = ahora - timedelta(hours=2)
 
-    # 1. Cancelar transacciones vencidas (48h desde expiración)
+    # 1. Cancelar transacciones con estado pendiente/in_process vencidas hace más de 48h
     transacciones_lentas = Transaccion.objects.filter(
         estado__in=['pendiente', 'in_process'],
         fecha_expiracion__lt=limite_48h
     )
 
-    # 2. Cancelar transacciones abandonadas (sin payment_id y >2h desde creación)
+    # 2. Transacciones abandonadas sin método de pago elegido por más de 2h
     transacciones_abandonadas = Transaccion.objects.filter(
         estado='pendiente',
         payment_id__isnull=True,
         fecha_creacion__lt=limite_2h
     )
 
+    # 3. Transacciones con ticket generado (OXXO, SPEI, etc.) que ya expiraron
+    transacciones_expiradas_sin_webhook = Transaccion.objects.filter(
+        estado='pendiente',
+        fecha_expiracion__lt=ahora,
+        payment_id__isnull=False
+    )
+
     total_canceladas = 0
-    for trans in list(transacciones_lentas) + list(transacciones_abandonadas):
+    for trans in list(transacciones_lentas) + list(transacciones_abandonadas) + list(transacciones_expiradas_sin_webhook):
         if cancelar_transaccion_completa(trans):
             total_canceladas += 1
 
     if total_canceladas > 0:
-        print(f"🗑️ Celery canceló {total_canceladas} transacciones colgadas (48h vencidas o abandonadas).")
+        log.info(f"🗑️ Celery canceló {total_canceladas} transacciones colgadas (vencidas o abandonadas).")
     else:
-        print("⏳ No hay transacciones colgadas para cancelar.")
-
+        log.info("⏳ No hay transacciones colgadas para cancelar.")
 
 
 @shared_task
