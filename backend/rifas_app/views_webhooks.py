@@ -56,16 +56,13 @@ def mercadopago_webhook(request):
             with transaction.atomic():
                 tx = Transaccion.objects.select_for_update().get(folio=external_reference)
 
-                if not tx.payment_id:
-                    tx.payment_id = str(payment_id)
-                    tx.save(update_fields=["payment_id"])
-                    log.info(f"💾 payment_id guardado en transacción: {payment_id}")
-
-                if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm",
-                                                              "bolbradesco", "pec"]:
+                if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec"]:
                     if not tx.payment_id:
                         enviar_sms_pago_creado(tx)
                         log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
+                        tx.payment_id = str(payment_id)
+                        tx.save(update_fields=["payment_id"])
+                        log.info(f"💾 payment_id guardado en transacción: {payment_id}")
 
                 if status_pago == "approved":
                     if tx.estado != "completado":
