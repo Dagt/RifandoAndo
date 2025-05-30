@@ -63,8 +63,9 @@ def mercadopago_webhook(request):
 
                 if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm",
                                                               "bolbradesco", "pec"]:
-                    enviar_sms_pago_creado(tx)
-                    log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
+                    if not tx.payment_id:
+                        enviar_sms_pago_creado(tx)
+                        log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
 
                 if status_pago == "approved":
                     if tx.estado != "completado":
