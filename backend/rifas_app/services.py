@@ -20,7 +20,7 @@ def procesar_transaccion_completada(tx: Transaccion):
     """
 
     tx = Transaccion.objects.select_for_update().get(id=tx.id)
-    if tx.estado == "completado":
+    if tx.estado in ["completado", "cancelado"]:
         return
 
     cfg = ConfiguracionReferidos.objects.first()

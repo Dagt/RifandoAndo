@@ -9,7 +9,7 @@ def enviar_sms_pago_creado(trans):
         f"RifandoAndo\n\n"
         f"Folio: {trans.folio}\n"
         f"Monto: ${trans.monto}\n"
-        f"Paga antes de las {fecha_exp} o los boletos se liberarán\n"
+        f"Paga hoy o los boletos se liberarán\n"
         f"Verifica el estatus de tus boletos en:\n{settings.BASE_FRONTEND_URL}/verificador?folio={trans.folio}"
     )
     enviar_sms(mensaje, trans.telefono)
