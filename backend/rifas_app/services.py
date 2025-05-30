@@ -169,37 +169,47 @@ def cancelar_transaccion_completa(transaccion: Transaccion) -> bool:
     if transaccion.estado == "cancelado":
         return False
 
+    # Cambiar estado de la transacción
     transaccion.estado = "cancelado"
     transaccion.save()
 
+    # Eliminar todos los boletos asociados a la transacción
     BoletoSeleccionado.objects.filter(transaccion=transaccion).delete()
 
+    # Invalidar link de referido generado (si existe)
     try:
         link = LinkReferido.objects.get(transaccion_origen=transaccion)
         link.expirado = True
         link.usado = True
         link.save()
 
+        # Cancelar la transacción de boletos de premio, si existiera
         if link.transaccion_premio:
             transaccion_premio = link.transaccion_premio
             transaccion_premio.estado = "cancelado"
             transaccion_premio.save()
-            BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
-    except LinkReferido.DoesNotExist:
-        pass
 
+            # Borrar boletos de la transacción de premio
+            BoletoSeleccionado.objects.filter(transaccion=transaccion_premio).delete()
+
+    except LinkReferido.DoesNotExist:
+        pass  # No hay problema si no existe
+
+    # Revertir uso de código promocional (si aplicaba)
     if transaccion.codigo_usado:
         try:
             codigo_usado = transaccion.codigo_usado
             codigo_promocional = codigo_usado.codigo
 
-
-            if transaccion.estado == "completado":
+            if codigo_promocional:
+                # Disminuir usos_actuales
                 codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
                 codigo_promocional.save()
 
+            # Eliminar registro de uso
             codigo_usado.delete()
+
         except Exception as e:
-            log.warning(f"⚠️ Error al revertir código promocional: {str(e)}")
+            log.warning(f"⚠️ Error al revertir uso de código promocional: {str(e)}")
 
     return True
