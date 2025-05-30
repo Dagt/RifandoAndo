@@ -61,18 +61,11 @@ def mercadopago_webhook(request):
                     tx.save(update_fields=["payment_id"])
                     log.info(f"💾 payment_id guardado en transacción: {payment_id}")
 
-                # 👇 Enviar SMS si es recién creado (status "pending") y método es OXXO o SPEI
-                if status_pago == "pending" and tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec", "account_money"]:
-                    enviar_sms_pago_creado(tx)
-                    log.info(f"📲 SMS de instrucciones enviado para {tx.folio} ({tipo_pago})")
 
                 if status_pago == "approved":
                     if tx.estado != "completado":
-                        procesar_transaccion_completada(tx)
+                        procesar_transaccion_completada(tx, tipo_pago)
                         log.info(f"✅ Transacción completada: {tx.folio}")
-
-                        if tipo_pago in ["credit_card", "debit_card", "account_money"]:
-                            enviar_sms_pago_exitoso(tx)
 
 
                 elif status_pago in ["rejected", "cancelled", "expired"]:

@@ -2,6 +2,7 @@ import logging, random
 from django.db import transaction as db_tx
 from django.utils import timezone
 from datetime import timedelta
+from rifas_app.utils import enviar_sms_pago_exitoso, enviar_sms_pago_creado
 from rifas_app.models import (
     BoletoSeleccionado, ConfiguracionReferidos, LinkReferido,
     Transaccion, CodigoPromocional
@@ -13,7 +14,7 @@ from rifas_app.emails import (
 log = logging.getLogger(__name__)
 
 @db_tx.atomic
-def procesar_transaccion_completada(tx: Transaccion):
+def procesar_transaccion_completada(tx: Transaccion, tipo_pago=None):
     """
     Marca la transacción como completada y ejecuta TODA la lógica
     (boletos, referidos, correos…).  Es idempotente.
@@ -153,6 +154,17 @@ def procesar_transaccion_completada(tx: Transaccion):
     except Exception as e:
         log.warning("Correo confirmación falló: %s", e)
 
+    # ── 7. Enviar SMS ───────────────────────────────────────
+    try:
+        if tipo_pago in ["credit_card", "debit_card", "account_money"]:
+            enviar_sms_pago_exitoso(tx)
+            log.info(f"📲 SMS de confirmación enviado: {tx.folio}")
+        elif tipo_pago in ["oxxo", "oxxo_cash", "ticket", "bank_transfer", "atm", "bolbradesco", "pec"]:
+            enviar_sms_pago_creado(tx)
+            log.info(f"📲 SMS de instrucciones enviado: {tx.folio}")
+    except Exception as e:
+        log.warning(f"⚠️ Error al enviar SMS: {e}")
+
     log.info("Transacción %s completada", tx.folio)
 
 
@@ -185,8 +197,9 @@ def cancelar_transaccion_completa(transaccion: Transaccion) -> bool:
             codigo_promocional = codigo_usado.codigo
 
             if codigo_promocional:
-                codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
-                codigo_promocional.save()
+                if transaccion.estado == "completado":
+                    codigo_promocional.usos_actuales = max((codigo_promocional.usos_actuales or 1) - 1, 0)
+                    codigo_promocional.save()
 
             codigo_usado.delete()
         except Exception as e:
