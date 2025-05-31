@@ -8,6 +8,7 @@ import {
   CreditCard,
   Search,
   Tag,
+  Info,
   Link,
   Settings,
   Dice5,
@@ -84,6 +85,19 @@ const AdminPanel = () => {
               Ver transacciones
             </h2>
             <p className="text-sm text-white/80">Consulta las compras realizadas y valida pagos.</p>
+          </div>
+
+          <div
+            onClick={() => navigate("/panel/consultar-pagos")}
+            className="bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md text-center hover:shadow-lg transition cursor-pointer"
+          >
+            <h2 className="text-lg font-bold text-yellow-300 mb-2 flex justify-center items-center gap-2">
+              <Info className="w-6 h-6 text-cyan-300" />
+              Consultar pagos
+            </h2>
+            <p className="text-sm text-white/80">
+              Revisa los detalles de cualquier transacción por folio.
+            </p>
           </div>
 
           <div

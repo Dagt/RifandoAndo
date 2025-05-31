@@ -32,6 +32,7 @@ import ComoFunciona from "./pages/ComoFunciona";
 import ConfiguracionReferidosAdmin from "./pages/ConfiguracionReferidosAdmin.jsx";
 import SimuladorCajasSorpresa from "./pages/SimuladorCajaSorpresa.jsx";
 import CajasHome from "./components/CajasHome.jsx";
+import ConsultarPagos from "./pages/ConsultarPagos"
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
           <Route path="/panel/buscador-boletos" element={<RutaProtegida><BuscadorBoletos /></RutaProtegida>} />
           <Route path="/panel/links-referidos" element={<RutaProtegida><ConfiguracionReferidosAdmin /></RutaProtegida>} />
           <Route path="/panel/simular-caja-sorpresa" element={<RutaProtegida><SimuladorCajasSorpresa /></RutaProtegida>} />
+          <Route path="/panel/consultar-pagos" element={<RutaProtegida><ConsultarPagos /></RutaProtegida>} />
           <Route path="/cajas-home" element={<CajasHome />} />
         </Route>
       </Routes>

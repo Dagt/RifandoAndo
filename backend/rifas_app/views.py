@@ -994,6 +994,58 @@ def usar_link_referido(request, codigo):
         }, status=200)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def consultar_pagos(request):
+    folio = request.GET.get("folio")
+
+    if not folio:
+        return Response({"error": "Folio no proporcionado."}, status=400)
+
+    try:
+        tx = Transaccion.objects.get(folio=folio)
+    except Transaccion.DoesNotExist:
+        return Response({"error": "Transacción no encontrada."}, status=404)
+
+    if not tx.payment_id:
+        return Response({
+            "folio": tx.folio,
+            "estado": tx.estado,
+            "payment_id": None,
+            "mensaje": "Transacción sin payment_id (posiblemente colgada)."
+        }, status=200)
+
+    # Consultar a Mercado Pago
+    url = f"https://api.mercadopago.com/v1/payments/{tx.payment_id}"
+    headers = {
+        "Authorization": f"Bearer {settings.MERCADO_PAGO_ACCESS_TOKEN}"
+    }
+    r = requests.get(url, headers=headers)
+
+    if r.status_code != 200:
+        return Response({"error": "No se pudo obtener información desde Mercado Pago."}, status=502)
+
+    pago = r.json()
+    return Response({
+        "folio": tx.folio,
+        "payment_id": tx.payment_id,
+        "estado_interno": tx.estado,
+        "estado_mp": pago.get("status"),
+        "detalle_status_mp": pago.get("status_detail"),
+        "tipo_pago": pago.get("payment_type_id"),
+        "metodo_pago": pago.get("payment_method_id"),
+        "referencia": pago.get("transaction_details", {}).get("payment_method_reference_id"),
+        "fecha_creacion": pago.get("date_created"),
+        "fecha_aprobacion": pago.get("date_approved"),
+        "fecha_expiracion": pago.get("date_of_expiration"),
+        "monto_total": pago.get("transaction_amount"),
+        "neto_recibido": pago.get("transaction_details", {}).get("net_received_amount"),
+        "link_ticket": pago.get("transaction_details", {}).get("external_resource_url"),
+        "acreditado": pago.get("status") == "approved",
+        "cancelado": pago.get("status") in ["cancelled", "rejected", "expired"],
+    }, status=200)
+
+
 #Endpoint con la simulacion y estructura de las Cajas Sorpresa.
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

@@ -15,9 +15,11 @@ const Home = () => {
         return res.json();
       })
       .then((data) => {
-        setRifas(data); // ya no uses data.results
-        setCargando(false);
-      })
+  const ordenadas = data.sort((a, b) => new Date(a.fecha_fin) - new Date(b.fecha_fin));
+  setRifas(ordenadas);
+  setCargando(false);
+})
+
       .catch((err) => {
         setError(err.message);
         setCargando(false);

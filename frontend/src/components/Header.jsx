@@ -19,7 +19,8 @@ import {
   ChevronDown,
   SearchCheck,
   Tag,
-  LinkIcon
+  LinkIcon,
+  ScrollText
 } from "lucide-react";
 import { useAuth } from "../utils/AuthContext";
 
@@ -82,6 +83,9 @@ const Header = () => {
                 </Link>
                 <Link to="/panel/transacciones" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <CreditCard className="w-4 h-4" /> Transacciones
+                </Link>
+                <Link to="/panel/consultar-pagos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
+                  <ScrollText  className="w-4 h-4" /> Pagos
                 </Link>
                 <Link to="/panel/buscador-boletos" onClick={cerrarSubmenu} className="hover:text-yellow-300 flex items-center gap-2 py-1">
                   <SearchCheck className="w-4 h-4" /> Buscar boleto
@@ -153,6 +157,9 @@ const Header = () => {
       </Link>
       <Link to="/panel/transacciones" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <CreditCard className="w-4 h-4" /> Transacciones
+      </Link>
+      <Link to="/panel/consultar-pagos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
+        <ScrollText  className="w-4 h-4" /> Pagos
       </Link>
       <Link to="/panel/buscador-boletos" onClick={() => setMenuAbierto(false)} className="hover:text-yellow-300 flex items-center gap-2">
         <SearchCheck className="w-4 h-4" /> Buscar boleto
