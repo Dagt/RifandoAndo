@@ -64,7 +64,7 @@ def mercadopago_webhook(request):
 
                         lugares_pago = {
                             "oxxo": "OXXO",
-                            "bancomer": "BBVA",
+                            "bancomer": "el establecimiento seleccionado",
                             "santander": "Santander",
                             "7eleven": "7-Eleven",
                             "extra": "Extra",
@@ -89,7 +89,7 @@ def mercadopago_webhook(request):
 
                 elif status_pago in ["rejected", "cancelled", "expired"]:
                     metodo = pago.get("payment_method_id", "").lower()
-                    metodos_lentos = ["oxxo", "farmaciasdelahorro", "bancomer"]
+                    metodos_lentos = ["oxxo", "bancomer"]
 
                     if status_pago == "expired" and metodo in metodos_lentos:
                         log.info(f"⏳ Expiración ignorada para método lento: {tx.folio} ({metodo})")
