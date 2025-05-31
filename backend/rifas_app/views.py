@@ -3,6 +3,7 @@ from collections import defaultdict
 import traceback
 import math
 import random
+import requests
 import logging
 from rest_framework.response import Response
 from rifas_app.services import procesar_transaccion_completada, cancelar_transaccion_completa
