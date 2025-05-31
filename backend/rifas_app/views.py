@@ -16,6 +16,7 @@ from django.db.models.functions import NullIf
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
+from django.conf import settings
 from .models import Rifa, BoletoSeleccionado, Transaccion, Galeria, CodigoPromocional, CodigoUsado, ConfiguracionReferidos, LinkReferido, GaleriaExclusiva, RifaExclusiva, Jackpot, CajaSorpresa, BoletoJackpot, PremioCaja, TransaccionCaja, AperturaCaja
 from .mercadopago_utils import crear_preferencia_pago
 from django.utils import timezone
