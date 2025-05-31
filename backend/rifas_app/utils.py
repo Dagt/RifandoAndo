@@ -8,7 +8,8 @@ def enviar_sms_pago_creado(trans, referencia=None):
         f"RifandoAndo\n"
         f"Paga hoy ${trans.monto} con referencia:\n"
         f"{referencia}\n"
-        f"o los boletos se liberaran"
+        f"o los boletos se liberaran\n"
+        f"Verifica tus boletos:\n{settings.BASE_FRONTEND_URL}/verificador?folio={trans.folio}"
 
     )
 
