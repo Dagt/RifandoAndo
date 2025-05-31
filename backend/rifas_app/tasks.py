@@ -23,10 +23,10 @@ def liberar_boletos_expirados():
         fecha_creacion__lt=limite_2h
     )
 
-    # 2. Transacciones colgadas hace más de 48h desde su expiración (respaldo)
+    # 2. Cancelar transacciones con estado pendiente/in_process creadas hace más de 48h
     transacciones_lentas = Transaccion.objects.filter(
         estado__in=['pendiente', 'in_process'],
-        fecha_expiracion__lt=limite_48h
+        fecha_creacion__lt=limite_48h
     )
 
     total_canceladas = 0

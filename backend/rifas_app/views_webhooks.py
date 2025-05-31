@@ -60,9 +60,21 @@ def mercadopago_webhook(request):
                                                               "bolbradesco", "pec"]:
                     if not tx.payment_id:
                         referencia = pago.get("transaction_details", {}).get("payment_method_reference_id")
+                        metodo = pago.get("payment_method_id", "").lower()
 
+                        lugares_pago = {
+                            "oxxo": "OXXO",
+                            "bancomer": "BBVA",
+                            "santander": "Santander",
+                            "7eleven": "7-Eleven",
+                            "extra": "Extra",
+                            "circlek": "Circle K",
+                            "farmaciasdelahorro": "Farmacias del Ahorro",
+                            "atm": "cajero automático"
+                        }
+                        lugar_pago = lugares_pago.get(metodo, "el establecimiento seleccionado")
 
-                        enviar_sms_pago_creado(tx, referencia=referencia)
+                        enviar_sms_pago_creado(tx, referencia=referencia, lugar_pago=lugar_pago)
                         log.info(f"📲 SMS enviado con referencia {referencia} para {tx.folio} ({tipo_pago})")
 
                         tx.payment_id = str(payment_id)
@@ -76,7 +88,12 @@ def mercadopago_webhook(request):
 
 
                 elif status_pago in ["rejected", "cancelled", "expired"]:
-                    if tx.estado != "cancelado":
+                    metodo = pago.get("payment_method_id", "").lower()
+                    metodos_lentos = ["oxxo", "farmaciasdelahorro", "bancomer"]
+
+                    if status_pago == "expired" and metodo in metodos_lentos:
+                        log.info(f"⏳ Expiración ignorada para método lento: {tx.folio} ({metodo})")
+                    elif tx.estado != "cancelado":
                         cancelada = cancelar_transaccion_completa(tx)
                         if cancelada:
                             log.info(f"❌ Transacción cancelada correctamente con lógica completa: {tx.folio}")
