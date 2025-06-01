@@ -1,4 +1,3 @@
-// src/pages/PoliticasCondiciones.jsx
 import React from "react";
 import { ShieldCheck, Info } from "lucide-react";
 
@@ -25,51 +24,75 @@ const PoliticasCondiciones = () => {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">3. Participación en Sorteos</h2>
+          <h2 className="text-2xl font-semibold text-white">3. Requisitos para Participar</h2>
           <ul className="list-disc pl-6 text-white/90 space-y-1">
-            <li>Para participar en los sorteos, el usuario deberá adquirir boletos a través de los medios autorizados por "Rifando Ando".</li>
-            <li>Los pagos realizados a través de Oxxo incluirán una comisión adicional de $12.00 MXN por transacción.</li>
-            <li>Pagos no confirmados, fuera de plazo o con comprobantes alterados anularán el boleto.</li>
-            <li>Los boletos apartados se liberarán automáticamente después de 2 horas si no han sido pagados.</li>
+            <li>El usuario debe ser mayor de edad (18 años o más) para participar en cualquier sorteo.</li>
+            <li>Debe proporcionar información verídica y completa al registrarse y participar.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">4. Requisitos para la Entrega de Premios</h2>
+          <h2 className="text-2xl font-semibold text-white">4. Participación en Sorteos</h2>
           <ul className="list-disc pl-6 text-white/90 space-y-1">
-            <li>El ganador deberá ser mayor de edad y presentar una identificación oficial vigente.</li>
-            <li>Si no cumple con los requisitos o no se le localiza en 7 días, el premio será reasignado mediante nuevo sorteo.</li>
+            <li>Los boletos deben ser adquiridos exclusivamente a través de los medios autorizados por la plataforma.</li>
+            <li>Cada transacción conlleva una comisión adicional de $4.00 MXN para cubrir los gastos de procesamiento de pago.</li>
+            <li>Boletos no pagados en un plazo de 24 horas desde su apartado serán automáticamente liberados.</li>
+            <li>Boletos alterados, falsificados o con información errónea serán anulados sin derecho a reembolso.</li>
+            <li>No se realizarán reembolsos por pagos fuera de plazo, errores en el monto o pagos hechos a cuentas distintas.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">5. Condiciones del Sorteo</h2>
+          <h2 className="text-2xl font-semibold text-white">5. Mecanismo de Selección de Ganadores</h2>
           <ul className="list-disc pl-6 text-white/90 space-y-1">
-            <li>El sorteo se realizará solo si se ha vendido al menos el 50% de los boletos.</li>
-            <li>Si el boleto ganador no fue vendido o incumple con los términos, se sorteará de nuevo.</li>
-            <li>Se publicará un video como evidencia del sorteo.</li>
+            <li>El ganador será definido mediante los resultados oficiales de la Lotería Nacional Mexicana, tomando como referencia los últimos dígitos del número ganador.</li>
+            <li>Los detalles específicos de cada sorteo serán publicados junto con el número base para transparencia.</li>
+            <li>Se documentará y publicará el resultado del sorteo como evidencia.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">6. Responsabilidad</h2>
+          <h2 className="text-2xl font-semibold text-white">6. Entrega de Premios</h2>
+          <ul className="list-disc pl-6 text-white/90 space-y-1">
+            <li>El ganador deberá presentar una identificación oficial vigente para reclamar el premio.</li>
+            <li>Si el ganador no cumple los requisitos o no responde en un plazo de 7 días naturales, el premio será reasignado mediante nuevo sorteo.</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-2xl font-semibold text-white">7. Condiciones del Sorteo</h2>
+          <ul className="list-disc pl-6 text-white/90 space-y-1">
+            <li>Los sorteos solo se realizarán si se ha alcanzado un mínimo del 60% de boletos vendidos.</li>
+            <li>Si el boleto ganador no fue vendido o resulta inválido, se sorteará nuevamente.</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-2xl font-semibold text-white">8. Uso de Códigos Promocionales y Referidos</h2>
+          <ul className="list-disc pl-6 text-white/90 space-y-1">
+            <li>Los códigos promocionales son de uso personal, único e intransferible, salvo indicación expresa.</li>
+            <li>El uso fraudulento o malicioso de códigos, links de referidos u otros mecanismos promocionales podrá anular boletos del usuario.</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-2xl font-semibold text-white">9. Uso Inadecuado de la Plataforma</h2>
           <p className="text-white/90">
-            "Rifando Ando" no se hace responsable por errores del usuario al realizar pagos o transferencias, incluyendo pagos incorrectos o a cuentas no autorizadas.
+            Cualquier uso indebido del sistema, intento de manipulación, hackeo o vulneración de las reglas será motivo de suspensión permanente y, en su caso, acciones legales.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">7. Reembolsos</h2>
+          <h2 className="text-2xl font-semibold text-white">10. Reembolsos</h2>
           <ul className="list-disc pl-6 text-white/90 space-y-1">
-            <li>Los boletos adquiridos no son reembolsables.</li>
-            <li>Solo se realizará devolución si la rifa es cancelada por el organizador.</li>
+            <li>No se realizarán reembolsos, salvo en el caso de que la rifa sea cancelada por el organizador.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-2xl font-semibold text-white">8. Modificaciones</h2>
+          <h2 className="text-2xl font-semibold text-white">11. Modificaciones</h2>
           <p className="text-white/90">
-            "Rifando Ando" se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones se publicarán en la plataforma y serán efectivas de inmediato.
+            "Rifando Ando" se reserva el derecho de modificar estos términos, condiciones o mecánicas en cualquier momento, sin previo aviso. Las modificaciones serán publicadas en esta misma sección.
           </p>
         </section>
 
@@ -103,8 +126,7 @@ const PoliticasCondiciones = () => {
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold text-white">4. Derechos ARCO</h2>
           <p className="text-white/90">
-            Para ejercer sus derechos de acceso, rectificación, cancelación u oposición, envíe un correo a{" "}
-            <a href="mailto:contacto@rifandoando.club" className="text-yellow-300 underline">contacto@rifandoando.club</a> con los siguientes datos:
+            Para ejercer sus derechos de acceso, rectificación, cancelación u oposición, envíe un correo a <a href="mailto:contacto@rifandoando.club" className="text-yellow-300 underline">contacto@rifandoando.club</a> con los siguientes datos:
           </p>
           <ul className="list-disc pl-6 text-white/90 space-y-1">
             <li>Nombre completo, domicilio, teléfono y correo.</li>
