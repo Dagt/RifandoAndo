@@ -74,7 +74,7 @@ def mercadopago_webhook(request):
                         }
                         lugar_pago = lugares_pago.get(metodo, "el establecimiento seleccionado")
 
-                        enviar_sms_pago_creado(tx, referencia=referencia, lugar_pago=lugar_pago)
+                        enviar_sms_pago_creado(tx, referencia=referencia, lugar_pago=lugar_pago, tipo_pago=tipo_pago)
                         log.info(f"📲 SMS enviado con referencia {referencia} para {tx.folio} ({tipo_pago})")
 
                         tx.payment_id = str(payment_id)
