@@ -1,6 +1,6 @@
 import React from "react";
 import { Facebook, Instagram, Youtube } from "lucide-react";
-import { SiTiktok } from "react-icons/si";
+import { SiTiktok, SiWhatsapp  } from "react-icons/si";
 
 const Footer = () => {
   return (
@@ -17,6 +17,9 @@ const Footer = () => {
         </a>
         <a href="https://www.youtube.com/@RifandoAndoClub" target="_blank" rel="noreferrer">
           <Youtube className="w-4 h-4 hover:text-red-500" />
+        </a>
+        <a href="https://chat.whatsapp.com/EXxrXcpC4KYJEkHu5FWxi9" target="_blank" rel="noreferrer">
+          <SiWhatsapp className="w-4 h-4 hover:text-green-400" />
         </a>
       </div>
       <p>

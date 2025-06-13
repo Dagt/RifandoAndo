@@ -83,6 +83,12 @@ def mercadopago_webhook(request):
 
                 if status_pago == "approved":
                     if tx.estado != "completado":
+
+                        if not tx.payment_id:
+                            tx.payment_id = str(payment_id)
+                            tx.save(update_fields=["payment_id"])
+                            log.info(f"💾 payment_id guardado en transacción (approved): {payment_id}")
+
                         procesar_transaccion_completada(tx, tipo_pago)
                         log.info(f"✅ Transacción completada: {tx.folio}")
 
