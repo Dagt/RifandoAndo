@@ -179,8 +179,8 @@ Puedo pagar en las siguientes cuentas:
 • CLABE: 012580015504812925
 • Tarjeta: 4152 3140 5999 6119
 
-Después de hacer el pago, validaré mi compra aquí:
-🔗 https://rifandoando.club/verificador?folio=${folio}`;
+Después de hacer el pago, enviare el comprobante por este medio y validaré mi compra aquí:
+🔗 https://www.rifandoando.club/verificador?folio=${folio}`;
 
 if (codigoFinal) {
   mensaje += `

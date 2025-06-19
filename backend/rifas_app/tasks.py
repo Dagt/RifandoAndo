@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 def liberar_boletos_expirados():
     ahora = now()
     limite_48h = ahora - timedelta(hours=48)
-    limite_2h = ahora - timedelta(hours=2)
+    limite_2h = ahora - timedelta(hours=24)
 
     # 1. Transacciones abandonadas (sin método de pago) por más de 2h
     transacciones_abandonadas = Transaccion.objects.filter(
