@@ -188,7 +188,7 @@ const ConfirmarCompra = () => {
 
       mensaje += `%0A%0A🙌 ¡Gracias! Estoy listo para participar.`;
 
-      const numeroWhatsApp = "5215214498860396"; // ← pon aquí tu número real sin espacios
+      const numeroWhatsApp = "5214498860396"; // ← pon aquí tu número real sin espacios
       const url = `https://wa.me/${numeroWhatsApp}?text=${mensaje}`;
 
       localStorage.clear();
