@@ -113,7 +113,6 @@ def confirmar_compra(request):
         codigo_usado = codigo_usado,
         codigo_referido=data.get("codigo_referido")
     )
-    instrucciones = None
 
     try:
         BoletoSeleccionado.objects.bulk_create([
@@ -143,8 +142,7 @@ def confirmar_compra(request):
         "monto": transaccion.monto,
         "rifa": transaccion.rifa_nombre,
         "boletos": boletos_solicitados,
-        "total_boletos": rifa.total_boletos,
-        "instrucciones": instrucciones
+        "total_boletos": rifa.total_boletos
     }
 
     return Response(response_data)
