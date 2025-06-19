@@ -116,17 +116,6 @@ def confirmar_compra(request):
     instrucciones = None
 
     try:
-        instrucciones = crear_preferencia_pago(
-            transaccion=transaccion,
-            rifa=rifa,
-            boletos_solicitados=boletos_solicitados,
-            tiempo_expiracion=tiempo_expiracion
-        )
-
-        if instrucciones is None:
-            transaccion.delete()
-            return Response({"error": "No se pudieron generar las instrucciones de pago"}, status=400)
-
         BoletoSeleccionado.objects.bulk_create([
             BoletoSeleccionado(
                 rifa=rifa,
