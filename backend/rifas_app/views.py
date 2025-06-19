@@ -83,7 +83,7 @@ def confirmar_compra(request):
     if telefono.isdigit() and len(telefono) == 10:
         telefono = f"+52{telefono}"
 
-    tiempo_expiracion = timezone.now() + timedelta(hours=48)
+    tiempo_expiracion = timezone.now() + timedelta(hours=4)
     expires_at = int(tiempo_expiracion.timestamp())
 
     # Código promocional (si aplica)
@@ -96,12 +96,12 @@ def confirmar_compra(request):
                 codigo_usado = CodigoUsado.objects.create(
                     codigo=promo,
                     telefono=telefono,
-                    monto_generado=0  # Se actualiza al confirmar pago
+                    monto_generado=0  # Solo lo actualizaremos si se completa el pago
                 )
         except CodigoPromocional.DoesNotExist:
             print("⚠️ Código promocional no encontrado")
 
-    # Crear la transacción
+    # Creamos la transacción pero no asignamos boletos aún
     transaccion = Transaccion.objects.create(
         nombre_completo=data["nombre"],
         correo=data["correo"],
@@ -110,31 +110,42 @@ def confirmar_compra(request):
         monto=data["monto"],
         fecha_expiracion=tiempo_expiracion,
         rifa_nombre=rifa.nombre,
-        codigo_usado=codigo_usado,
-        codigo_referido=data.get("codigo_referido"),
-        metodo_pago="manual",  # o "deposito"
-        estado="pendiente"
+        codigo_usado = codigo_usado,
+        codigo_referido=data.get("codigo_referido")
     )
 
-    # Apartar boletos
-    BoletoSeleccionado.objects.bulk_create([
-        BoletoSeleccionado(
-            rifa=rifa,
-            transaccion=transaccion,
-            numero=numero,
-            apartado=True,
-            pagado=False
-        )
-        for numero in boletos_solicitados
-    ])
+    try:
+        BoletoSeleccionado.objects.bulk_create([
+            BoletoSeleccionado(
+                rifa=rifa,
+                transaccion=transaccion,
+                numero=numero,
+                apartado=True,
+                pagado=False
+            )
+            for numero in boletos_solicitados
+        ])
+
+    except Exception as e:
+        transaccion.delete()
+        logger.error("❌ Error al generar la orden", exc_info=True)
+        return Response({"error": f"Error al generar la orden: {str(e)}"}, status=400)
 
     response_data = {
         "success": True,
         "transaccion": {
             "folio": transaccion.folio,
+            "nombre": transaccion.nombre_completo,
+            "telefono": transaccion.telefono,
+            "correo": transaccion.correo,
+            "fecha": transaccion.fecha_creacion,
+            "expira_pago": expires_at,
+            "monto": transaccion.monto,
+            "rifa": transaccion.rifa_nombre,
+            "boletos": boletos_solicitados,
+            "total_boletos": rifa.total_boletos
         }
     }
-
     return Response(response_data)
 
 
