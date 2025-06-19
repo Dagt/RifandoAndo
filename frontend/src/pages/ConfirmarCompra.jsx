@@ -130,51 +130,78 @@ const ConfirmarCompra = () => {
     return Object.keys(nuevosErrores).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validar()) return;
+   const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validar()) return;
 
-    const codigoGuardado = localStorage.getItem("codigo_promocional");
-    const codigoFinal = codigoGuardado && infoCodigo?.cumple_minimo ? codigoGuardado : null;
+  const codigoGuardado = localStorage.getItem("codigo_promocional");
+  const codigoFinal = codigoGuardado && infoCodigo?.cumple_minimo ? codigoGuardado : null;
 
-    const payload = {
-      nombre: formulario.nombre,
-      correo: formulario.correo,
-      telefono: formulario.telefono,
-      nacimiento: formulario.nacimiento,
-      metodo_pago: "mercadopago",
-      rifa_id: id,
-      boletos: boletos,
-      monto: montoFinal,
-      codigo_promocional: codigoFinal,
-      codigo_referido: codigoReferidoGuardado || null,
-    };
-
-    try {
-      const response = await fetch("/api/confirmar-compra/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        const instrucciones = data.instrucciones || null;
-        localStorage.clear();
-        if (instrucciones?.checkout_url) {
-          window.location.href = instrucciones.checkout_url;
-        } else {
-          alert("No se pudo generar la instrucción de pago.");
-        }
-      } else {
-        alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error al conectar con el servidor.");
-    }
+  const payload = {
+    nombre: formulario.nombre,
+    correo: formulario.correo,
+    telefono: formulario.telefono,
+    nacimiento: formulario.nacimiento,
+    metodo_pago: "manual",  // o "deposito" si así lo manejas en backend
+    rifa_id: id,
+    boletos: boletos,
+    monto: montoFinal,
+    codigo_promocional: codigoFinal,
+    codigo_referido: codigoReferidoGuardado || null,
   };
+
+  try {
+    const response = await fetch("/api/confirmar-compra/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.transaccion?.folio) {
+      const folio = data.transaccion.folio;
+      const nombre = formulario.nombre.trim();
+
+      const boletosFormateados = boletos
+        .map((n) => n.toString().padStart(padLength, "0"))
+        .join(", ");
+
+      let mensaje = `� *Hola!*%0A`;
+      mensaje += `Mi nombre es *${nombre}* �%0A`;
+      mensaje += `� Mi folio es *${folio}*%0A`;
+      mensaje += `� Voy a comprar los boletos: *${boletosFormateados}*%0A`;
+      mensaje += `� Total a pagar: *$${montoFinal.toFixed(2)} MXN*%0A%0A`;
+
+      mensaje += `� Voy a pagar a cualquiera de las siguientes cuentas:%0A`;
+      mensaje += `� *BBVA*%0A`;
+      mensaje += `• Cuenta: 155 048 1292%0A`;
+      mensaje += `• CLABE: 012580015504812925%0A`;
+      mensaje += `• Tarjeta: 4152 3140 5999 6119%0A%0A`;
+
+      mensaje += `✅ Después de hacer el pago, validaré mi compra aquí:%0A`;
+      mensaje += `� https://rifandoando.com/validar/${folio}%0A`;
+
+      if (codigoFinal) {
+        mensaje += `%0A� Código promocional usado: *${codigoFinal}*`;
+      }
+
+      mensaje += `%0A%0A� ¡Gracias! Estoy listo para participar.`;
+
+      const numeroWhatsApp = "521XXXXXXXXXX"; // ← pon aquí tu número real sin espacios
+      const url = `https://wa.me/${numeroWhatsApp}?text=${mensaje}`;
+
+      localStorage.clear();
+      window.open(url, "_blank");
+    } else {
+      alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
+    }
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al conectar con el servidor.");
+  }
+};
+
 
   const totalBoletos = parseInt(localStorage.getItem("total_boletos") || "100", 10);
   const padLength = totalBoletos ? String(totalBoletos - 1).length : 2;
