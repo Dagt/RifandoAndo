@@ -168,31 +168,33 @@ const ConfirmarCompra = () => {
         .join(", ");
 
       let mensaje = `👋 *Hola!*%0A`;
-      mensaje += `Mi nombre es *${nombre}* 🤠%0A`;
-      mensaje += `🎫 Mi folio es *${folio}*%0A`;
-      mensaje += `🧾 Voy a comprar los boletos: *${boletosFormateados}*%0A`;
-      mensaje += `💰 Total a pagar: *$${montoFinal.toFixed(2)} MXN*%0A%0A`;
+      mensaje += `Mi nombre es *${nombre}*%0A`;
+      mensaje += ` Mi folio es *${folio}*%0A`;
+      mensaje += `🎟 Voy a comprar los boletos: *${boletosFormateados}*%0A`;
+      mensaje += `💰 Por un total de: *$${montoFinal.toFixed(2)} MXN*%0A%0A`;
 
-      mensaje += `📲 Voy a pagar a cualquiera de las siguientes cuentas:%0A`;
+      mensaje += `Puedo pagar en las siguientes cuentas:%0A`;
       mensaje += `🏦 *BBVA*%0A`;
       mensaje += `• Cuenta: 155 048 1292%0A`;
       mensaje += `• CLABE: 012580015504812925%0A`;
       mensaje += `• Tarjeta: 4152 3140 5999 6119%0A%0A`;
 
-      mensaje += `✅ Después de hacer el pago, validaré mi compra aquí:%0A`;
-      mensaje += `🔗 https://rifandoando.com/validar/${folio}%0A`;
+      mensaje += ` Después de hacer el pago, validaré mi compra aquí:%0A`;
+      mensaje += `🔗 https://rifandoando.club/validar/${folio}%0A`;
 
       if (codigoFinal) {
         mensaje += `%0A🎁 Código promocional usado: *${codigoFinal}*`;
       }
 
-      mensaje += `%0A%0A🙌 ¡Gracias! Estoy listo para participar.`;
 
       const numeroWhatsApp = "4498860396"; // ← pon aquí tu número real sin espacios
       const url = `https://wa.me/${numeroWhatsApp}?text=${mensaje}`;
 
       localStorage.clear();
       window.open(url, "_blank");
+      setTimeout(() => {
+        navigate("/"); // o navigate(`/validar/${folio}`);
+        }, 2000);
     } else {
       alert("❌ Error: " + (data.error || "No se pudo procesar la compra."));
     }
