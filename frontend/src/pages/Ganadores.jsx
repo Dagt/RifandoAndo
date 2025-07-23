@@ -129,7 +129,7 @@ const Ganadores = () => {
 
               <div className="mt-3 text-center">
                 <a
-                  href="https://www.lotenal.gob.mx/sorteos"
+                  href="https://www.loterianacional.gob.mx/Mascarillas/ListasPremios"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-yellow-300 underline hover:text-yellow-400"

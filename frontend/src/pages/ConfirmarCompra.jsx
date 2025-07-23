@@ -168,29 +168,28 @@ const ConfirmarCompra = () => {
         .join(", ");
 
       let mensaje = `👋 *Hola!*
-Mi nombre es *${nombre}*
-Mi folio es *${folio}*
-🎟 Voy a comprar los boletos: *${boletosFormateados}*
-💰 Por un total de: *$${montoFinal.toFixed(2)} MXN*
+      Mi nombre es *${nombre}*
+      Mi folio es *${folio}*
+      🎟 Voy a comprar los boletos: *${boletosFormateados}*
+      💰 Por un total de: *$${montoFinal.toFixed(2)} MXN*
 
-Puedo pagar en las siguientes cuentas:
-🏦 *BBVA*
-• Cuenta: 155 048 1292
-• CLABE: 012580015504812925
-• Tarjeta: 4152 3140 5999 6119
+      Puedo pagar en las siguientes cuentas:
+      🏦 *BBVA*
+      • Cuenta: 155 048 1292
+      • CLABE: 012580015504812925
+      • Tarjeta: 4152 3140 5999 6119
 
-Después de hacer el pago, enviare el comprobante por este medio y validaré mi compra aquí:
-🔗 https://www.rifandoando.club/verificador?folio=${folio}`;
+      Después de hacer el pago, enviare el comprobante por este medio y validaré mi compra aquí:
+      🔗 https://www.rifandoando.club/verificador?folio=${folio}`;
 
-if (codigoFinal) {
-  mensaje += `
+      if (codigoFinal) {
+        mensaje += `
 
-🎁 Código promocional usado: *${codigoFinal}*`;
-}
+        🎁 Código promocional usado: *${codigoFinal}*`;
+      }
 
-const numeroWhatsApp = "4498860396";
-const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-
+      const numeroWhatsApp = "4498860396";
+      const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
       localStorage.clear();
       window.open(url, "_blank");
